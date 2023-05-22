@@ -1,7 +1,7 @@
 <template>
-  <HelloWorld />
+  <CCCApp />
 </template>
 
 <script setup>
-  import HelloWorld from '@/components/HelloWorld.vue'
+  import CCCApp from '@/components/CCCApp.vue'
 </script>
