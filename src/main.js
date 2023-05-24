@@ -23,6 +23,9 @@ app.component('app-bar', AppBar)
 app.component('base-card', BaseCard)
 app.component('base-button', BaseButton)
 
+import SelectAlias from './components/SelectAlias.vue'
+app.component('select-alias', SelectAlias)
+
 registerPlugins(app)
 
 app.mount('#app')

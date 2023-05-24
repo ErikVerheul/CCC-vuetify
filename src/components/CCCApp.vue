@@ -4,16 +4,18 @@
       <app-bar :is-authenticated="matchGevonden"></app-bar>
       <base-card>
         <form @submit.prevent="submitForm">
-          <div class="form-control">         
+          <div class="form-control">
             <template v-if="userEntryMode === 'login'">
               <label for="schuilNaam">Uw schuilnaam</label>
-              <input type="text" id="schuilNaam" v-model.trim="schuilNaam"/>
+              <input type="text" id="schuilNaam" v-model.trim="schuilNaam" />
             </template>
             <template v-if="userEntryMode === 'signup'">
-              <p>Beschikbare letters: {{ allowedCharacters }}</p>
-              <label v-if="!matchGevonden" for="schuilNaamId">Kies uw schuilnaam</label>
-              <label v-if="matchGevonden" for="schuilNaamId">Kies uw schuilnaam ✅ gevonden</label>
-              <input type="text" id="schuilNaamId" v-model.trim="schuilNaam" @keypress="filterInput($event)" />
+              <select-alias 
+                :assigned-aliases="assignedAliases" 
+                :all-aliases="allAliases"
+                @alias-selected="showSelectedAlias">
+              </select-alias>
+              <p v-if="selectedAlias !== undefined">Gekozen schuilnaam is {{ selectedAlias }}</p>
             </template>
           </div>
           <div class="form-control">
@@ -73,37 +75,19 @@ import AppBar from './AppBar.vue'
 export default {
   data() {
     return {
-      lastKey: '',
-      schuilNaam: '',
-      allowedChars: '',
-      matchGevonden: false,
-      alleSchuilnamen: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
-      gekozenSchuilnamen: ['Jelle', 'Pieter', 'Jan'],
+      selectedAlias: undefined,
 
+      schuilNaam: '',
+      matchGevonden: false,
+      allAliases: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
+      assignedAliases: ['Jelle', 'Pieter', 'Jan'],
       password: '',
       formIsValid: true,
       userEntryMode: 'login',
-      isLoading: false,
-      error: null,
     }
   },
 
   computed: {
-    allowedCharacters() {
-      let index = this.schuilNaam.length
-      let allowedChars = ''
-      this.alleSchuilnamen.forEach(item => {
-        if (!this.gekozenSchuilnamen.includes(item)) {
-          if (item.startsWith(this.schuilNaam)) {
-            const letter = item.charAt(index)
-            // add new letter if not already in letters
-            if (allowedChars.indexOf(letter) === -1) allowedChars += item.charAt(index)
-          }
-        }
-      })
-      return allowedChars
-    },
-
     submitButtonCaption() {
       if (this.userEntryMode === 'login') {
         return 'Login';
@@ -121,17 +105,8 @@ export default {
   },
 
   methods: {
-    filterInput(e) {
-      console.log('e=' + e)
-      console.log('e=' + JSON.stringify(e, null, 2))
-      console.log('e.key=' + JSON.stringify(e.key, null, 2))
-      if (e && e.key !== 'Backspace') {    
-        this.lastKey = e.key
-        if (!this.allowedCharacters.includes(e.key) || /^\W$/.test(e.key)) {
-          // a non-allowed char or a special character was entered; skip it
-          e.preventDefault();
-        }
-      }
+    showSelectedAlias(selectedAlias) {
+      this.selectedAlias = selectedAlias
     },
 
     async submitForm() {
@@ -159,9 +134,29 @@ export default {
   },
 
   watch: {
+    selected: {
+      handler(val, oldVal) {
+        // note: val and oldVal are equal, see https://vuejs.org/guide/essentials/watchers.html#deep-watchers
+        // save the lastIndex on Data
+
+        let newIndex = this.lastIndex
+        for (let i = 0; i < val.length; i++) {
+          if (i !== this.lastIndex && val[i] !== undefined) newIndex = i
+        }
+
+        // reset the previous pressed button
+        if (newIndex !== this.lastIndex) {
+          this.selected[this.lastIndex] = undefined
+        }
+
+        this.lastIndex = newIndex
+      },
+      deep: true
+    },
+
     schuilNaam(val) {
-      if (this.userEntryMode === 'login') this.matchGevonden = this.gekozenSchuilnamen.includes(val)
-      if (this.userEntryMode === 'signup') this.matchGevonden = (!this.gekozenSchuilnamen.includes(val) && this.alleSchuilnamen.includes(val))
+      if (this.userEntryMode === 'login') this.matchFound = this.assignedAliases.includes(val)
+      if (this.userEntryMode === 'signup') this.matchFound = (!this.assignedAliases.includes(val) && this.allAliases.includes(val))
     }
   }
 }
