@@ -133,6 +133,7 @@ export default {
     },
 
     aliasOK() {
+      if (this.alias === undefined) return false
       if (this.userEntryMode === 'login') return this.alias.length > 0 && this.assignedAliases.includes(this.alias)
       if (this.userEntryMode === 'signup') return this.alias.length > 0 && !this.assignedAliases.includes(this.alias)
     }
@@ -164,8 +165,8 @@ export default {
       this.PIN = ''
       this.PINOK = false
       this.alias = ''
-      this.aliasOK = false,
-        this.signInMessage = ''
+      this.aliasOK = false
+      this.signInMessage = ''
       this.signUpMessage = ''
       if (this.userEntryMode === 'login') {
         this.userEntryMode = 'signup';

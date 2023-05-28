@@ -50,7 +50,6 @@ export default {
   watch: {
     aliasButtonSelections: {
       handler(rowValue, oldRowValue) {
-        console.log('aliasButtonSelections =' + rowValue)
         // note: rowValue and oldRowValue are equal, see https://vuejs.org/guide/essentials/watchers.html#deep-watchers
 
         // preset newIndex in case a button in the same row is clicked
