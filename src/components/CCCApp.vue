@@ -13,6 +13,9 @@
                   <v-text-field v-model.trim="alias" label="Uw alias" :rules="nameRules" />
                 </template>
                 <template v-if="userEntryMode === 'signup'">
+                  <v-alert v-model="alert" border="start" variant="tonal" type="warning" title="Alias bezet">
+                    Deze alias is al gekozen door een andere gebruiker. Kies een andere alias.
+                  </v-alert>
                   <select-alias :assigned-aliases="assignedAliases" :all-aliases="allAliases"
                     @alias-selected="setSelectedAlias">
                   </select-alias>
@@ -78,6 +81,7 @@ import AppBar from './AppBar.vue'
 export default {
   data() {
     return {
+      alert: true,
       userEntryMode: 'login',
       selectedAlias: undefined,
       formIsValid: false,
@@ -137,6 +141,8 @@ export default {
   methods: {
     setSelectedAlias(selectedAlias) {
       this.alias = selectedAlias
+      this.alert = this.assignedAliases.includes(this.alias)
+      console.log('CCCapp: selected alias=' + this.alias)
     },
 
     doSigninUser() {
@@ -167,28 +173,6 @@ export default {
         this.userEntryMode = 'login';
       }
     },
-  },
-
-  watch: {
-    selected: {
-      handler(val, oldVal) {
-        // note: val and oldVal are equal, see https://vuejs.org/guide/essentials/watchers.html#deep-watchers
-        // save the lastIndex on Data
-
-        let newIndex = this.lastIndex
-        for (let i = 0; i < val.length; i++) {
-          if (i !== this.lastIndex && val[i] !== undefined) newIndex = i
-        }
-
-        // reset the previous pressed button
-        if (newIndex !== this.lastIndex) {
-          this.selected[this.lastIndex] = undefined
-        }
-
-        this.lastIndex = newIndex
-      },
-      deep: true
-    }
   }
 }
 </script>
