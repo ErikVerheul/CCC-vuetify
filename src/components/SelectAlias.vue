@@ -5,75 +5,12 @@
       <v-card-subtitle>Scroll door alias namen en kies er een</v-card-subtitle>
       <v-card-text>
         <v-row align="center" justify="center">       
-          <select-alias-row
+          <select-alias-row v-for="(num, index) in numberOfRows"
           :assigned-aliases="assignedAliases" 
           :random-names="randomNames"
-          :row=0
+          :row=index
           :alias-button-selections="aliasButtonSelections"
-          ></select-alias-row>
-
-          <select-alias-row
-          :assigned-aliases="assignedAliases" 
-          :random-names="randomNames"
-          :row=1
-          :alias-button-selections="aliasButtonSelections"
-          ></select-alias-row>
-
-          <select-alias-row
-          :assigned-aliases="assignedAliases" 
-          :random-names="randomNames"
-          :row=2
-          :alias-button-selections="aliasButtonSelections"
-          ></select-alias-row>
-
-          <select-alias-row
-          :assigned-aliases="assignedAliases" 
-          :random-names="randomNames"
-          :row=3
-          :alias-button-selections="aliasButtonSelections"
-          ></select-alias-row>
-
-          <select-alias-row
-          :assigned-aliases="assignedAliases" 
-          :random-names="randomNames"
-          :row=4
-          :alias-button-selections="aliasButtonSelections"
-          ></select-alias-row>
-
-          <select-alias-row
-          :assigned-aliases="assignedAliases" 
-          :random-names="randomNames"
-          :row=5
-          :alias-button-selections="aliasButtonSelections"
-          ></select-alias-row>
-
-          <select-alias-row
-          :assigned-aliases="assignedAliases" 
-          :random-names="randomNames"
-          :row=6
-          :alias-button-selections="aliasButtonSelections"
-          ></select-alias-row>
-
-          <select-alias-row
-          :assigned-aliases="assignedAliases" 
-          :random-names="randomNames"
-          :row=7
-          :alias-button-selections="aliasButtonSelections"
-          ></select-alias-row>
-
-          <select-alias-row
-          :assigned-aliases="assignedAliases" 
-          :random-names="randomNames"
-          :row=8
-          :alias-button-selections="aliasButtonSelections"
-          ></select-alias-row>
-
-          <select-alias-row
-          :assigned-aliases="assignedAliases" 
-          :random-names="randomNames"
-          :row=9
-          :alias-button-selections="aliasButtonSelections"
-          ></select-alias-row>         
+          ></select-alias-row>      
         </v-row>
       </v-card-text>
     </v-card>
@@ -88,7 +25,7 @@ export default {
     // randomize alias names
     const numberOfButtons = this.numberOfRows * this.rowLength
     for (let i = 0; i < numberOfButtons; i++) {
-      let index = Math.round(Math.random() * this.allAliases.length)
+      let index = Math.round(Math.random() * (this.allAliases.length - 1))
       this.randomNames[i] = this.allAliases[index]
     }
     // initialize button selection
@@ -99,7 +36,7 @@ export default {
 
   data() {
     return {
-      numberOfRows: 10,
+      numberOfRows: 20,
       rowLength: 4,
       aliasButtonSelections: [],
       selectedButtonInRows: [],
