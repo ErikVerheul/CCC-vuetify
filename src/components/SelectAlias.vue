@@ -8,6 +8,7 @@
           <select-alias-row v-for="(num, index) in numberOfRows"
           :assigned-aliases="assignedAliases" 
           :random-names="randomNames"
+          :row-length="rowLength"
           :row=index
           :alias-button-selections="aliasButtonSelections"
           ></select-alias-row>      
@@ -70,13 +71,11 @@ export default {
         for (let i = 0; i < rowValue.length; i++) {
           if (i !== this.lastIndex && rowValue[i] !== undefined) newIndex = i
         }
-
         // reset the previous clicked button and prevent firing an 'alias-selected' event
         if (this.lastIndex !== undefined && newIndex !== this.lastIndex) {
           this.aliasButtonSelections[this.lastIndex] = undefined
           this.skipWatch = true
         }
-
         // save the index of the clicked buttom row for removal at the next selection
         this.lastIndex = newIndex
 
