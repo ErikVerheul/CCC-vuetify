@@ -23,11 +23,20 @@ export default {
 
   beforeMount() {
     // randomize alias names
-    const numberOfButtons = this.numberOfRows * this.rowLength
-    for (let i = 0; i < numberOfButtons; i++) {
-      let index = Math.round(Math.random() * (this.allAliases.length - 1))
-      this.randomNames[i] = this.allAliases[index]
-    }
+    let itemsSet = 0
+    let numberOfButtons = this.rowLength * this.numberOfRows
+    this.randomNames = []
+    do {
+      // pick a random alias
+      let alias = this.allAliases[Math.round(Math.random() * (this.allAliases.length - 1))]
+      if (!this.randomNames.includes(alias)) {
+        // select if not already done
+        this.randomNames.push(alias)
+        itemsSet++
+      }
+    } while (itemsSet < numberOfButtons)
+
+
     // initialize button selection
     for (let i = 0; i < this.numberOfRows; i++) {
       this.aliasButtonSelections[i] = undefined
@@ -41,9 +50,9 @@ export default {
       aliasButtonSelections: [],
       selectedButtonInRows: [],
       lastSelectedRow: undefined,
-
       lastIndex: undefined,
-      randomNames: []
+      randomNames: [],
+      skipWatch: false
     }
   },
 
@@ -52,18 +61,23 @@ export default {
       handler(rowValue, oldRowValue) {
         // note: rowValue and oldRowValue are equal, see https://vuejs.org/guide/essentials/watchers.html#deep-watchers
 
+        if (this.skipWatch) {
+          this.skipWatch = false
+          return
+        }
         // preset newIndex in case a button in the same row is clicked
         let newIndex = this.lastIndex
         for (let i = 0; i < rowValue.length; i++) {
           if (i !== this.lastIndex && rowValue[i] !== undefined) newIndex = i
         }
 
-        // reset the previous clicked button
-        if (newIndex !== this.lastIndex) {
+        // reset the previous clicked button and prevent firing an 'alias-selected' event
+        if (this.lastIndex !== undefined && newIndex !== this.lastIndex) {
           this.aliasButtonSelections[this.lastIndex] = undefined
+          this.skipWatch = true
         }
 
-        // save the index of the clicked buttom for removal at the next selection
+        // save the index of the clicked buttom row for removal at the next selection
         this.lastIndex = newIndex
 
         let index = newIndex * this.rowLength + this.aliasButtonSelections[newIndex]
