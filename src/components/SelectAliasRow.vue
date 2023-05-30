@@ -18,15 +18,10 @@
   </v-btn-toggle>
 </template>
 
-<script>
-export default {
-  props: ['assignedAliases', 'randomNames', 'rowLength', 'row', 'aliasButtonSelections'],
-
-  computed: {
-    indexOffset() {
-      return this.row * 4
-    }
-  }
-
-}
+<script setup>
+import { computed } from 'vue'
+const props = defineProps(['assignedAliases', 'randomNames', 'rowLength', 'row', 'aliasButtonSelections'])
+const indexOffset = computed(() => {
+  return props.row * 4
+})
 </script>

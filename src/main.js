@@ -16,13 +16,8 @@ import { registerPlugins } from '@/plugins'
 const app = createApp(App)
 
 // Global components
-import AppBar from './components/AppBar.vue'
-app.component('app-bar', AppBar)
-
-import SelectAlias from './components/SelectAlias.vue'
-app.component('select-alias', SelectAlias)
-import SelectAliasRow from './components/SelectAliasRow.vue'
-app.component('select-alias-row', SelectAliasRow)
+import AppBarImplementation from './components/AppBar.vue'
+app.component('AppBar', AppBarImplementation)
 
 registerPlugins(app)
 

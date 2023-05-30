@@ -8,7 +8,7 @@
       <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
     </template>
 
-    <v-app-bar-title>CCC-app v.0.0.4</v-app-bar-title>
+    <v-app-bar-title>CCC-app v.0.0.5</v-app-bar-title>
 
     <v-spacer></v-spacer>
 
@@ -30,41 +30,40 @@
   </v-navigation-drawer>
 </template>
 
-<script>
-export default {
-  props: {
-    isAuthenticated: {
-      type: Boolean,
-      required: true
-    }
-  },
-  data: () => ({
-    drawer: false,
-    group: null,
-    items: [
-      {
-        title: 'Foo',
-        value: 'foo',
-      },
-      {
-        title: 'Bar',
-        value: 'bar',
-      },
-      {
-        title: 'Fizz',
-        value: 'fizz',
-      },
-      {
-        title: 'Buzz',
-        value: 'buzz',
-      },
-    ],
-  }),
+<script setup>
+import { reactive, watch } from 'vue'
 
-  watch: {
-    group() {
-      this.drawer = false
+const props = defineProps({
+  isAuthenticated: {
+    type: Boolean,
+    required: true
+  }
+})
+
+const state = reactive({
+  drawer: false,
+  group: null,
+  items: [
+    {
+      title: 'Foo',
+      value: 'foo',
     },
-  },
-}
+    {
+      title: 'Bar',
+      value: 'bar',
+    },
+    {
+      title: 'Fizz',
+      value: 'fizz',
+    },
+    {
+      title: 'Buzz',
+      value: 'buzz',
+    },
+  ],
+})
+
+watch(state.group, (value, oldValue) => {
+  state.drawer = false
+})
 </script>

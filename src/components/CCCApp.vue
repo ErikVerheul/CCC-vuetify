@@ -1,32 +1,32 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
-      <app-bar :is-authenticated="isAuthenticated"></app-bar>
+      <AppBar :is-authenticated="isAuthenticated"/>
       <v-row class="d-flex align-center justify-center">
         <v-col cols="auto">
           <v-card variant="text">
             <v-form @submit.prevent>
               <div>
-                <template v-if="userEntryMode === 'login'">
+                <template v-if="state.userEntryMode === 'login'">
                   <v-card-title class="text-h5">login</v-card-title>
                   <v-card-subtitle>Login met uw alias en PIN code</v-card-subtitle>
-                  <v-text-field v-model.trim="alias" label="Uw alias" :rules="nameRules" />
+                  <v-text-field v-model.trim="state.aliasSelected" label="Uw alias" :rules="state.nameRules" />
                 </template>
-                <template v-if="userEntryMode === 'signup'">
-                  <v-alert v-model="alert" border="start" variant="tonal" type="warning" title="Alias bezet">
+                <template v-if="state.userEntryMode === 'signup'">
+                  <v-alert v-model="state.alert" border="start" variant="tonal" type="warning" title="Alias bezet">
                     Deze alias is al gekozen door een andere gebruiker. Kies een andere alias.
                   </v-alert>
-                  <select-alias :assigned-aliases="assignedAliases" :all-aliases="allAliases"
+                  <SelectAlias :assigned-aliases="state.assignedAliases" :all-aliases="state.allAliases"
                     @alias-selected="setSelectedAlias">
-                  </select-alias>
+                  </SelectAlias>
                   <div class="py-2" />
                   <label>Kies een PIN code</label>
                 </template>
-                <v-text-field v-model.trim="PIN" label="PIN" :rules="pinRules" />
+                <v-text-field v-model.trim="state.PIN" label="PIN" :rules="state.pinRules" />
               </div>
-              <v-btn v-if="userEntryMode === 'login'" type="submit" color="black" @click='doSigninUser' rounded="l"
+              <v-btn v-if="state.userEntryMode === 'login'" type="submit" color="black" @click='doSigninUser' rounded="l"
                 size="large">Login</v-btn>
-              <v-btn v-if="userEntryMode === 'signup'" type="submit" color="black" @click='doSignupUser' rounded="l"
+              <v-btn v-if="state.userEntryMode === 'signup'" type="submit" color="black" @click='doSignupUser' rounded="l"
                 size="large">Maak persoonlijke alias aan</v-btn>
               <v-btn type="button" variant="text" @click="switchAuthMode">{{ switchModeButtonCaption }}</v-btn>
             </v-form>
@@ -76,104 +76,95 @@
   </v-container>
 </template>
 
-<script>
-import AppBar from './AppBar.vue'
-export default {
-  data() {
-    return {
-      alert: true,
-      userEntryMode: 'login',
-      selectedAlias: undefined,
-      formIsValid: false,
-      alias: '',
-      nameRules: [
-        value => {
-          if (this.assignedAliases.includes(value)) return true
+<script setup>
+import { reactive, computed } from 'vue'
+import SelectAlias from './SelectAlias.vue'
 
-          return 'Alias onbekend.'
-        },
-      ],
-      PIN: '',
-      pinRules: [
-        value => {
-          if (value) return true
+const state = reactive({
+  alert: true,
+  userEntryMode: 'login',
+  selectedAlias: undefined,
+  aliasSelected: '',
+  nameRules: [
+    value => {
+      if (state.assignedAliases.includes(value)) return true
 
-          return 'Vul 4 of meer cijfers in.'
-        },
-        value => {
-          if (!isNaN(value)) return true
-
-          return 'Vul alleen cijfers in.'
-        },
-        value => {
-          if (value.length >= 4) return true
-
-          return 'Vul minimaal 4 cijfers in.'
-        },
-      ],
-      isAuthenticated: false,
-      allAliases: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
-      assignedAliases: ['Jelle', 'Pieter', 'Jan'],
-
-      signInMessage: '',
-      signUpMessage: ''
-    }
-  },
-
-  computed: {
-    switchModeButtonCaption() {
-      if (this.userEntryMode === 'login') {
-        return 'Ga naar nieuwe aanmelding';
-      } else {
-        return 'Ga naar Login';
-      }
+      return 'Alias onbekend.'
     },
-    PINOK() {
-      return !isNaN(this.PIN) && this.PIN.length >= 4
+  ],
+  PIN: '',
+  pinRules: [
+    value => {
+      if (value) return true
+
+      return 'Vul 4 of meer cijfers in.'
     },
+    value => {
+      if (!isNaN(value)) return true
 
-    aliasOK() {
-      if (this.alias === undefined) return false
-      if (this.userEntryMode === 'login') return this.alias.length > 0 && this.assignedAliases.includes(this.alias)
-      if (this.userEntryMode === 'signup') return this.alias.length > 0 && !this.assignedAliases.includes(this.alias)
-    }
-  },
-
-  methods: {
-    setSelectedAlias(selectedAlias) {
-      this.alias = selectedAlias
-      this.alert = this.assignedAliases.includes(this.alias)
-      console.log('CCCapp: selected alias=' + this.alias)
+      return 'Vul alleen cijfers in.'
     },
+    value => {
+      if (value.length >= 4) return true
 
-    doSigninUser() {
-      this.signInMessage = 'alias OK= ' + this.aliasOK + ', PIN OK = ' + this.PINOK
-
-      // on success
-      this.isAuthenticated = true
+      return 'Vul minimaal 4 cijfers in.'
     },
+  ],
+  isAuthenticated: false,
+  allAliases: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
+  assignedAliases: ['Jelle', 'Pieter', 'Jan'],
+  signInMessage: '',
+  signUpMessage: ''
+})
 
-    doSignupUser() {
-      this.signUpMessage = 'alias OK= ' + this.aliasOK + ', PIN OK = ' + this.PINOK
+const switchModeButtonCaption = computed(() => {
+  if (state.userEntryMode === 'login') {
+    return 'Ga naar nieuwe aanmelding';
+  } else {
+    return 'Ga naar Login';
+  }
+})
 
-      // on success signin user
-      this.isAuthenticated = true
-    },
+const PINOK = computed(() => {
+  return !isNaN(state.PIN) && state.PIN.length >= 4
+})
 
-    switchAuthMode() {
-      this.isAuthenticated = false
-      this.PIN = ''
-      this.PINOK = false
-      this.alias = ''
-      this.aliasOK = false
-      this.signInMessage = ''
-      this.signUpMessage = ''
-      if (this.userEntryMode === 'login') {
-        this.userEntryMode = 'signup';
-      } else {
-        this.userEntryMode = 'login';
-      }
-    },
+const aliasOK = computed(() => {
+  if (state.aliasSelected === undefined) return false
+  if (state.userEntryMode === 'login') return state.aliasSelected.length > 0 && state.assignedAliases.includes(state.aliasSelected)
+  if (state.userEntryMode === 'signup') return state.aliasSelected.length > 0 && !state.assignedAliases.includes(state.aliasSelected)
+})
+
+function setSelectedAlias(selectedAlias) {
+  state.aliasSelected = selectedAlias
+  state.alert = state.assignedAliases.includes(state.aliasSelected)
+  console.log('CCCapp: selected alias=' + state.aliasSelected)
+}
+
+function doSigninUser() {
+  state.signInMessage = 'alias OK= ' + aliasOK + ', PIN OK = ' + PINOK
+
+  // on success
+  state.isAuthenticated = true
+}
+
+function doSignupUser() {
+  state.signUpMessage = 'alias OK= ' + aliasOK + ', PIN OK = ' + PINOK
+
+  // on success signin user
+  state.isAuthenticated = true
+}
+
+function switchAuthMode() {
+  state.isAuthenticated = false
+  state.PIN = ''
+  state.aliasSelected = ''
+  state.signInMessage = ''
+  state.signUpMessage = ''
+  if (state.userEntryMode === 'login') {
+    state.userEntryMode = 'signup';
+  } else {
+    state.userEntryMode = 'login';
   }
 }
 </script>
