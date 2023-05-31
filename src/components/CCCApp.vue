@@ -1,7 +1,7 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
-      <AppBar :is-authenticated="isAuthenticated"/>
+      <AppBar :is-authenticated="isAuthenticated" />
       <v-row class="d-flex align-center justify-center">
         <v-col cols="auto">
           <v-card variant="text">
@@ -24,10 +24,25 @@
                 </template>
                 <v-text-field v-model.trim="state.PIN" label="PIN" :rules="state.pinRules" />
               </div>
-              <v-btn v-if="state.userEntryMode === 'login'" type="submit" color="black" @click='doSigninUser' rounded="l"
+              <v-btn v-if="state.userEntryMode === 'login' && aliasOK && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l"
                 size="large">Login</v-btn>
-              <v-btn v-if="state.userEntryMode === 'signup'" type="submit" color="black" @click='doSignupUser' rounded="l"
-                size="large">Maak persoonlijke alias aan</v-btn>
+
+              <v-dialog v-if="state.userEntryMode === 'signup' && aliasOK && PINOK" v-model="state.newUserDialog" width="auto">
+                <template v-slot:activator="{ props: newUserProps }">
+                  <v-btn color="black" rounded="l" size="large" v-bind="newUserProps">Maak persoonlijke alias aan</v-btn>                 
+                </template>
+                <v-card>
+                  <v-card-text>
+                    <h4>Welkom in de CCC app</h4>
+                    <p>Uw alias is {{ state.aliasSelected }}</p>
+                    <p>Uw PIN is {{ state.PIN }}</p>
+                    <p>Gebruik deze alias en PIN om voortaan in te loggen</p>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn color="primary" block @click="state.newUserDialog = false">Ontdek de app</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
               <v-btn type="button" variant="text" @click="switchAuthMode">{{ switchModeButtonCaption }}</v-btn>
             </v-form>
           </v-card>
@@ -82,6 +97,7 @@ import SelectAlias from './SelectAlias.vue'
 
 const state = reactive({
   alert: true,
+  newUserDialog: false,
   userEntryMode: 'login',
   selectedAlias: undefined,
   aliasSelected: '',
