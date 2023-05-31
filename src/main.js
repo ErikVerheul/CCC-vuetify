@@ -4,16 +4,24 @@
  * Bootstraps Vuetify and other plugins then mounts the App`
  */
 
-// Components
-import App from './App.vue'
-
-// Composables
 import { createApp } from 'vue'
+import { VueFire, VueFireAuth } from 'vuefire'
+import App from './App.vue'
+import { firebaseApp } from './firebase'
 
 // Plugins
 import { registerPlugins } from '@/plugins'
 
 const app = createApp(App)
+
+app.use(VueFire, {
+    // imported above but could also just be created here
+    firebaseApp,
+    modules: [
+        // we will see other modules later on
+        VueFireAuth(),
+    ],
+})
 
 // Global components
 import AppBarImplementation from './components/AppBar.vue'
