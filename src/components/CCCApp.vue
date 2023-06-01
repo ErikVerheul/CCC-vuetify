@@ -13,7 +13,7 @@
                   <v-text-field v-model.trim="state.aliasSelected" label="Uw alias" :rules="state.nameRules" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
-                  <v-alert v-model="state.alert" border="start" variant="tonal" type="warning" title="Alias bezet">
+                  <v-alert v-if="state.aliasSelected !== undefined" v-model="state.alert" border="start" variant="tonal" type="warning" title="Alias bezet">
                     Deze alias is al gekozen door een andere gebruiker. Kies een andere alias.
                   </v-alert>
                   <SelectAlias :assigned-aliases="state.assignedAliases" :all-aliases="state.allAliases"
@@ -96,7 +96,7 @@ import { reactive, computed } from 'vue'
 import SelectAlias from './SelectAlias.vue'
 
 const state = reactive({
-  alert: true,
+  alert: false,
   newUserDialog: false,
   userEntryMode: 'login',
   selectedAlias: undefined,
@@ -153,6 +153,7 @@ const aliasOK = computed(() => {
 })
 
 function setSelectedAlias(selectedAlias) {
+  if (selectedAlias === undefined) return
   state.aliasSelected = selectedAlias
   state.alert = state.assignedAliases.includes(state.aliasSelected.toLowerCase())
   console.log('CCCapp: selected alias=' + state.aliasSelected)
