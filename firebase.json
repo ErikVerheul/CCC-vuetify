@@ -3,7 +3,13 @@
     "rules": "database.rules.json"
   },
   "emulators": {
-    "singleProjectMode": true
+    "singleProjectMode": true,
+    "database": {
+      "port": 9000
+    },
+    "ui": {
+      "enabled": true
+    }
   },
   "remoteconfig": {
     "template": "remoteconfig.template.json"
