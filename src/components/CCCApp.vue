@@ -106,7 +106,7 @@ onBeforeMount(() => {
   get(child(dbRef, `users/`)).then((snapshot) => {
     if (snapshot.exists()) {
       console.log('snapshot.val()=' + JSON.stringify(snapshot.val(), null, 2));
-      console.log(console.log(Object.keys(snapshot.val())))
+      // create the array with already assigned users in lowercase
       Object.keys(snapshot.val()).forEach(el => state.assignedAliases.push(el.toLowerCase()))
     } else {
       console.log("No data available");
@@ -121,7 +121,6 @@ const state = reactive({
   alert: false,
   newUserDialog: false,
   userEntryMode: 'login',
-  selectedAlias: undefined,
   aliasSelected: '',
   nameRules: [
     value => {
@@ -197,6 +196,8 @@ function doSignupUser() {
       PIN: state.PIN,
       subscriptionDate: Date.now()
     })
+    // add new alias to current array
+    state.assignedAliases.push(state.aliasSelected.toLowerCase())
 
     // on success signin user
     state.isAuthenticated = true
@@ -207,7 +208,7 @@ function doSignupUser() {
 function switchAuthMode() {
   state.isAuthenticated = false
   state.PIN = ''
-  state.aliasSelected = ''
+  state.aliasSelected = undefined
   state.signInMessage = ''
   state.signUpMessage = ''
   if (state.userEntryMode === 'login') {
