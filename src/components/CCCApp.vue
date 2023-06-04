@@ -13,7 +13,8 @@
                   <v-text-field v-model.trim="state.aliasSelected" label="Uw alias" :rules="state.nameRules" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
-                  <v-alert v-if="state.aliasSelected !== undefined" v-model="state.alert" border="start" variant="tonal" type="warning" title="Alias bezet">
+                  <v-alert v-if="state.aliasSelected !== undefined" v-model="state.alert" border="start" variant="tonal"
+                    type="warning" title="Alias bezet">
                     Deze alias is al gekozen door een andere gebruiker. Kies een andere alias.
                   </v-alert>
                   <SelectAlias :assigned-aliases="state.assignedAliases" :all-aliases="state.allAliases"
@@ -24,12 +25,13 @@
                 </template>
                 <v-text-field v-model.trim="state.PIN" label="PIN" :rules="state.pinRules" />
               </div>
-              <v-btn v-if="state.userEntryMode === 'login' && aliasOK && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l"
-                size="large">Login</v-btn>
+              <v-btn v-if="state.userEntryMode === 'login' && aliasOK && PINOK" type="submit" color="black"
+                @click='doSigninUser' rounded="l" size="large">Login</v-btn>
 
-              <v-dialog v-if="state.userEntryMode === 'signup' && aliasOK && PINOK" v-model="state.newUserDialog" width="auto">
+              <v-dialog v-if="state.userEntryMode === 'signup' && aliasOK && PINOK" v-model="state.newUserDialog"
+                width="auto">
                 <template v-slot:activator="{ props: newUserProps }">
-                  <v-btn color="black" rounded="l" size="large" v-bind="newUserProps">Maak persoonlijke alias aan</v-btn>                 
+                  <v-btn color="black" rounded="l" size="large" v-bind="newUserProps">Maak persoonlijke alias aan</v-btn>
                 </template>
                 <v-card>
                   <v-card-text>
@@ -39,7 +41,7 @@
                     <p>Gebruik deze alias en PIN om voortaan in te loggen</p>
                   </v-card-text>
                   <v-card-actions>
-                    <v-btn color="primary" block @click="state.newUserDialog = false">Ontdek de app</v-btn>
+                    <v-btn color="primary" block @click="doSignupUser">Ontdek de app</v-btn>
                   </v-card-actions>
                 </v-card>
               </v-dialog>
@@ -92,10 +94,30 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue'
+import { onBeforeMount,reactive, computed } from 'vue'
 import SelectAlias from './SelectAlias.vue'
 
+// import { getDatabase, ref, child, get } from "firebase/database"
+import { getDatabase, ref, set, child, get } from "firebase/database"
+
+onBeforeMount(() => {
+  // get the assigned aliases
+  const dbRef = ref(getDatabase());
+  get(child(dbRef, `users/`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      console.log('snapshot.val()=' + JSON.stringify(snapshot.val(), null, 2));
+      console.log(console.log(Object.keys(snapshot.val())))
+      Object.keys(snapshot.val()).forEach(el => state.assignedAliases.push(el.toLowerCase()))
+    } else {
+      console.log("No data available");
+    }
+  }).catch((error) => {
+    console.error(error);
+  })
+})
+
 const state = reactive({
+  userId: 'Niels',
   alert: false,
   newUserDialog: false,
   userEntryMode: 'login',
@@ -129,7 +151,7 @@ const state = reactive({
   isAuthenticated: false,
   allAliases: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
   // note that assignedAliases must be converted to lowercase
-  assignedAliases: ['jelle', 'pieter', 'jan'],
+  assignedAliases: [],
   signInMessage: '',
   signUpMessage: ''
 })
@@ -167,10 +189,19 @@ function doSigninUser() {
 }
 
 function doSignupUser() {
-  state.signUpMessage = 'alias OK= ' + aliasOK + ', PIN OK = ' + PINOK
+  state.newUserDialog = false
 
-  // on success signin user
-  state.isAuthenticated = true
+  if (aliasOK && PINOK) {
+    const db = getDatabase();
+    set(ref(db, 'users/' + state.aliasSelected), {
+      PIN: state.PIN,
+      subscriptionDate: Date.now()
+    })
+
+    // on success signin user
+    state.isAuthenticated = true
+    console.log('CCCapp: sucessfully subsribed user with alias ' + state.aliasSelected)
+  }
 }
 
 function switchAuthMode() {
