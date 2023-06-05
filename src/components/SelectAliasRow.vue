@@ -1,7 +1,7 @@
 <template>
   <v-btn-toggle v-model="aliasButtonSelections[row]" mandatory>
     <template v-for="(num, index) in rowLength">
-      <template v-if="!assignedAliases.includes(randomNames[indexOffset + index].toLowerCase())">
+      <template v-if="!assignedUserIds.includes(randomNames[indexOffset + index].toUpperCase())">
         <v-btn size="small">
           {{ randomNames[indexOffset + index] }}
         </v-btn>
@@ -20,7 +20,7 @@
 
 <script setup>
 import { computed } from 'vue'
-const props = defineProps(['assignedAliases', 'randomNames', 'rowLength', 'row', 'aliasButtonSelections'])
+const props = defineProps(['assignedUserIds', 'randomNames', 'rowLength', 'row', 'aliasButtonSelections'])
 const indexOffset = computed(() => {
   return props.row * 4
 })

@@ -8,7 +8,7 @@
       <v-app-bar-nav-icon variant="text" @click.stop="state.drawer = !state.drawer"></v-app-bar-nav-icon>
     </template>
 
-    <v-app-bar-title>CCC-app v.0.0.8</v-app-bar-title>
+    <v-app-bar-title>CCC-app v.0.0.9</v-app-bar-title>
 
     <v-spacer></v-spacer>
 

@@ -6,7 +6,7 @@
       <v-card-text>
         <v-row align="center" justify="center">
           <SelectAliasRow v-for="(num, index) in state.numberOfRows"
-          :assigned-aliases="assignedAliases" 
+          :assigned-user-ids="assignedUserIds" 
           :random-names="state.randomNames"
           :row-length="state.rowLength"
           :row=index
@@ -21,7 +21,7 @@
 <script setup>
   import { onBeforeMount, reactive, watch } from 'vue'
   import SelectAliasRow from './SelectAliasRow.vue'
-  const props = defineProps(['assignedAliases', 'allAliases'])
+  const props = defineProps(['assignedUserIds', 'allAliases'])
   const emit = defineEmits(['alias-selected'])
 
   onBeforeMount(() => {

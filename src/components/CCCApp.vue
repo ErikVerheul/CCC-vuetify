@@ -17,7 +17,7 @@
                     type="warning" title="Alias bezet">
                     Deze alias is al gekozen door een andere gebruiker. Kies een andere alias.
                   </v-alert>
-                  <SelectAlias :assigned-aliases="state.assignedAliases" :all-aliases="state.allAliases"
+                  <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases"
                     @alias-selected="setSelectedAlias">
                   </SelectAlias>
                   <div class="py-2" />
@@ -112,8 +112,8 @@ onBeforeMount(() => {
   get(child(dbRef, `users/`)).then((snapshot) => {
     if (snapshot.exists()) {
       console.log('snapshot.val()=' + JSON.stringify(snapshot.val(), null, 2));
-      // create the array with already assigned users in lowercase
-      Object.keys(snapshot.val()).forEach(el => state.assignedAliases.push(el.toLowerCase()))
+      // create the array with already assigned users
+      Object.keys(snapshot.val()).forEach(el => state.assignedUserIds.push(el))
     } else {
       console.log("No data available");
     }
@@ -130,7 +130,7 @@ const state = reactive({
   aliasSelected: '',
   nameRules: [
     value => {
-      if (state.assignedAliases.includes(value.toLowerCase())) return true
+      if (state.assignedUserIds.includes(value.toUpperCase())) return true
 
       return 'Alias onbekend.'
     },
@@ -155,8 +155,7 @@ const state = reactive({
   ],
   PINverifiedOk: false,
   allAliases: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
-  // note that assignedAliases must be converted to lowercase
-  assignedAliases: [],
+  assignedUserIds: [],
   signUpMessage: ''
 })
 
@@ -174,8 +173,8 @@ const PINOK = computed(() => {
 
 const aliasOK = computed(() => {
   if (state.aliasSelected === undefined) return false
-  if (state.userEntryMode === 'login') return state.aliasSelected.length > 0 && state.assignedAliases.includes(state.aliasSelected.toLowerCase())
-  if (state.userEntryMode === 'signup') return state.aliasSelected.length > 0 && !state.assignedAliases.includes(state.aliasSelected.toLowerCase())
+  if (state.userEntryMode === 'login') return state.aliasSelected.length > 0 && state.assignedUserIds.includes(state.aliasSelected.toUpperCase())
+  if (state.userEntryMode === 'signup') return state.aliasSelected.length > 0 && !state.assignedUserIds.includes(state.aliasSelected.toUpperCase())
 })
 
 const isAuthenticated = computed(() => {
@@ -185,7 +184,7 @@ const isAuthenticated = computed(() => {
 function setSelectedAlias(selectedAlias) {
   if (selectedAlias === undefined) return
   state.aliasSelected = selectedAlias
-  state.alert = state.assignedAliases.includes(state.aliasSelected.toLowerCase())
+  state.alert = state.assignedUserIds.includes(state.aliasSelected.toUpperCase())
 }
 
 function doSigninUser() {
@@ -193,7 +192,7 @@ function doSigninUser() {
   if (aliasOK && PINOK) {
     // get the user's PIN
     const dbRef = ref(getDatabase());
-    get(child(dbRef, `users/` + state.aliasSelected + '/PIN')).then((snapshot) => {
+    get(child(dbRef, `users/` + state.aliasSelected.toUpperCase() + '/PIN')).then((snapshot) => {
       if (snapshot.exists()) {
         if (snapshot.val() === state.PIN) {
           // on success
@@ -213,12 +212,13 @@ function doSignupUser() {
 
   if (aliasOK && PINOK) {
     const db = getDatabase();
-    set(ref(db, 'users/' + state.aliasSelected), {
+    set(ref(db, 'users/' + state.aliasSelected.toUpperCase()), {
       PIN: state.PIN,
+      alias: state.aliasSelected,
       subscriptionDate: Date.now()
     })
     // add new alias to current array
-    state.assignedAliases.push(state.aliasSelected.toLowerCase())
+    state.assignedUserIds.push(state.aliasSelected.toUpperCase())
 
     // on success
     state.PINverifiedOk = true
