@@ -25,7 +25,7 @@
                 </template>
                 <v-text-field v-model.trim="state.PIN" label="PIN" :rules="state.pinRules" />
               </div>
-              <v-btn v-if="state.userEntryMode === 'login' && aliasOK && PINOK" type="submit" color="black"
+              <v-btn v-if="state.userEntryMode === 'login' && aliasOK && PINOK && !isAuthenticated" type="submit" color="black"
                 @click='doSigninUser' rounded="l" size="large">Login</v-btn>
 
               <v-dialog v-if="state.userEntryMode === 'signup' && aliasOK && PINOK" v-model="state.newUserDialog"
@@ -45,7 +45,13 @@
                   </v-card-actions>
                 </v-card>
               </v-dialog>
-              <v-btn type="button" variant="text" @click="switchAuthMode">{{ switchModeButtonCaption }}</v-btn>
+              <v-btn v-if="!isAuthenticated" type="button" variant="text" @click="switchAuthMode">{{ switchModeButtonCaption }}</v-btn>
+              <div v-if="isAuthenticated">
+                <p>U bent ingelogd</p>
+              </div>
+              <div v-else>
+                <p>U bent (nog) niet ingelogd</p>
+              </div>
             </v-form>
           </v-card>
         </v-col>
@@ -94,7 +100,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount,reactive, computed } from 'vue'
+import { onBeforeMount, reactive, computed } from 'vue'
 import SelectAlias from './SelectAlias.vue'
 
 // import { getDatabase, ref, child, get } from "firebase/database"
@@ -147,11 +153,10 @@ const state = reactive({
       return 'Vul minimaal 4 cijfers in.'
     },
   ],
-  isAuthenticated: false,
+  PINverifiedOk: false,
   allAliases: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
   // note that assignedAliases must be converted to lowercase
   assignedAliases: [],
-  signInMessage: '',
   signUpMessage: ''
 })
 
@@ -173,18 +178,34 @@ const aliasOK = computed(() => {
   if (state.userEntryMode === 'signup') return state.aliasSelected.length > 0 && !state.assignedAliases.includes(state.aliasSelected.toLowerCase())
 })
 
+const isAuthenticated = computed(() => {
+  return PINOK && aliasOK && state.PINverifiedOk
+})
+
 function setSelectedAlias(selectedAlias) {
   if (selectedAlias === undefined) return
   state.aliasSelected = selectedAlias
   state.alert = state.assignedAliases.includes(state.aliasSelected.toLowerCase())
-  console.log('CCCapp: selected alias=' + state.aliasSelected)
 }
 
 function doSigninUser() {
-  state.signInMessage = 'alias OK= ' + aliasOK + ', PIN OK = ' + PINOK
-
-  // on success
-  state.isAuthenticated = true
+  state.PINverifiedOk = false
+  if (aliasOK && PINOK) {
+    // get the user's PIN
+    const dbRef = ref(getDatabase());
+    get(child(dbRef, `users/` + state.aliasSelected + '/PIN')).then((snapshot) => {
+      if (snapshot.exists()) {
+        if (snapshot.val() === state.PIN) {
+          // on success
+          state.PINverifiedOk = true
+        }
+      } else {
+        console.log("No data available")
+      }
+    }).catch((error) => {
+      console.error(error);
+    })
+  }
 }
 
 function doSignupUser() {
@@ -199,17 +220,15 @@ function doSignupUser() {
     // add new alias to current array
     state.assignedAliases.push(state.aliasSelected.toLowerCase())
 
-    // on success signin user
-    state.isAuthenticated = true
-    console.log('CCCapp: sucessfully subsribed user with alias ' + state.aliasSelected)
+    // on success
+    state.PINverifiedOk = true
   }
 }
 
 function switchAuthMode() {
-  state.isAuthenticated = false
   state.PIN = ''
+  state.PINverifiedOk = false
   state.aliasSelected = undefined
-  state.signInMessage = ''
   state.signUpMessage = ''
   if (state.userEntryMode === 'login') {
     state.userEntryMode = 'signup';
