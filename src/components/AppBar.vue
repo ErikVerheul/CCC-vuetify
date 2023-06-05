@@ -5,10 +5,10 @@
     </template>
 
     <template v-slot:prepend>
-      <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon variant="text" @click.stop="state.drawer = !state.drawer"></v-app-bar-nav-icon>
     </template>
 
-    <v-app-bar-title>CCC-app v.0.0.7</v-app-bar-title>
+    <v-app-bar-title>CCC-app v.0.0.8</v-app-bar-title>
 
     <v-spacer></v-spacer>
 
@@ -25,8 +25,8 @@
     </v-btn>
   </v-app-bar>
 
-  <v-navigation-drawer v-if="isAuthenticated" v-model="drawer" location="top" temporary>
-    <v-list :items="items"></v-list>
+  <v-navigation-drawer v-if="props.isAuthenticated" v-model="state.drawer" location="top" temporary>
+    <v-list :items="state.items"></v-list>
   </v-navigation-drawer>
 </template>
 
