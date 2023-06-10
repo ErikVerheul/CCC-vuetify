@@ -10,13 +10,13 @@
               <div>
                 <template v-if="state.userEntryMode === 'login'">
                   <v-card-title class="text-h5">login</v-card-title>
-                  <v-card-subtitle>Login met uw alias en PIN code</v-card-subtitle>
-                  <v-text-field v-model.trim="state.aliasSelected" label="Uw alias" :rules="state.nameRules" />
+                  <v-card-subtitle>Login met uw schuilnaam en PIN code</v-card-subtitle>
+                  <v-text-field v-model.trim="state.aliasSelected" label="Uw schuilnaam" :rules="state.nameRules" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <v-alert v-if="state.aliasSelected !== undefined" v-model="state.alert" border="start" variant="tonal"
-                    type="warning" title="Alias bezet">
-                    Deze alias is al gekozen door een andere gebruiker. Kies een andere alias.
+                    type="warning" title="Schuilnaam bezet">
+                    Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
                   </v-alert>
                   <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases"
                     @alias-selected="setSelectedAlias">
@@ -32,14 +32,14 @@
               <v-dialog v-if="state.userEntryMode === 'signup' && aliasOK && PINOK" v-model="state.newUserDialog"
                 width="auto">
                 <template v-slot:activator="{ props: newUserProps }">
-                  <v-btn color="black" rounded="l" size="large" v-bind="newUserProps">Maak persoonlijke alias aan</v-btn>
+                  <v-btn color="black" rounded="l" size="large" v-bind="newUserProps">Maak persoonlijke schuilnaam aan</v-btn>
                 </template>
                 <v-card>
                   <v-card-text>
                     <h4>Welkom in de CCC app</h4>
-                    <p>Uw alias is {{ state.aliasSelected }}</p>
+                    <p>Uw schuilnaam is {{ state.aliasSelected }}</p>
                     <p>Uw PIN is {{ state.PIN }}</p>
-                    <p>Gebruik deze alias en PIN om voortaan in te loggen</p>
+                    <p>Gebruik deze schuilnaam en PIN om voortaan in te loggen</p>
                   </v-card-text>
                   <v-card-actions>
                     <v-btn color="primary" block @click="doSignupUser">Ontdek de app</v-btn>
@@ -96,7 +96,7 @@ const state = reactive({
     value => {
       if (state.assignedUserIds.includes(value.toUpperCase())) return true
 
-      return 'Alias onbekend.'
+      return 'Schuilnaam onbekend.'
     },
   ],
   PIN: '',

@@ -13,7 +13,7 @@
       <v-col cols="auto">
         <h1>speelmee app<br><br></h1>
         <h3>Verbeter spelenderwijs<br>je kennis en conditie<br>en geniet van cultuur.<br><br></h3>
-        <h4>Even aanmelden: kies<br>een alias en pin code<br><br>
+        <h4>Even aanmelden: kies<br>een schuilnaam en pin code<br><br>
           Dat is alles om te kunnen meedoen!
         </h4>
       </v-col>
