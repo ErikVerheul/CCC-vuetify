@@ -1,11 +1,12 @@
 <template>
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
-      <AppBar v-if="!state.showOpeningScreen" :is-authenticated="isAuthenticated" />
-      <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="state.showOpeningScreen=false"></Speelmee>
+      <!-- <AppBar v-if="!state.showOpeningScreen" :is-authenticated="isAuthenticated" /> -->
+      <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="state.showOpeningScreen = false">
+      </Speelmee>
       <v-row class="d-flex align-center justify-center">
         <v-col cols="auto">
-          <v-card variant="text">           
+          <v-card variant="text">
             <v-form v-if="!state.showOpeningScreen" @submit.prevent>
               <div>
                 <template v-if="state.userEntryMode === 'login'">
@@ -25,9 +26,18 @@
                   <label>Kies een PIN code</label>
                 </template>
                 <v-text-field v-model.trim="state.PIN" label="PIN" :rules="state.pinRules" />
+                <p>De speelmee.app neemt Privacy serieus;<br>
+                  daarom maken we het mogelijk alle<br>
+                  persoonlijke data te wissen als je geen<br>
+                  gebruik meer wil maken van de app.<br>
+                </p>
+                <v-switch label="Verwijder alle gegevens"></v-switch>
+
+                De laatste login was -datum-
+                <choose-pin :doChoosePin="true" :alias="state.aliasSelected"></choose-pin>
               </div>
-              <v-btn v-if="state.userEntryMode === 'login' && aliasOK && PINOK && !isAuthenticated" type="submit" color="black"
-                @click='doSigninUser' rounded="l" size="large">Login</v-btn>
+              <v-btn v-if="state.userEntryMode === 'login' && aliasOK && PINOK && !isAuthenticated" type="submit"
+                color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
 
               <v-dialog v-if="state.userEntryMode === 'signup' && aliasOK && PINOK" v-model="state.newUserDialog"
                 width="auto">
@@ -46,7 +56,8 @@
                   </v-card-actions>
                 </v-card>
               </v-dialog>
-              <v-btn v-if="!isAuthenticated" type="button" variant="text" @click="switchAuthMode">{{ switchModeButtonCaption }}</v-btn>
+              <v-btn v-if="!isAuthenticated" type="button" variant="text" @click="switchAuthMode">{{
+                switchModeButtonCaption }}</v-btn>
               <div v-if="isAuthenticated">
                 <p>U bent ingelogd</p>
               </div>
@@ -65,6 +76,7 @@
 import { onBeforeMount, reactive, computed } from 'vue'
 import Speelmee from './Speelmee.vue'
 import SelectAlias from './SelectAlias.vue'
+import ChoosePin from './ChoosePin.vue'
 
 // import { getDatabase, ref, child, get } from "firebase/database"
 import { getDatabase, ref, set, child, get } from "firebase/database"
@@ -87,7 +99,6 @@ onBeforeMount(() => {
 
 const state = reactive({
   showOpeningScreen: true,
-  userId: 'Niels',
   alert: false,
   newUserDialog: false,
   userEntryMode: 'login',
