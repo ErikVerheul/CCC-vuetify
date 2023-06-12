@@ -2,61 +2,70 @@
   <v-container class="fill-height">
     <v-responsive class="d-flex align-center text-center fill-height">
       <AppBar v-if="!state.showOpeningScreen" :is-authenticated="isAuthenticated" />
-      <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="state.showOpeningScreen=false"></Speelmee>
-      <v-row class="d-flex align-center justify-center">
-        <v-col cols="auto">
-          <v-card variant="text">           
-            <v-form v-if="!state.showOpeningScreen" @submit.prevent>
-              <div>
-                <template v-if="state.userEntryMode === 'login'">
-                  <v-card-title class="text-h5">login</v-card-title>
-                  <v-card-subtitle>Login met uw schuilnaam en PIN code</v-card-subtitle>
-                  <v-text-field v-model.trim="state.aliasSelected" label="Uw schuilnaam" :rules="state.nameRules" />
-                </template>
-                <template v-if="state.userEntryMode === 'signup'">
-                  <v-alert v-if="state.aliasSelected !== undefined" v-model="state.alert" border="start" variant="tonal"
-                    type="warning" title="Schuilnaam bezet">
-                    Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
-                  </v-alert>
-                  <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases"
-                    @alias-selected="setSelectedAlias">
-                  </SelectAlias>
-                  <div class="py-2" />
-                  <label>Kies een PIN code</label>
-                </template>
-                <v-text-field v-model.trim="state.PIN" label="PIN" :rules="state.pinRules" />
-              </div>
-              <v-btn v-if="state.userEntryMode === 'login' && aliasOK && PINOK && !isAuthenticated" type="submit" color="black"
-                @click='doSigninUser' rounded="l" size="large">Login</v-btn>
+      <div v-if="state.userId !== undefined">
+        <AutoLogin :userId="state.userId" />
+      </div>
+      <template v-else>
+        <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="state.showOpeningScreen = false">
+        </Speelmee>
+        <v-row class="d-flex align-center justify-center">
+          <v-col cols="auto">
+            <v-card variant="text">
+              <v-form v-if="!state.showOpeningScreen" @submit.prevent>
+                <div>
+                  <template v-if="state.userEntryMode === 'login'">
+                    <v-card-title class="text-h5">login</v-card-title>
+                    <v-card-subtitle>Login met uw schuilnaam en PIN code</v-card-subtitle>
+                    <v-text-field v-model.trim="state.aliasSelected" label="Uw schuilnaam" :rules="state.nameRules" />
+                  </template>
+                  <template v-if="state.userEntryMode === 'signup'">
+                    <v-alert v-if="state.aliasSelected !== undefined" v-model="state.alert" border="start" variant="tonal"
+                      type="warning" title="Schuilnaam bezet">
+                      Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
+                    </v-alert>
+                    <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases"
+                      @alias-selected="setSelectedAlias">
+                    </SelectAlias>
+                    <div class="py-2" />
+                    <label>Kies een PIN code</label>
+                  </template>
+                  <v-text-field v-model.trim="state.PIN" label="PIN" :rules="state.pinRules" />
+                </div>
+                <v-btn v-if="state.userEntryMode === 'login' && aliasOK && PINOK && !isAuthenticated" type="submit"
+                  color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
 
-              <v-dialog v-if="state.userEntryMode === 'signup' && aliasOK && PINOK" v-model="state.newUserDialog"
-                width="auto">
-                <template v-slot:activator="{ props: newUserProps }">
-                  <v-btn color="black" rounded="l" size="large" v-bind="newUserProps">Maak persoonlijke schuilnaam aan</v-btn>
-                </template>
-                <v-card>
-                  <v-card-text>
-                    <h4>Welkom in de CCC app</h4>
-                    <p>Uw schuilnaam is {{ state.aliasSelected }}</p>
-                    <p>Uw PIN is {{ state.PIN }}</p>
-                    <p>Gebruik deze schuilnaam en PIN om voortaan in te loggen</p>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-btn color="primary" block @click="doSignupUser">Ontdek de app</v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-              <v-btn v-if="!isAuthenticated" type="button" variant="text" @click="switchAuthMode">{{ switchModeButtonCaption }}</v-btn>
-              <div v-if="isAuthenticated">
-                <p>U bent ingelogd</p>
-              </div>
-              <div v-else>
-                <p>U bent (nog) niet ingelogd</p>
-              </div>
-            </v-form>
-          </v-card>
-        </v-col>
-      </v-row>
+                <v-dialog v-if="state.userEntryMode === 'signup' && aliasOK && PINOK" v-model="state.newUserDialog"
+                  width="auto">
+                  <template v-slot:activator="{ props: newUserProps }">
+                    <v-btn color="black" rounded="l" size="large" v-bind="newUserProps">Maak persoonlijke schuilnaam
+                      aan</v-btn>
+                  </template>
+                  <v-card>
+                    <v-card-text>
+                      <h4>Welkom in de CCC app</h4>
+                      <p>Uw schuilnaam is {{ state.aliasSelected }}</p>
+                      <p>Uw PIN is {{ state.PIN }}</p>
+                      <p>Gebruik deze schuilnaam en PIN om op een ander apparaat in te loggen</p>
+                      <p>Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt</p>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-btn color="primary" block @click="doSignupUser">Ontdek de app</v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+                <v-btn v-if="!isAuthenticated" type="button" variant="text" @click="switchAuthMode">{{
+                  switchModeButtonCaption }}</v-btn>
+                <div v-if="isAuthenticated">
+                  <p>U bent ingelogd</p>
+                </div>
+                <div v-else>
+                  <p>U bent (nog) niet ingelogd</p>
+                </div>
+              </v-form>
+            </v-card>
+          </v-col>
+        </v-row>
+      </template>
     </v-responsive>
   </v-container>
 </template>
@@ -65,6 +74,8 @@
 import { onBeforeMount, reactive, computed } from 'vue'
 import Speelmee from './Speelmee.vue'
 import SelectAlias from './SelectAlias.vue'
+import Cookies from 'universal-cookie'
+import AutoLogin from './AutoLogin.vue'
 
 // import { getDatabase, ref, child, get } from "firebase/database"
 import { getDatabase, ref, set, child, get } from "firebase/database"
@@ -83,11 +94,20 @@ onBeforeMount(() => {
   }).catch((error) => {
     console.error(error);
   })
+  // get the user's credentials from cookie, if set
+  const cookies = new Cookies()
+  const retrievedCookie = cookies.get('speelMee')
+  if (retrievedCookie !== undefined) {
+    state.userId = retrievedCookie.user
+    //refresh cookie
+    cookies.remove('speelMee', { sameSite: true })
+    cookies.set('speelMee', { user: state.userId }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+  }
 })
 
 const state = reactive({
   showOpeningScreen: true,
-  userId: 'Niels',
+  userId: undefined,
   alert: false,
   newUserDialog: false,
   userEntryMode: 'login',
@@ -186,6 +206,8 @@ function doSignupUser() {
 
     // on success
     state.PINverifiedOk = true
+    const cookies = new Cookies()
+    cookies.set('speelMee', { user: state.aliasSelected.toUpperCase() }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
   }
 }
 
