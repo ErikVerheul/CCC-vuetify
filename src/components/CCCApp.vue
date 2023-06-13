@@ -181,6 +181,9 @@ function doSigninUser() {
         if (snapshot.val() === state.PIN) {
           // on success
           state.PINverifiedOk = true
+          // save a cookie for auto login next time
+          const cookies = new Cookies()
+          cookies.set('speelMee', { user: state.aliasSelected.toUpperCase() }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
         }
       } else {
         console.log("No data available")
