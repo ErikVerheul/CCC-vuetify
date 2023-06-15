@@ -1,17 +1,13 @@
 <template>
   <div v-if="showOpeningScreen">
-    <v-row class="d-flex align-start justify-center">
+    <v-row>
       <v-col cols="12">
-        <v-card color="purple">
-          <v-card-title class="text-h3">
-            Welkom
-          </v-card-title>
-        </v-card>
+        <h1 class="titleLine">Welkom</h1>
       </v-col>
     </v-row>
     <v-row class="d-flex align-center justify-center">
       <v-col cols="auto">
-        <h1>speelmee app<br><br></h1>
+        <h1>speelmee.app<br><br></h1>
         <h3>Verbeter spelenderwijs<br>je kennis en conditie<br>en geniet van cultuur.<br><br></h3>
         <h4>Even aanmelden: kies<br>een schuilnaam en pin code<br><br>
           Dat is alles om te kunnen meedoen!
@@ -38,3 +34,11 @@ import { reactive } from 'vue'
 const props = defineProps(['showOpeningScreen'])
 const emit = defineEmits(['exit-opening-screen'])
 </script>
+
+<style scoped>
+.titleLine {
+  background-color: purple;
+  color: white;
+  text-align:center;
+}
+</style>

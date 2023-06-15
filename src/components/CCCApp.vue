@@ -1,71 +1,75 @@
 <template>
-  <v-container class="fill-height">
-    <v-responsive class="d-flex align-center text-center fill-height">
-      <AppBar v-if="!state.showOpeningScreen" :is-authenticated="isAuthenticated" />
-      <div v-if="state.userId !== undefined">
-        <AutoLogin :userId="state.userId" />
-      </div>
-      <template v-else>
-        <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="state.showOpeningScreen = false">
-        </Speelmee>
-        <v-row class="d-flex align-center justify-center">
-          <v-col cols="auto">
-            <v-card variant="text">
-              <v-form v-if="!state.showOpeningScreen" @submit.prevent>
-                <div>
-                  <template v-if="state.userEntryMode === 'login'">
-                    <v-card-title class="text-h5">login</v-card-title>
-                    <v-card-subtitle>Login met uw schuilnaam en PIN code</v-card-subtitle>
-                    <v-text-field v-model.trim="state.aliasSelected" label="Uw schuilnaam" :rules="state.nameRules" />
-                  </template>
-                  <template v-if="state.userEntryMode === 'signup'">
-                    <v-alert v-if="state.aliasSelected !== undefined" v-model="state.alert" border="start" variant="tonal"
-                      type="warning" title="Schuilnaam bezet">
-                      Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
-                    </v-alert>
-                    <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases"
-                      @alias-selected="setSelectedAlias">
-                    </SelectAlias>
-                    <div class="py-2" />
-                    <label>Kies een PIN code</label>
-                  </template>
-                  <v-text-field v-model.trim="state.PIN" label="PIN" :rules="state.pinRules" />
-                </div>
-                <v-btn v-if="state.userEntryMode === 'login' && aliasOK && PINOK && !isAuthenticated" type="submit"
-                  color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
+  <v-container>
+    <v-responsive>
+      <AppBar v-if="state.alias !== undefined" :is-authenticated="isAuthenticated" :user-name="state.alias"
+        :PIN="state.PIN" :scherm-naam="state.schermNaam" />
 
-                <v-dialog v-if="state.userEntryMode === 'signup' && aliasOK && PINOK" v-model="state.newUserDialog"
-                  width="auto">
-                  <template v-slot:activator="{ props: newUserProps }">
-                    <v-btn color="black" rounded="l" size="large" v-bind="newUserProps">Maak persoonlijke schuilnaam
-                      aan</v-btn>
-                  </template>
-                  <v-card>
-                    <v-card-text>
-                      <h4>Welkom in de CCC app</h4>
-                      <p>Uw schuilnaam is {{ state.aliasSelected }}</p>
-                      <p>Uw PIN is {{ state.PIN }}</p>
-                      <p>Gebruik deze schuilnaam en PIN om op een ander apparaat in te loggen</p>
-                      <p>Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt</p>
-                    </v-card-text>
-                    <v-card-actions>
-                      <v-btn color="primary" block @click="doSignupUser">Ontdek de app</v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
-                <v-btn v-if="!isAuthenticated" type="button" variant="text" @click="switchAuthMode">{{
-                  switchModeButtonCaption }}</v-btn>
-                <div v-if="isAuthenticated">
-                  <p>U bent ingelogd</p>
-                </div>
-                <div v-else>
-                  <p>U bent (nog) niet ingelogd</p>
-                </div>
-              </v-form>
-            </v-card>
-          </v-col>
-        </v-row>
-      </template>
+      <div>
+        <div v-if="isAuthenticated">
+          <MainMemu></MainMemu>
+        </div>
+        <div v-else>
+          <Speelmee :show-opening-screen="state.showOpeningScreen"
+            @exit-opening-screen="loginOrSignIn"/>
+          <v-row class="d-flex align-center justify-center">
+            <v-col cols="auto">
+              <v-card variant="text">
+                <v-form v-if="!state.showOpeningScreen" @submit.prevent>
+                  <div>
+                    <template v-if="state.userEntryMode === 'login'">
+                      <v-card-title class="text-h5">login</v-card-title>
+                      <v-card-subtitle>Login met uw schuilnaam en PIN code</v-card-subtitle>
+                      <v-text-field v-model.trim="state.aliasSelected" label="Uw schuilnaam" :rules="state.nameRules" />
+                    </template>
+                    <template v-if="state.userEntryMode === 'signup'">
+                      <v-alert v-if="state.aliasSelected !== undefined" v-model="state.alert" border="start"
+                        variant="tonal" type="warning" title="Schuilnaam bezet">
+                        Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
+                      </v-alert>
+                      <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases"
+                        @alias-selected="setSelectedAlias">
+                      </SelectAlias>
+                      <div class="py-2" />
+                      <label>Kies een PIN code</label>
+                    </template>
+                    <v-text-field v-model.trim="state.PIN" label="PIN" :rules="state.pinRules" />
+                  </div>
+                  <v-btn v-if="state.userEntryMode === 'login' && aliasOK && PINOK && !isAuthenticated" type="submit"
+                    color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
+
+                  <v-dialog v-if="state.userEntryMode === 'signup' && aliasOK && PINOK" v-model="state.newUserDialog"
+                    width="auto">
+                    <template v-slot:activator="{ props: newUserProps }">
+                      <v-btn color="black" rounded="l" size="large" v-bind="newUserProps">Maak persoonlijke schuilnaam
+                        aan</v-btn>
+                    </template>
+                    <v-card>
+                      <v-card-text>
+                        <h4>Welkom in de Speelmee.app</h4>
+                        <p>Uw schuilnaam is {{ state.aliasSelected }}</p>
+                        <p>Uw PIN is {{ state.PIN }}</p>
+                        <p>Gebruik deze schuilnaam en PIN om op een ander apparaat in te loggen</p>
+                        <p>Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt</p>
+                      </v-card-text>
+                      <v-card-actions>
+                        <v-btn color="primary" block @click="doSignupUser">Ontdek de app</v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
+                  <v-btn v-if="!isAuthenticated" type="button" variant="text" @click="switchAuthMode">{{
+                    switchModeButtonCaption }}</v-btn>
+                  <div v-if="isAuthenticated">
+                    <p>U bent ingelogd</p>
+                  </div>
+                  <div v-else>
+                    <p>U bent (nog) niet ingelogd</p>
+                  </div>
+                </v-form>
+              </v-card>
+            </v-col>
+          </v-row>
+        </div>
+      </div>
     </v-responsive>
   </v-container>
 </template>
@@ -75,7 +79,7 @@ import { onBeforeMount, reactive, computed } from 'vue'
 import Speelmee from './Speelmee.vue'
 import SelectAlias from './SelectAlias.vue'
 import Cookies from 'universal-cookie'
-import AutoLogin from './AutoLogin.vue'
+import MainMemu from './MainMenu.vue'
 
 // import { getDatabase, ref, child, get } from "firebase/database"
 import { getDatabase, ref, set, child, get } from "firebase/database"
@@ -89,28 +93,51 @@ onBeforeMount(() => {
       // create the array with already assigned users
       Object.keys(snapshot.val()).forEach(el => state.assignedUserIds.push(el))
     } else {
-      console.log("No data available");
+      console.log("No assigned aliases data available");
     }
   }).catch((error) => {
     console.error(error);
   })
-  // get the user's credentials from cookie, if set
+  // automatically signin from cookie, if set
   const cookies = new Cookies()
   const retrievedCookie = cookies.get('speelMee')
   if (retrievedCookie !== undefined) {
     state.userId = retrievedCookie.user
-    //refresh cookie
+    // get other user data from the database
+    get(child(dbRef, `users/` + state.userId)).then((snapshot) => {
+      if (snapshot.exists()) {
+        console.log('snapshot.val()=' + JSON.stringify(snapshot.val(), null, 2))
+        state.alias = snapshot.val().alias
+        state.PIN = snapshot.val().PIN
+        state.subscriptionDate = snapshot.val().subscriptionDate
+        // set authenticated
+        state.isAutoSignedIn = true
+      }
+    }).catch((error) => {
+      console.error(error);
+    })  
+    // refresh cookie to maintain a year long subscription
     cookies.remove('speelMee', { sameSite: true })
     cookies.set('speelMee', { user: state.userId }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+    state.schermNaam = 'Menu'
+  } else {
+    // manual login or signin needed
+    state.showOpeningScreen = true
+    state.userEntryMode = 'login'
+    state.schermNaam = 'Welkom'
   }
 })
 
 const state = reactive({
+  schermNaam: undefined,
+  isAutoSignedIn: false,
   showOpeningScreen: true,
   userId: undefined,
+  alias: undefined,
+  subscriptionDate: undefined,
   alert: false,
   newUserDialog: false,
-  userEntryMode: 'login',
+  userEntryMode: undefined,
   aliasSelected: '',
   nameRules: [
     value => {
@@ -139,8 +166,7 @@ const state = reactive({
   ],
   PINverifiedOk: false,
   allAliases: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
-  assignedUserIds: [],
-  signUpMessage: ''
+  assignedUserIds: [], // in uppercase
 })
 
 const switchModeButtonCaption = computed(() => {
@@ -162,8 +188,13 @@ const aliasOK = computed(() => {
 })
 
 const isAuthenticated = computed(() => {
-  return PINOK && aliasOK && state.PINverifiedOk
+  return state.isAutoSignedIn || (PINOK && aliasOK && state.PINverifiedOk)
 })
+
+function loginOrSignIn() {
+  state.showOpeningScreen = false 
+  state.schermNaam='Inloggen'
+}
 
 function setSelectedAlias(selectedAlias) {
   if (selectedAlias === undefined) return
@@ -176,14 +207,17 @@ function doSigninUser() {
   if (aliasOK && PINOK) {
     // get the user's PIN
     const dbRef = ref(getDatabase());
-    get(child(dbRef, `users/` + state.aliasSelected.toUpperCase() + '/PIN')).then((snapshot) => {
+    get(child(dbRef, `users/` + state.aliasSelected.toUpperCase())).then((snapshot) => {
       if (snapshot.exists()) {
-        if (snapshot.val() === state.PIN) {
+        if (snapshot.val().PIN === state.PIN) {
           // on success
+          state.alias = snapshot.val().alias
+          state.subscriptionDate = snapshot.val().subscriptionDate
           state.PINverifiedOk = true
           // save a cookie for auto login next time
           const cookies = new Cookies()
           cookies.set('speelMee', { user: state.aliasSelected.toUpperCase() }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+          state.schermNaam = 'Menu'
         }
       } else {
         console.log("No data available")
@@ -196,13 +230,14 @@ function doSigninUser() {
 
 function doSignupUser() {
   state.newUserDialog = false
-
   if (aliasOK && PINOK) {
+    state.alias = state.aliasSelected
+    state.subscriptionDate = Date.now()
     const db = getDatabase();
     set(ref(db, 'users/' + state.aliasSelected.toUpperCase()), {
       PIN: state.PIN,
-      alias: state.aliasSelected,
-      subscriptionDate: Date.now()
+      alias: state.alias,
+      subscriptionDate: state.subscriptionDate
     })
     // add new alias to current array
     state.assignedUserIds.push(state.aliasSelected.toUpperCase())
@@ -211,6 +246,7 @@ function doSignupUser() {
     state.PINverifiedOk = true
     const cookies = new Cookies()
     cookies.set('speelMee', { user: state.aliasSelected.toUpperCase() }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+    state.schermNaam = 'Menu'
   }
 }
 
@@ -218,11 +254,12 @@ function switchAuthMode() {
   state.PIN = ''
   state.PINverifiedOk = false
   state.aliasSelected = undefined
-  state.signUpMessage = ''
   if (state.userEntryMode === 'login') {
-    state.userEntryMode = 'signup';
+    state.userEntryMode = 'signup'
+    state.schermNaam = 'Schuilnaam kiezen'
   } else {
-    state.userEntryMode = 'login';
+    state.userEntryMode = 'login'
+    state.schermNaam = 'Inloggen'
   }
 }
 </script>

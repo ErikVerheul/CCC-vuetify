@@ -1,8 +1,7 @@
 <template>
   <v-row>
     <v-card flat>
-      <v-card-title class="text-h5">schuilnaam kiezen</v-card-title>
-      <v-card-subtitle>Scroll door de schuilnamen en kies er een</v-card-subtitle>
+      <v-card-title class="text-h5">Scroll door de schuilnamen en kies er een</v-card-title>
       <v-card-text>
         <v-row align="center" justify="center">
           <SelectAliasRow v-for="(num, index) in state.numberOfRows"
