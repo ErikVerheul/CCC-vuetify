@@ -1922,10 +1922,10 @@ vuefire@^3.1.0:
   dependencies:
     vue-demi latest
 
-vuetify@^3.0.0:
-  version "3.2.4"
-  resolved "https://registry.npmjs.org/vuetify/-/vuetify-3.2.4.tgz"
-  integrity sha512-Lj3fXSTY/lLXpuzAM0n2B/9o7WKpHsqv2USanXyFVXbePsl9kx7XY4HPrMqTDEYRlY9AyMjF9ilTbkQ8IovPmQ==
+vuetify@^3.2.0:
+  version "3.3.3"
+  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-3.3.3.tgz#82904abbed936abaf775b8394b0d094d4b56cbc7"
+  integrity sha512-oLpm6L6Zvf4b7Ua8V3INnUkGoxbi04O68ymEbBDLrPFzmIkzAcwd9L/2Ega582PRJnjTBBZapa6KdmosvhVvgA==
 
 webfontloader@^1.0.0:
   version "1.6.28"

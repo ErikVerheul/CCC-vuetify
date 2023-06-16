@@ -1,16 +1,15 @@
 <template>
-  <v-app-bar color="teal-darken-4" image="https://picsum.photos/1920/1080?random">
+  <v-app-bar density="compact" color="teal-darken-4" image="https://picsum.photos/1920/1080?random">
     <template v-slot:image>
       <v-img gradient="to top right, rgba(19,84,122,.8), rgba(128,208,199,.8)"></v-img>
     </template>
 
-    <template v-slot:prepend>
+    <!-- <template v-slot:prepend>
       <v-app-bar-nav-icon variant="text" @click.stop="state.drawer = !state.drawer"></v-app-bar-nav-icon>
-    </template>
+    </template> -->
 
-    <v-app-bar-title>SPEELMEE.APP {{ welcomeMsg }}</v-app-bar-title>
+    <v-app-bar-title>{{ welcomeMsg }}</v-app-bar-title>
     <v-app-bar-title>{{ schermNaam }}</v-app-bar-title>
-    <v-spacer></v-spacer>
 
     <!-- <v-btn icon>
       <v-icon>mdi-magnify</v-icon>
@@ -70,9 +69,9 @@
     </v-menu>
   </v-app-bar>
 
-  <v-navigation-drawer v-if="props.isAuthenticated" v-model="state.drawer" location="top" temporary>
+  <!-- <v-navigation-drawer v-if="props.isAuthenticated" v-model="state.drawer" location="top" temporary>
     <v-list :items="state.items"></v-list>
-  </v-navigation-drawer>
+  </v-navigation-drawer> -->
 
   <v-dialog v-model="state.dialog1" width="auto">
     <v-card>

@@ -12,6 +12,19 @@
         <h4>Even aanmelden: kies<br>een schuilnaam en pin code<br><br>
           Dat is alles om te kunnen meedoen!
         </h4>
+        <div class="py-4" />
+        <v-btn size="x-small" color="yellow-lighten-3" @click="state.showHowTo = true">Heb je al een account op een ander
+          apparaat?</v-btn>
+        <template v-if="state.showHowTo">
+          <div class="py-4" />
+          <p>Als u al een account hebt op een ander apparaat log dan in met uw schuilnaam en pin code. Die kunt u
+            terugvinden op het andere apparaat door op
+            <v-icon>mdi-dots-vertical</v-icon> rechtsboven te tikken en 'Inloggen op ander apparaat' te kiezen.
+          </p>
+        </template>
+        <div class="py-4" />
+        <p>Lees het privacybeleid nu of later.<br>
+        Geen gebruikelijke juridische bla bla!</p>
       </v-col>
     </v-row>
     <div class="py-14" />
@@ -27,18 +40,25 @@
     </v-row>
     <div class="py-14" />
   </div>
+  <PrivacyBeleid :show-privacy-screen="state.showPrivacyScreen" @exit-privacy-screen="state.showPrivacyScreen = false" />
 </template>
 
 <script setup>
 import { reactive } from 'vue'
+import PrivacyBeleid from './PrivacyBeleid.vue'
 const props = defineProps(['showOpeningScreen'])
 const emit = defineEmits(['exit-opening-screen'])
+
+const state = reactive({
+  showPrivacyScreen: false,
+  showHowTo: false
+})
 </script>
 
 <style scoped>
 .titleLine {
   background-color: purple;
   color: white;
-  text-align:center;
+  text-align: center
 }
 </style>
