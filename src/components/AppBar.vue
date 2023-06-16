@@ -61,6 +61,11 @@
           </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
+          <v-btn flat size="small" @click="state.dialog8 = true">
+            privacybeleid
+          </v-btn>
+        </v-list-item>
+        <v-list-item v-if="props.isAuthenticated">
           <v-btn flat size="small" @click="">
             Logout
           </v-btn>
@@ -109,17 +114,24 @@
   <v-dialog v-model="state.dialog7" width="auto">
     <v-card>
       <v-card-text>
-        Speelmee.app is in ontwikkeling. De huidige versie is v.0.1.2
+        Speelmee.app is in ontwikkeling. De huidige versie is v.0.1.3
       </v-card-text>
       <v-card-actions>
         <v-btn color="purple" block @click="state.dialog7 = false">Sluit</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <v-dialog v-model="state.dialog8" width="auto">
+    <v-card class="pa-3">
+      <PrivacyBeleid :show-privacy-screen="state.dialog8" @exit-privacy-screen="state.dialog8 = false" />
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
 import { computed, reactive } from 'vue'
+import PrivacyBeleid from './PrivacyBeleid.vue'
 import Cookies from 'universal-cookie'
 
 const props = defineProps({
@@ -151,6 +163,7 @@ const state = reactive({
   dialog1: false,
   dialog2: false,
   dialog7: false,
+  dialog8:false,
   drawer: undefined,
   cookieIsRemoved: false,
   items: [
