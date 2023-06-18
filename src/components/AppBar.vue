@@ -1,23 +1,8 @@
 <template>
-  <v-app-bar density="compact" color="teal-darken-4" image="https://picsum.photos/1920/1080?random">
-    <template v-slot:image>
-      <v-img gradient="to top right, rgba(19,84,122,.8), rgba(128,208,199,.8)"></v-img>
-    </template>
+  <v-app-bar density="compact" color="purple">
 
-    <!-- <template v-slot:prepend>
-      <v-app-bar-nav-icon variant="text" @click.stop="state.drawer = !state.drawer"></v-app-bar-nav-icon>
-    </template> -->
-
-    <v-app-bar-title>{{ welcomeMsg }}</v-app-bar-title>
-    <v-app-bar-title>{{ schermNaam }}</v-app-bar-title>
-
-    <!-- <v-btn icon>
-      <v-icon>mdi-magnify</v-icon>
-    </v-btn>
-
-    <v-btn icon>
-      <v-icon>mdi-heart</v-icon>
-    </v-btn> -->
+    <v-app-bar-title v-if="welcomeMsg !== undefined">{{ welcomeMsg }}</v-app-bar-title>
+    <v-app-bar-title>{{ screenName }}</v-app-bar-title>
 
     <v-btn icon id="menu-activator">
       <v-icon>mdi-dots-vertical</v-icon>
@@ -60,7 +45,7 @@
             Over de Speelmee app
           </v-btn>
         </v-list-item>
-        <v-list-item v-if="props.isAuthenticated">
+        <v-list-item>
           <v-btn flat size="small" @click="state.dialog8 = true">
             privacybeleid
           </v-btn>
@@ -73,10 +58,6 @@
       </v-list>
     </v-menu>
   </v-app-bar>
-
-  <!-- <v-navigation-drawer v-if="props.isAuthenticated" v-model="state.drawer" location="top" temporary>
-    <v-list :items="state.items"></v-list>
-  </v-navigation-drawer> -->
 
   <v-dialog v-model="state.dialog1" width="auto">
     <v-card>
@@ -103,7 +84,7 @@
           <li>Uw pin code: {{ props.PIN }}</li>
         </ul>
         <v-btn class="mt-8" @click="removeCookie">Stop automatisch inloggen</v-btn>
-        <h3 v-if="state.cookieIsRemoved">Automatisch inloggen is uitgezet</h3>
+        <h3 class="mt-4" v-if="state.cookieIsRemoved">Automatisch inloggen is uitgezet</h3>
       </v-card-text>
       <v-card-actions>
         <v-btn color="purple" block @click="state.dialog2 = false">Sluit</v-btn>
@@ -145,9 +126,9 @@ const props = defineProps({
   },
   PIN: {
     type: String,
-    required: true
+    default: undefined
   },
-  schermNaam: {
+  screenName: {
     type: String,
     required: true
   }
@@ -156,7 +137,7 @@ const props = defineProps({
 const welcomeMsg = computed(() => {
   if (props.isAuthenticated) {
     return 'Welkom ' + props.userName
-  }
+  } else return undefined
 })
 
 const state = reactive({
@@ -166,24 +147,6 @@ const state = reactive({
   dialog8:false,
   drawer: undefined,
   cookieIsRemoved: false,
-  items: [
-    {
-      title: 'Foo',
-      value: 'foo',
-    },
-    {
-      title: 'Bar',
-      value: 'bar',
-    },
-    {
-      title: 'Fizz',
-      value: 'fizz',
-    },
-    {
-      title: 'Buzz',
-      value: 'buzz',
-    },
-  ],
 })
 
 function removeCookie() {
