@@ -3,7 +3,7 @@
     <v-card-title>Login met uw schuilnaam en PIN code</v-card-title>
     <v-text-field v-model.trim="state.alias" label="Uw schuilnaam" :rules="state.nameRules" />
     <v-text-field v-model.trim="state.pinCode" label="PIN" :rules="state.pinRules" />
-    <v-btn v-if="aliasOK && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l"
+    <v-btn class="my-6" v-if="aliasOK && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l"
       size="large">Login</v-btn>
     <v-btn type="button" variant="text" @click="emit('change-to-signup')">Ga naar nieuwe
       aanmelding</v-btn>
@@ -47,7 +47,8 @@ const state = reactive({
     },
   ],
   PINverifiedOk: false,
-  subscriptionDate: undefined
+  subscriptionDate: undefined,
+  lastLogin: undefined
 })
 
 function doSigninUser() {
@@ -61,6 +62,7 @@ function doSigninUser() {
           // on success
           state.alias = snapshot.val().alias
           state.subscriptionDate = snapshot.val().subscriptionDate
+          state.lastLogin = snapshot.val().lastLogin
           state.PINverifiedOk = true
           // save a cookie for auto login next time
           const cookies = new Cookies()

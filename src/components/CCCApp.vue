@@ -1,12 +1,12 @@
 <template>
   <v-container>
     <v-responsive>
-      <AppBar :is-authenticated="isAuthenticated" :user-name="state.alias" :PIN="state.PIN"
-        :screen-name="state.screenName" />
+      <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.alias" :PIN="state.PIN"
+        :screen-name="state.screenName" @reset-app="resetApp"/>
 
       <div>
-        <div v-if="isAuthenticated">
-          <MainMemu></MainMemu>
+        <div v-if="state.isAuthenticated">
+          <MainMemu :lastLogin="state.lastLogin"></MainMemu>
         </div>
         <div v-else>
           <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="loginOrSignIn" />
@@ -49,7 +49,7 @@ import Cookies from 'universal-cookie'
 import MainMemu from './MainMenu.vue'
 import SignupUser from './SignupUser.vue'
 import SigninUser from './SigninUser.vue'
-import { getDatabase, ref, child, get } from "firebase/database"
+import { getDatabase, ref, child, get, push, update } from "firebase/database"
 
 onBeforeMount(() => {
   // get the assigned aliases
@@ -77,8 +77,10 @@ onBeforeMount(() => {
         state.alias = snapshot.val().alias
         state.PIN = snapshot.val().PIN
         state.subscriptionDate = snapshot.val().subscriptionDate
+        state.lastLogin = snapshot.val().lastLogin
         // set authenticated
-        state.isAutoSignedIn = true
+        state.isAuthenticated = true
+        writeNewLastLogin(state.userId, Date.now())
       }
     }).catch((error) => {
       console.error(error);
@@ -96,7 +98,7 @@ onBeforeMount(() => {
 
 const state = reactive({
   screenName: undefined,
-  isAutoSignedIn: false,
+  isAuthenticated: false,
   showOpeningScreen: undefined,
   userId: undefined,
   alias: undefined,
@@ -129,7 +131,6 @@ const state = reactive({
       return 'Vul minimaal 4 cijfers in.'
     },
   ],
-  PINverifiedOk: false,
   allAliases: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
   assignedUserIds: [], // in uppercase
 })
@@ -144,10 +145,6 @@ const aliasOK = computed(() => {
   if (state.userEntryMode === 'signup') return state.aliasSelected.length > 0 && !state.assignedUserIds.includes(state.aliasSelected.toUpperCase())
 })
 
-const isAuthenticated = computed(() => {
-  return state.isAutoSignedIn || (PINOK && aliasOK && state.PINverifiedOk)
-})
-
 function loginOrSignIn() {
   state.showOpeningScreen = false
   state.userEntryMode = 'login'
@@ -156,7 +153,6 @@ function loginOrSignIn() {
 
 function returnToLogin() {
   state.PIN = ''
-  state.PINverifiedOk = false
   state.aliasSelected = undefined
   state.userEntryMode = 'login'
   state.screenName = 'Inloggen'
@@ -164,7 +160,6 @@ function returnToLogin() {
 
 function switchToSignup() {
   state.PIN = ''
-  state.PINverifiedOk = false
   state.aliasSelected = undefined
   state.userEntryMode = 'signup'
   state.screenName = 'Aanmelden'
@@ -173,8 +168,9 @@ function switchToSignup() {
 function finishSignin(alias, pin) {
   state.alias = alias
   state.PIN = pin
-  state.PINverifiedOk = true
+  state.isAuthenticated = true
   state.screenName = 'Menu'
+  writeNewLastLogin(alias.toUpperCase(), Date.now())
 }
 
 function finishSignup(alias, pin) {
@@ -183,8 +179,9 @@ function finishSignup(alias, pin) {
   // add new alias to current array
   state.assignedUserIds.push(state.aliasSelected.toUpperCase())
 
-  state.PINverifiedOk = true
+  state.isAuthenticated = true
   state.screenName = 'Menu'
+  writeNewLastLogin(alias.toUpperCase(), Date.now())
 }
 
 function aliasClicked(alias) { 
@@ -199,5 +196,22 @@ function setSelectedAlias(alias) {
   if (!state.assignedUserIds.includes(alias.toUpperCase())) {
     state.aliasSelected = alias
   } 
+}
+
+function writeNewLastLogin(uid, newLastLogin) {
+  const db = getDatabase()
+  const updates = {}
+  updates['/users/' + uid + '/lastLogin'] = newLastLogin
+
+  return update(ref(db), updates)
+}
+
+function resetApp() {
+  state.isAuthenticated = false
+  state.aliasSelected = undefined
+  state.PIN = ''
+  state.userEntryMode = undefined
+  state.showOpeningScreen = true
+  state.screenName = 'Welkom'
 }
 </script>

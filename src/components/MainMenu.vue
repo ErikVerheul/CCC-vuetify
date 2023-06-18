@@ -2,6 +2,8 @@
   <v-container class="fill-height">
     <v-row>
       <v-col cols="auto">
+        <p v-if="props.lastLogin !== undefined">Mijn laatste login was op {{ new
+          Date(Number(props.lastLogin)).toString().substring(0, 25) }}</p>
         <h2>Hoe goed ben ik in</h2>
         <ul>
           <li>
@@ -89,6 +91,7 @@
 </template>
 
 <script setup>
+const props = defineProps(['lastLogin'])
 
 </script>
 
@@ -96,5 +99,4 @@
 li {
   margin-left: 20px;
 }
-
 </style>
