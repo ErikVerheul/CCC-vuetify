@@ -9,7 +9,7 @@
     </v-btn>
 
     <v-menu activator="#menu-activator">
-      <v-list>       
+      <v-list>
         <v-list-item v-if="props.isAuthenticated">
           <v-btn flat size="small" @click="state.dialog1 = true">
             Inloggen op ander apparaat
@@ -39,7 +39,7 @@
           <v-btn flat size="small" @click="">
             Hulp
           </v-btn>
-        </v-list-item>      
+        </v-list-item>
         <v-list-item>
           <v-btn flat size="small" @click="state.dialog7 = true">
             Over de Speelmee app
@@ -51,7 +51,7 @@
           </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="">
+          <v-btn flat size="small" @click="state.dialog9 = true">
             Logout
           </v-btn>
         </v-list-item>
@@ -114,10 +114,24 @@
     </v-card>
   </v-dialog>
 
+  <v-dialog v-model="state.dialog9" width="auto">
+    <v-card>
+      <v-card-text>
+        <h3>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten. Als u hier uitlogt stopt u ook de automatische login.</h3>
+        <v-btn class="mt-8" @click="logout">Log uit en ga naar startscherm</v-btn>
+        <h3 class="mt-4" v-if="state.accountIsRemoved">U wordt uitgelogd.</h3>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="purple" block @click="state.dialog9 = false">Sluit</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
   <v-dialog v-model="state.dialog10" width="auto">
     <v-card>
       <v-card-text>
         <h3>Als u uw gegevens verwijderd kunt u niet meer inloggen. Wel kunt u een nieuwe schuilnaam en pin code kiezen en fris opnieuw beginnen.</h3>
+        <h3>UW GEGEVENS WORDEN VERNIETIGD NIEMAND KAN DIE NOG TERUGHALEN</h3>
         <v-btn class="mt-8" @click="removeAccount">Verwijder mijn gegevens</v-btn>
         <h3 class="mt-4" v-if="state.accountIsRemoved">Uw gegevens zijn verwijderd. U wordt uitgelogd.</h3>
       </v-card-text>
@@ -166,14 +180,20 @@ const state = reactive({
   dialog2: false,
   dialog7: false,
   dialog8: false,
+  dialog9: false,
   dialog10: false,
   cookieIsRemoved: false,
 })
 
 function removeCookie() {
   const cookies = new Cookies()
-    cookies.remove('speelMee', { sameSite: true })
-    state.cookieIsRemoved = true
+  cookies.remove('speelMee', { sameSite: true })
+  state.cookieIsRemoved = true
+}
+
+function logout() {
+  removeCookie()
+  emit('reset-app')
 }
 
 function removeAccount() {
