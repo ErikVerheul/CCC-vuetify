@@ -23,7 +23,7 @@ const PINOK = computed(() => {
 
 const aliasOK = computed(() => {
   if (state.alias === undefined) return false
-  return state.alias.length > 0 && props.assignedUserIds.includes(state.alias.toUpperCase())
+  return state.alias.length > 0 && props.assignedUserIds.includes(userId())
 })
 
 const state = reactive({
@@ -51,12 +51,18 @@ const state = reactive({
   lastLogin: undefined
 })
 
+// convenience method to derive user id
+function userId() {
+  if (state.alias === undefined) return undefined
+  return state.alias.toUpperCase()
+}
+
 function doSigninUser() {
   state.PINverifiedOk = false
   if (aliasOK && PINOK) {
     // get the user's PIN
     const dbRef = ref(getDatabase());
-    get(child(dbRef, `users/` + state.alias.toUpperCase())).then((snapshot) => {
+    get(child(dbRef, `users/` + userId())).then((snapshot) => {
       if (snapshot.exists()) {
         if (snapshot.val().PIN === state.pinCode) {
           // on success
@@ -66,14 +72,14 @@ function doSigninUser() {
           state.PINverifiedOk = true
           // save a cookie for auto login next time
           const cookies = new Cookies()
-          cookies.set('speelMee', { user: state.alias.toUpperCase() }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+          cookies.set('speelMee', { user: userId() }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
           emit('signin-completed', state.alias, state.pinCode)
         }
       } else {
-        console.log("No data available")
+        console.log(`No data available. User ${userId()} unknown`)
       }
     }).catch((error) => {
-      console.error(error);
+      console.error(`Error while reading child ${userId()} from database: ` + error)
     })
   }
 }

@@ -1,12 +1,11 @@
 <template>
   <v-container>
     <v-responsive>
-      <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.alias" :PIN="state.PIN"
-        :screen-name="state.screenName" @reset-app="resetApp"/>
+      <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.alias" :PIN="state.PIN" :screen-name="state.screenName" @reset-app="resetApp" />
 
       <div>
-        <div v-if="state.isAuthenticated">
-          <MainMemu :lastLogin="state.lastLogin"></MainMemu>
+        <div v-if="state.isAuthenticated && !nowPlaying">
+          <MainMemu :lastLogin="state.lastLogin" @menu-item-selected="doGame"></MainMemu>
         </div>
         <div v-else>
           <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="loginOrSignIn" />
@@ -14,13 +13,11 @@
             <v-col cols="auto">
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
-                  <SigninUser :assigned-user-ids="state.assignedUserIds" @signin-completed="finishSignin"
-                    @change-to-signup="switchToSignup" />
+                  <SigninUser :assigned-user-ids="state.assignedUserIds" @signin-completed="finishSignin" @change-to-signup="switchToSignup" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
-                  <template v-if="state.aliasSelected === undefined">
-                    <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases" @alias-clicked="aliasClicked"
-                      @alias-selected="setSelectedAlias">
+                  <template v-if="state.alias === undefined">
+                    <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases" @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias">
                     </SelectAlias>
                     <v-alert v-model="state.alert" border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
                       Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
@@ -28,13 +25,15 @@
                   </template>
                   <template v-else>
                     <div class="py-2" />
-                    <SignupUser :alias="state.aliasSelected" @signup-completed="finishSignup"
-                      @exit-signup="returnToLogin" />
+                    <SignupUser :userId="userId()" :alias="state.alias" @signup-completed="finishSignup" @exit-signup="returnToLogin" />
                   </template>
                 </template>
               </v-card>
             </v-col>
           </v-row>
+        </div>
+        <div v-if="state.maastrichtStories">
+          <MaastrichtStories :user-id="userId()" :alias="state.alias"></MaastrichtStories>
         </div>
       </div>
     </v-responsive>
@@ -50,62 +49,61 @@ import MainMemu from './MainMenu.vue'
 import SignupUser from './SignupUser.vue'
 import SigninUser from './SigninUser.vue'
 import { getDatabase, ref, child, get, push, update } from "firebase/database"
+import MaastrichtStories from './MaastrichtStories.vue'
 
 onBeforeMount(() => {
   // get the assigned aliases
   const dbRef = ref(getDatabase());
   get(child(dbRef, `users/`)).then((snapshot) => {
     if (snapshot.exists()) {
-      console.log('snapshot.val()=' + JSON.stringify(snapshot.val(), null, 2));
       // create the array with already assigned users
       Object.keys(snapshot.val()).forEach(el => state.assignedUserIds.push(el))
     } else {
       console.log("No assigned aliases data available");
     }
+    // automatically signin from cookie, if set
+    const cookies = new Cookies()
+    const retrievedCookie = cookies.get('speelMee')
+    if (retrievedCookie !== undefined) {
+      // get other user data from the database
+      get(child(dbRef, `users/` + retrievedCookie.user)).then((snapshot) => {
+        if (snapshot.exists()) {
+          state.alias = snapshot.val().alias
+          state.PIN = snapshot.val().PIN
+          state.subscriptionDate = snapshot.val().subscriptionDate
+          state.lastLogin = snapshot.val().lastLogin
+          // the user is authenticated by having this cookie
+          state.isAuthenticated = true
+          // update last login date in database
+          refreshLastLogin()
+          // refresh cookie to maintain a year long subscription
+          cookies.remove('speelMee', { sameSite: true })
+          cookies.set('speelMee', { user: userId() }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+          state.screenName = 'Menu'
+        } else {
+          console.log(`No data available. User ${retrievedCookie.user} unknown`)
+        }
+      }).catch((error) => {
+        console.error(`Error while reading child ${retrievedCookie.user} from database: ` + error)
+      })
+    } else {
+      // no cookie available; manual login or signup needed
+      state.showOpeningScreen = true
+      state.screenName = 'Welkom'
+    }
   }).catch((error) => {
-    console.error(error);
+    console.error('Error while reading all assignedUserIds from database: ' + error)
   })
-  // automatically signin from cookie, if set
-  const cookies = new Cookies()
-  const retrievedCookie = cookies.get('speelMee')
-  if (retrievedCookie !== undefined) {
-    state.userId = retrievedCookie.user
-    // get other user data from the database
-    get(child(dbRef, `users/` + state.userId)).then((snapshot) => {
-      if (snapshot.exists()) {
-        console.log('snapshot.val()=' + JSON.stringify(snapshot.val(), null, 2))
-        state.alias = snapshot.val().alias
-        state.PIN = snapshot.val().PIN
-        state.subscriptionDate = snapshot.val().subscriptionDate
-        state.lastLogin = snapshot.val().lastLogin
-        // set authenticated
-        state.isAuthenticated = true
-        writeNewLastLogin(state.userId, Date.now())
-      }
-    }).catch((error) => {
-      console.error(error);
-    })
-    // refresh cookie to maintain a year long subscription
-    cookies.remove('speelMee', { sameSite: true })
-    cookies.set('speelMee', { user: state.userId }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-    state.screenName = 'Menu'
-  } else {
-    // manual login or signup needed
-    state.showOpeningScreen = true
-    state.screenName = 'Welkom'
-  }
 })
 
 const state = reactive({
-  screenName: undefined,
+  screenName: '',
   isAuthenticated: false,
   showOpeningScreen: undefined,
-  userId: undefined,
   alias: undefined,
   subscriptionDate: undefined,
   alert: false,
   userEntryMode: undefined,
-  aliasSelected: '',
   nameRules: [
     value => {
       if (state.assignedUserIds.includes(value.toUpperCase())) return true
@@ -133,17 +131,23 @@ const state = reactive({
   ],
   allAliases: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
   assignedUserIds: [], // in uppercase
+  maastrichtStories: false
 })
 
-const PINOK = computed(() => {
-  return !isNaN(state.PIN) && state.PIN.length >= 4
+// convenience method to derive user id
+function userId() {
+  if (state.alias === undefined) return undefined
+  return state.alias.toUpperCase()
+}
+
+const nowPlaying = computed(() => {
+  return state.maastrichtStories
 })
 
-const aliasOK = computed(() => {
-  if (state.aliasSelected === undefined) return false
-  if (state.userEntryMode === 'login') return state.aliasSelected.length > 0 && state.assignedUserIds.includes(state.aliasSelected.toUpperCase())
-  if (state.userEntryMode === 'signup') return state.aliasSelected.length > 0 && !state.assignedUserIds.includes(state.aliasSelected.toUpperCase())
-})
+function doGame(game) {
+  console.log('doeSpel = ' + game)
+  state.maastrichtStories = true
+}
 
 function loginOrSignIn() {
   state.showOpeningScreen = false
@@ -153,14 +157,14 @@ function loginOrSignIn() {
 
 function returnToLogin() {
   state.PIN = ''
-  state.aliasSelected = undefined
+  // state.alias = undefined
   state.userEntryMode = 'login'
   state.screenName = 'Inloggen'
 }
 
 function switchToSignup() {
   state.PIN = ''
-  state.aliasSelected = undefined
+  // state.alias = undefined
   state.userEntryMode = 'signup'
   state.screenName = 'Aanmelden'
 }
@@ -170,22 +174,22 @@ function finishSignin(alias, pin) {
   state.PIN = pin
   state.isAuthenticated = true
   state.screenName = 'Menu'
-  writeNewLastLogin(alias.toUpperCase(), Date.now())
+  refreshLastLogin()
 }
 
 function finishSignup(alias, pin) {
   state.alias = alias
   state.PIN = pin
   // add new alias to current array
-  state.assignedUserIds.push(state.aliasSelected.toUpperCase())
+  state.assignedUserIds.push(userId())
 
   state.isAuthenticated = true
   state.screenName = 'Menu'
-  writeNewLastLogin(alias.toUpperCase(), Date.now())
+  refreshLastLogin()
 }
 
-function aliasClicked(alias) { 
-  state.alert = state.assignedUserIds.includes(alias.toUpperCase())
+function aliasClicked(tmpAlias) {
+  state.alert = state.assignedUserIds.includes(tmpAlias.toUpperCase())
   if (state.alert) {
     state.screenName = 'Schuilnaam bezet'
   } else state.screenName = 'Schuilnaam geselecteerd'
@@ -194,21 +198,21 @@ function aliasClicked(alias) {
 function setSelectedAlias(alias) {
   if (alias === undefined) return
   if (!state.assignedUserIds.includes(alias.toUpperCase())) {
-    state.aliasSelected = alias
-  } 
+    state.alias = alias
+  }
 }
 
-function writeNewLastLogin(uid, newLastLogin) {
+function refreshLastLogin() {
   const db = getDatabase()
   const updates = {}
-  updates['/users/' + uid + '/lastLogin'] = newLastLogin
+  updates['/users/' + userId() + '/lastLogin'] = Date.now()
 
   return update(ref(db), updates)
 }
 
 function resetApp() {
   state.isAuthenticated = false
-  state.aliasSelected = undefined
+  state.alias = undefined
   state.PIN = ''
   state.userEntryMode = undefined
   state.showOpeningScreen = true
