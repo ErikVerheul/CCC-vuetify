@@ -172,7 +172,7 @@ const props = defineProps({
 const emit = defineEmits(['reset-app', 'app-settings'])
 
 const welcomeMsg = computed(() => {
-  if (props.isAuthenticated) {
+  if (props.isAuthenticated && props.screenName === 'Menu') {
     return 'Welkom ' + props.userName
   } else return undefined
 })
