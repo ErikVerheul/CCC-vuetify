@@ -38,14 +38,25 @@
             Niet opgegeven
           </v-btn>
         </v-btn-toggle>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="8">
         <p> Wil je maandelijks via de app op de<br>
           hoogte gehouden worden van nieuws<br>
-          over het speelmee.app platform?<br><br>
-          De speelmee.app neemt Privacy serieus;<br>
+          over het speelmee.app platform?
+        </p>
+      </v-col>
+      <v-col cols="4">
+        <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <p>De speelmee.app neemt Privacy serieus;<br>
           daarom maken we het mogelijk alle<br>
           persoonlijke data te wissen als je geen<br>
-          gebruik meer wil maken van de app.
-        </p>
+          gebruik meer wil maken van de app.</p>
       </v-col>
     </v-row>
     <v-row class="justify-start">
@@ -134,11 +145,17 @@ const state = reactive({
 
       return 'Vul 4 cijfers in.'
     }
-  ]
+  ],
+  newsFeed: false
 })
 
 const PINOK = computed(() => {
   return !isNaN(state.pinCode) && state.pinCode.length >= 4
+})
+
+const newsFeedLabel = computed(() => {
+ if (state.newsFeed) return 'Ja'
+ return 'Nee'
 })
 
 // an undefined year of birth is stored as 0; an undefined gender as -1
@@ -150,8 +167,8 @@ function doSignupUser() {
     subscriptionDate: Date.now(),
     lastLogin: Date.now(),
     yearOfBirth: state.yearOfBirth === undefined ? -1 :state.yearOfBirth,
-    gender: state.gender
-
+    gender: state.gender,
+    newsFeed: state.newsFeed
   })
   // on success
   const cookies = new Cookies()
