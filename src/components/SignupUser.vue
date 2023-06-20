@@ -97,7 +97,8 @@
 
 <script setup>
 import { computed, reactive } from 'vue'
-import { getDatabase, ref, set } from "firebase/database"
+import { db } from '../firebase'
+import { ref, set } from "firebase/database"
 import Cookies from 'universal-cookie'
 
 const props = defineProps(['alias'])
@@ -160,7 +161,6 @@ const newsFeedLabel = computed(() => {
 
 // an undefined year of birth is stored as 0; an undefined gender as -1
 function doSignupUser() {
-  const db = getDatabase();
   set(ref(db, 'users/' + props.alias.toUpperCase()), {
     PIN: state.pinCode,
     alias: props.alias,

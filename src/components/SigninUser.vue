@@ -10,7 +10,8 @@
 
 <script setup>
 import { computed, reactive } from 'vue'
-import { getDatabase, ref, get, child } from "firebase/database"
+import { dbRef } from '../firebase'
+import { get, child } from "firebase/database"
 import Cookies from 'universal-cookie'
 const props = defineProps(['assignedUserIds'])
 const emit = defineEmits(['signin-completed', 'change-to-signup'])
@@ -57,7 +58,6 @@ function doSigninUser() {
   state.PINverifiedOk = false
   if (aliasOK && PINOK) {
     // get the user's PIN
-    const dbRef = ref(getDatabase());
     get(child(dbRef, `users/` + userId())).then((snapshot) => {
       if (snapshot.exists()) {
         if (snapshot.val().PIN === state.pinCode) {

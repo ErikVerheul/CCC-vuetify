@@ -1,7 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore } from 'firebase/firestore'
-import { getDatabase } from 'firebase/database'
-import { ref as dbRef } from 'firebase/database'
+import { getDatabase, ref } from 'firebase/database'
 // ... other firebase imports
 
 
@@ -17,10 +15,5 @@ export const firebaseApp = initializeApp({
   appId: "1:336065373302:web:6dafcbb5dc724c3cdfab57"
 })
 
-// used for the databas refs
-const db = getDatabase(firebaseApp)
-
-// here we can export reusable database references
-// Dit werk niet! Uncaught SyntaxError: ambiguous indirect export: dbRef
-// import { dbRef } from 'firebase/database'
-export const todosRef = dbRef(db, 'todos')
+export const db = getDatabase()
+export const dbRef = ref(db)

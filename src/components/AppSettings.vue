@@ -30,10 +30,10 @@
 
 <script setup>
 import { onBeforeMount, computed, reactive } from 'vue'
-import { getDatabase, ref, child, get, update } from "firebase/database"
+import { dbRef } from '../firebase'
+import { child, get, update } from "firebase/database"
 const props = defineProps(['userId'])
 const emit = defineEmits(['return-to-menu'])
-const dbRef = ref(getDatabase())
 
 // get user's profile from database
 onBeforeMount(() => { 

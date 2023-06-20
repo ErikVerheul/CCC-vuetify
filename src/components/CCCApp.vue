@@ -56,13 +56,13 @@ import Cookies from 'universal-cookie'
 import MainMemu from './MainMenu.vue'
 import SignupUser from './SignupUser.vue'
 import SigninUser from './SigninUser.vue'
-import { getDatabase, ref, child, get, push, update } from "firebase/database"
+import { dbRef } from '../firebase'
+import { child, get, update } from "firebase/database"
 import MaastrichtStories from './MaastrichtStories.vue'
 import AppSettings from './AppSettings.vue'
 
 onBeforeMount(() => {
   // get the assigned aliases
-  const dbRef = ref(getDatabase())
   get(child(dbRef, `users/`)).then((snapshot) => {
     if (snapshot.exists()) {
       // create the array with already assigned users
@@ -215,7 +215,6 @@ function finishSignup(alias, pin) {
 function aliasClicked(tmpAlias) {
   // check for newly assigned aliases since login
   const tmpUserId = tmpAlias.toUpperCase()
-  const dbRef = ref(getDatabase())
   get(child(dbRef, `users/` + tmpUserId)).then((snapshot) => {
     if (snapshot.exists()) {
       state.assignedUserIds.push(tmpUserId)
@@ -237,11 +236,10 @@ function setSelectedAlias(alias) {
 }
 
 function refreshLastLogin() {
-  const db = getDatabase()
   const updates = {}
   updates['/users/' + userId() + '/lastLogin'] = Date.now()
 
-  return update(ref(db), updates)
+  return update(dbRef, updates)
 }
 
 function showMenu() {

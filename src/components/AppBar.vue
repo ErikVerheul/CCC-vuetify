@@ -146,9 +146,9 @@
 <script setup>
 import { computed, reactive } from 'vue'
 import Cookies from 'universal-cookie'
-import { getDatabase, child, ref, remove } from "firebase/database"
+import { dbRef } from '../firebase'
+import { child, remove } from "firebase/database"
 import PrivacyBeleid from './PrivacyBeleid.vue'
-import AppSettings from './AppSettings.vue'
 
 const props = defineProps({
   isAuthenticated: {
@@ -200,7 +200,6 @@ function logout() {
 
 function removeAccount() {
   removeCookie()
-  const dbRef = ref(getDatabase())
   remove(child(dbRef, '/users/' + props.userName.toUpperCase()))
   state.accountIsRemoved = true
   emit('reset-app')
