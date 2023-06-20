@@ -3,8 +3,8 @@
     <v-responsive>
       <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.alias" :PIN="state.PIN" :screen-name="state.screenName" @reset-app="resetApp" />
 
-      <div>
-        <div v-if="state.isAuthenticated && !nowPlaying">
+      <div v-if="!nowPlaying">
+        <div v-if="state.isAuthenticated">
           <MainMemu :lastLogin="state.lastLogin" @menu-item-selected="doGame"></MainMemu>
         </div>
         <div v-else>
@@ -17,7 +17,8 @@
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.alias === undefined">
-                    <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases" @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias">
+                    <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases" @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias"
+                      @reset-signup="returnToLogin">
                     </SelectAlias>
                     <v-alert v-model="state.alert" border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
                       Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
@@ -32,9 +33,9 @@
             </v-col>
           </v-row>
         </div>
-        <div v-if="state.maastrichtStories">
-          <MaastrichtStories :user-id="userId()" :alias="state.alias"></MaastrichtStories>
-        </div>
+      </div>
+      <div v-else-if="state.maastrichtStories">
+        <MaastrichtStories :user-id="userId()" :alias="state.alias"></MaastrichtStories>
       </div>
     </v-responsive>
   </v-container>
@@ -146,6 +147,7 @@ const nowPlaying = computed(() => {
 
 function doGame(game) {
   console.log('doeSpel = ' + game)
+  state.screenName = 'Verhalen van Maastricht'
   state.maastrichtStories = true
 }
 
@@ -157,21 +159,22 @@ function loginOrSignIn() {
 
 function returnToLogin() {
   state.PIN = ''
-  // state.alias = undefined
+  state.alias = undefined
   state.userEntryMode = 'login'
   state.screenName = 'Inloggen'
 }
 
 function switchToSignup() {
   state.PIN = ''
-  // state.alias = undefined
+  state.alias = undefined
   state.userEntryMode = 'signup'
   state.screenName = 'Aanmelden'
 }
 
-function finishSignin(alias, pin) {
+function finishSignin(alias, pin, lastLogin) {
   state.alias = alias
   state.PIN = pin
+  state.lastLogin = lastLogin
   state.isAuthenticated = true
   state.screenName = 'Menu'
   refreshLastLogin()

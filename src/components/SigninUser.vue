@@ -45,8 +45,6 @@ const state = reactive({
     },
   ],
   PINverifiedOk: false,
-  subscriptionDate: undefined,
-  lastLogin: undefined
 })
 
 // convenience method to derive user id
@@ -65,13 +63,11 @@ function doSigninUser() {
         if (snapshot.val().PIN === state.pinCode) {
           // on success
           state.alias = snapshot.val().alias
-          state.subscriptionDate = snapshot.val().subscriptionDate
-          state.lastLogin = snapshot.val().lastLogin
           state.PINverifiedOk = true
           // save a cookie for auto login next time
           const cookies = new Cookies()
           cookies.set('speelMee', { user: userId() }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-          emit('signin-completed', state.alias, state.pinCode)
+          emit('signin-completed', state.alias, state.pinCode, snapshot.val().lastLogin)
         }
       } else {
         console.log(`No data available. User ${userId()} unknown`)
