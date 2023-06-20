@@ -2,8 +2,7 @@
   <v-container class="fill-height">
     <v-row>
       <v-col cols="auto">
-        <p v-if="props.lastLogin !== undefined">Mijn laatste login was op {{ new
-          Date(Number(props.lastLogin)).toString().substring(0, 25) }}</p>
+        <p v-if="props.lastLogin !== undefined">Mijn laatste login was op {{ createDateTimeString() }}</p>
         <h2>Hoe goed ben ik in</h2>
         <ul>
           <li>
@@ -65,7 +64,7 @@
         <h2>Hoe goed ken ik</h2>
         <ul>
           <li>
-            <v-btn class="my-2" size="small" @click="emit('menu-item-selected','verborgenVerhalen')">
+            <v-btn class="my-2" size="small" @click="emit('menu-item-selected', 'verborgenVerhalen')">
               De verborgen verhalen van Maastricht
             </v-btn>
           </li>
@@ -94,6 +93,11 @@
 const props = defineProps(['lastLogin'])
 const emit = defineEmits(['menu-item-selected'])
 
+function createDateTimeString() {
+  const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }
+  const evt = new Date(Number(props.lastLogin))
+  return evt.toLocaleDateString('nl-NL', options)
+}
 </script>
 
 <style scoped>
