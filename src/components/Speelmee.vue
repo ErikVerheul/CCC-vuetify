@@ -35,7 +35,7 @@
     <v-row class="justify-end">
       <v-col cols="auto">
         <v-btn flat append-icon="mdi-arrow-right" @click="emit('exit-opening-screen')">
-          Doorgaan
+          Door
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
           </template>

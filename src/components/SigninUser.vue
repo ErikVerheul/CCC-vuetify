@@ -3,10 +3,8 @@
     <v-card-title>Login met uw schuilnaam en PIN code</v-card-title>
     <v-text-field v-model.trim="state.alias" label="Uw schuilnaam" :rules="state.nameRules" />
     <v-text-field v-model.trim="state.pinCode" label="PIN" :rules="state.pinRules" />
-    <v-btn class="my-6" v-if="aliasOK && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l"
-      size="large">Login</v-btn>
-    <v-btn type="button" variant="text" @click="emit('change-to-signup')">Ga naar nieuwe
-      aanmelding</v-btn>
+    <v-btn class="my-6" v-if="aliasOK && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
+    <v-btn type="button" variant="text" @click="emit('change-to-signup')">Ga naar nieuwe aanmelding</v-btn>
   </v-card>
 </template>
 
