@@ -100,7 +100,7 @@
   <v-dialog v-model="state.dialog7" width="auto">
     <v-card>
       <v-card-text>
-        Speelmee.app is in ontwikkeling. De huidige versie is v.0.1.4
+        Speelmee.app is in ontwikkeling. De huidige versie is v.0.2.0
       </v-card-text>
       <v-card-actions>
         <v-btn color="purple" block @click="state.dialog7 = false">Sluit</v-btn>

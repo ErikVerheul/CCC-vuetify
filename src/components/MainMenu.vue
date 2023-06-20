@@ -65,7 +65,7 @@
         <h2>Hoe goed ken ik</h2>
         <ul>
           <li>
-            <v-btn class="my-2" size="small" @click="">
+            <v-btn class="my-2" size="small" @click="emit('menu-item-selected','verborgenVerhalen')">
               De verborgen verhalen van Maastricht
             </v-btn>
           </li>
@@ -92,6 +92,7 @@
 
 <script setup>
 const props = defineProps(['lastLogin'])
+const emit = defineEmits(['menu-item-selected'])
 
 </script>
 
