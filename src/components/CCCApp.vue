@@ -35,7 +35,7 @@
         </div>
       </div>
       <div v-else-if="state.maastrichtStories">
-        <MaastrichtStories :user-id="userId()" :alias="state.alias"></MaastrichtStories>
+        <MaastrichtStories :user-id="userId()" :alias="state.alias" @return-to-menu="showMenu"></MaastrichtStories>
       </div>
     </v-responsive>
   </v-container>
@@ -54,7 +54,7 @@ import MaastrichtStories from './MaastrichtStories.vue'
 
 onBeforeMount(() => {
   // get the assigned aliases
-  const dbRef = ref(getDatabase());
+  const dbRef = ref(getDatabase())
   get(child(dbRef, `users/`)).then((snapshot) => {
     if (snapshot.exists()) {
       // create the array with already assigned users
@@ -192,10 +192,20 @@ function finishSignup(alias, pin) {
 }
 
 function aliasClicked(tmpAlias) {
-  state.alert = state.assignedUserIds.includes(tmpAlias.toUpperCase())
-  if (state.alert) {
-    state.screenName = 'Schuilnaam bezet'
-  } else state.screenName = 'Schuilnaam geselecteerd'
+  // check for newly assigned aliases since login
+  const tmpUserId = tmpAlias.toUpperCase()
+  const dbRef = ref(getDatabase())
+  get(child(dbRef, `users/` + tmpUserId)).then((snapshot) => {
+    if (snapshot.exists()) {
+      state.assignedUserIds.push(tmpUserId)
+    }
+    state.alert = state.assignedUserIds.includes(tmpUserId)
+    if (state.alert) {
+      state.screenName = 'Schuilnaam bezet'
+    } else state.screenName = 'Schuilnaam geselecteerd'
+  }).catch((error) => {
+    console.error(`Error while reading child ${tmpUserId} from database: ` + error)
+  })
 }
 
 function setSelectedAlias(alias) {
@@ -211,6 +221,11 @@ function refreshLastLogin() {
   updates['/users/' + userId() + '/lastLogin'] = Date.now()
 
   return update(ref(db), updates)
+}
+
+function showMenu() {
+  state.maastrichtStories = false
+  state.screenName = 'Menu'
 }
 
 function resetApp() {
