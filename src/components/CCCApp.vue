@@ -1,9 +1,10 @@
 <template>
   <v-container>
     <v-responsive>
-      <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.alias" :PIN="state.PIN" :screen-name="state.screenName" @reset-app="resetApp" />
+      <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.alias" :PIN="state.PIN" :screen-name="state.screenName"
+        @reset-app="resetApp" @app-settings="doAppSettings" />
 
-      <div v-if="!nowPlaying">
+      <div v-if="!nowPlaying && !nowOther">
         <div v-if="state.isAuthenticated">
           <MainMemu :lastLogin="state.lastLogin" @menu-item-selected="doGame"></MainMemu>
         </div>
@@ -13,12 +14,13 @@
             <v-col cols="auto">
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
-                  <SigninUser :assigned-user-ids="state.assignedUserIds" @signin-completed="finishSignin" @change-to-signup="switchToSignup" />
+                  <SigninUser :assigned-user-ids="state.assignedUserIds" @signin-completed="finishSignin"
+                    @change-to-signup="switchToSignup" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.alias === undefined">
-                    <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases" @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias"
-                      @reset-signup="returnToLogin">
+                    <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases" @alias-clicked="aliasClicked"
+                      @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
                     </SelectAlias>
                     <v-alert v-model="state.alert" border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
                       Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
@@ -34,8 +36,13 @@
           </v-row>
         </div>
       </div>
-      <div v-else-if="state.maastrichtStories">
-        <MaastrichtStories :user-id="userId()" :alias="state.alias" @return-to-menu="showMenu"></MaastrichtStories>
+      <div else>
+        <template v-if="state.maastrichtStoriesActive">
+          <MaastrichtStories :user-id="userId()" :alias="state.alias" @return-to-menu="showMenu"></MaastrichtStories>
+        </template>
+        <template v-if="state.userSettingsActive">
+          <AppSettings :userId="userId()" @return-to-menu="showMenu"></AppSettings>
+        </template>
       </div>
     </v-responsive>
   </v-container>
@@ -51,6 +58,7 @@ import SignupUser from './SignupUser.vue'
 import SigninUser from './SigninUser.vue'
 import { getDatabase, ref, child, get, push, update } from "firebase/database"
 import MaastrichtStories from './MaastrichtStories.vue'
+import AppSettings from './AppSettings.vue'
 
 onBeforeMount(() => {
   // get the assigned aliases
@@ -132,7 +140,18 @@ const state = reactive({
   ],
   allAliases: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
   assignedUserIds: [], // in uppercase
-  maastrichtStories: false
+  maastrichtStoriesActive: false,
+  userSettingsActive: false
+})
+
+// returns true if any of the games is active
+const nowPlaying = computed(() => {
+  return state.maastrichtStoriesActive
+})
+
+// returns true if any other activity is active (not login or signin)
+const nowOther = computed(() => {
+  return state.userSettingsActive
 })
 
 // convenience method to derive user id
@@ -141,14 +160,16 @@ function userId() {
   return state.alias.toUpperCase()
 }
 
-const nowPlaying = computed(() => {
-  return state.maastrichtStories
-})
+function doAppSettings() {
+  console.log('doAppSettings selected')
+  state.screenName = 'Instellingen'
+  state.userSettingsActive = true
+}
 
 function doGame(game) {
   console.log('doeSpel = ' + game)
   state.screenName = 'Verhalen van Maastricht'
-  state.maastrichtStories = true
+  state.maastrichtStoriesActive = true
 }
 
 function loginOrSignIn() {
@@ -224,7 +245,8 @@ function refreshLastLogin() {
 }
 
 function showMenu() {
-  state.maastrichtStories = false
+  state.userSettingsActive = false
+  state.maastrichtStoriesActive = false
   state.screenName = 'Menu'
 }
 

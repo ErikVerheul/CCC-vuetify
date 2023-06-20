@@ -21,7 +21,7 @@
           </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="">
+          <v-btn flat size="small" @click="emit('app-settings')">
             Instellingen
           </v-btn>
         </v-list-item>
@@ -47,7 +47,7 @@
         </v-list-item>
         <v-list-item>
           <v-btn flat size="small" @click="state.dialog8 = true">
-            privacybeleid
+            Privacybeleid
           </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
@@ -100,7 +100,8 @@
   <v-dialog v-model="state.dialog7" width="auto">
     <v-card>
       <v-card-text>
-        Speelmee.app is in ontwikkeling. De huidige versie is v.0.2.0
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.2.1</p>
+        <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>
         <v-btn color="purple" block @click="state.dialog7 = false">Sluit</v-btn>
@@ -144,9 +145,10 @@
 
 <script setup>
 import { computed, reactive } from 'vue'
-import PrivacyBeleid from './PrivacyBeleid.vue'
 import Cookies from 'universal-cookie'
 import { getDatabase, child, ref, remove } from "firebase/database"
+import PrivacyBeleid from './PrivacyBeleid.vue'
+import AppSettings from './AppSettings.vue'
 
 const props = defineProps({
   isAuthenticated: {
@@ -167,7 +169,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['reset-app'])
+const emit = defineEmits(['reset-app', 'app-settings'])
 
 const welcomeMsg = computed(() => {
   if (props.isAuthenticated) {
