@@ -17,7 +17,7 @@
     <v-row>
       <v-col cols="auto">
         <v-btn size="small">
-          a.Omdat ze op hun lie kregen van het stadsbestuur
+          a.Omdat ze op hun falie kregen van<br>het stadsbestuur
         </v-btn>
       </v-col>
     </v-row>

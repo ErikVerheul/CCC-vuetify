@@ -2,7 +2,7 @@
   <v-container class="fill-height">
     <v-row>
       <v-col cols="auto">
-        <p v-if="props.lastLogin !== undefined">Mijn laatste login was op {{ createDateTimeString() }}</p>
+        <p v-if="props.lastLogin !== undefined">Laatste login: {{ createDateTimeString() }}</p>
         <h2>Hoe goed ben ik in</h2>
         <ul>
           <li>
