@@ -52,7 +52,7 @@
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
           <v-btn flat size="small" @click="state.dialog9 = true">
-            Logout
+            Log uit
           </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
@@ -119,7 +119,7 @@
     <v-card>
       <v-card-text>
         <h3>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten. Als u hier uitlogt stopt u ook de automatische login.</h3>
-        <v-btn class="mt-8" @click="logout">Log uit en ga naar startscherm</v-btn>
+        <v-btn class="mt-8" @click="logout">Log uit en log opnieuw in</v-btn>
         <h3 class="mt-4" v-if="state.accountIsRemoved">U wordt uitgelogd.</h3>
       </v-card-text>
       <v-card-actions>
@@ -169,7 +169,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['reset-app', 'app-settings'])
+const emit = defineEmits(['logout-app', 'reset-app', 'app-settings'])
 
 const welcomeMsg = computed(() => {
   if (props.isAuthenticated && props.screenName === 'Menu') {
@@ -195,7 +195,7 @@ function removeCookie() {
 
 function logout() {
   removeCookie()
-  emit('reset-app')
+  emit('logout-app')
 }
 
 function removeAccount() {

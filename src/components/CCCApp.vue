@@ -2,7 +2,7 @@
   <v-container>
     <v-responsive>
       <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.alias" :PIN="state.PIN" :screen-name="state.screenName"
-        @reset-app="resetApp" @app-settings="doAppSettings" />
+        @logout-app="logoutApp" @reset-app="resetApp" @app-settings="doAppSettings" />
 
       <div v-if="!nowPlaying && !nowOther">
         <div v-if="state.isAuthenticated">
@@ -246,6 +246,11 @@ function showMenu() {
   state.userSettingsActive = false
   state.maastrichtStoriesActive = false
   state.screenName = 'Menu'
+}
+
+function logoutApp() {
+  state.isAuthenticated = false
+  returnToLogin()
 }
 
 function resetApp() {
