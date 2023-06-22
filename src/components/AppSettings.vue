@@ -7,10 +7,7 @@
   </v-row>
   <v-row>
     <v-col cols="8">
-      <p> Wil je maandelijks via de app op de<br>
-        hoogte gehouden worden van nieuws<br>
-        over het speelmee.app platform?
-      </p>
+      <p> Wil je maandelijks via de app op de hoogte gehouden worden van nieuws over het speelmee.app platform?</p>
     </v-col>
     <v-col cols="4">
       <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
@@ -36,7 +33,7 @@ const props = defineProps(['userId'])
 const emit = defineEmits(['return-to-menu'])
 
 // get user's profile from database
-onBeforeMount(() => { 
+onBeforeMount(() => {
   get(child(dbRef, `users/` + props.userId)).then((snapshot) => {
     if (snapshot.exists()) {
       state.newsFeed = snapshot.val().newsFeed
@@ -50,8 +47,8 @@ onBeforeMount(() => {
 })
 
 const newsFeedLabel = computed(() => {
- if (state.newsFeed) return 'Ja'
- return 'Nee'
+  if (state.newsFeed) return 'Ja'
+  return 'Nee'
 })
 
 function saveAndReturn() {
@@ -59,7 +56,7 @@ function saveAndReturn() {
   const updates = {}
   updates['/users/' + props.userId + '/newsFeed'] = state.newsFeed
   emit('return-to-menu')
-  return update(dbRef, updates) 
+  return update(dbRef, updates)
 }
 
 const state = reactive({

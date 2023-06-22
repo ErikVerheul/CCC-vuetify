@@ -26,18 +26,18 @@
           </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="">
+          <v-btn flat size="small" @click="state.dialog4 = true">
             Feedback
           </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="">
+          <v-btn flat size="small" @click="state.dialog5 = true">
             Contact
           </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="">
-            Hulp
+          <v-btn flat size="small" @click="state.dialog6 = true">
+            Veelgestelde vragen
           </v-btn>
         </v-list-item>
         <v-list-item>
@@ -97,10 +97,53 @@
     </v-card>
   </v-dialog>
 
+  <v-dialog v-model="state.dialog4" width="auto">
+    <v-card>
+      <v-card-text>
+        <h2>Stuur ons een bericht als je:</h2>
+        <ul>
+          <li>Een idee hebt</li>
+          <li>Wil bijdragen</li>
+          <li>Een klacht hebt</li>
+          <li>Gebeld wilt worden</li>
+          <li>Of een andere goede reden</li>
+        </ul>
+        <p>Ons e-mail adres is contact@speelmee.app</p>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="purple" block @click="state.dialog4 = false">Sluit</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="state.dialog5" width="auto">
+    <v-card>
+      <v-card-text>
+        <p>Je kunt ons bereiken op ons e-mail adres contact@speelmee.app</p>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="purple" block @click="state.dialog5 = false">Sluit</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="state.dialog6" width="auto">
+    <v-card>
+      <v-card-text>
+        <p>Vraag: Is de app wel veilig?</p>
+        <p>Ja, de app is veilig omdat er geen persoonlijke gegevens worden bewaard, zoals jouw e-mail adres, of ieder ander naar jou indentificerend gegeven. 
+          Het ergste wat kan gebeuren is dat iemand anders jouw pin code raadt en namens jou gaat spelen. Mail ons naar contact@speelmij.app als je vermoedt dat dit is gebeurd.</p>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="purple" block @click="state.dialog6 = false">Sluit</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
   <v-dialog v-model="state.dialog7" width="auto">
     <v-card>
       <v-card-text>
-        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.2.5</p>
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.2.6</p>
         <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>
@@ -180,6 +223,9 @@ const welcomeMsg = computed(() => {
 const state = reactive({
   dialog1: false,
   dialog2: false,
+  dialog4: false,
+  dialog5: false,
+  dialog6: false,
   dialog7: false,
   dialog8: false,
   dialog9: false,
