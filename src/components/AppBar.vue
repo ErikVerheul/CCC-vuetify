@@ -1,12 +1,17 @@
 <template>
   <v-app-bar density="compact" color="purple">
 
-    <v-app-bar-title v-if="welcomeMsg !== undefined">{{ welcomeMsg }}</v-app-bar-title>
-    <v-app-bar-title>{{ screenName }}</v-app-bar-title>
+    <template v-if="props.screenName === 'Welkom'">
+      <v-app-bar-title class="flex text-center">{{ props.screenName }}</v-app-bar-title>
+    </template>
+    <template v-else>
+      <v-app-bar-title v-if="welcomeMsg !== undefined">{{ welcomeMsg }}</v-app-bar-title>
+      <v-app-bar-title>{{ props.screenName }}</v-app-bar-title>
 
-    <v-btn icon id="menu-activator">
-      <v-icon>mdi-dots-vertical</v-icon>
-    </v-btn>
+      <v-btn icon id="menu-activator">
+        <v-icon>mdi-dots-vertical</v-icon>
+      </v-btn>
+    </template>
 
     <v-menu activator="#menu-activator">
       <v-list>
@@ -131,8 +136,10 @@
     <v-card>
       <v-card-text>
         <p>Vraag: Is de app wel veilig?</p>
-        <p>Ja, de app is veilig omdat er geen persoonlijke gegevens worden bewaard, zoals jouw e-mail adres, of ieder ander naar jou indentificerend gegeven. 
-          Het ergste wat kan gebeuren is dat iemand anders jouw pin code raadt en namens jou gaat spelen. Mail ons naar contact@speelmij.app als je vermoedt dat dit is gebeurd.</p>
+        <p>Ja, de app is veilig omdat er geen persoonlijke gegevens worden bewaard, zoals jouw e-mail adres, of ieder ander naar jou
+          indentificerend gegeven.
+          Het ergste wat kan gebeuren is dat iemand anders jouw pin code raadt en namens jou gaat spelen. Mail ons naar contact@speelmij.app
+          als je vermoedt dat dit is gebeurd.</p>
       </v-card-text>
       <v-card-actions>
         <v-btn color="purple" block @click="state.dialog6 = false">Sluit</v-btn>
@@ -143,7 +150,7 @@
   <v-dialog v-model="state.dialog7" width="auto">
     <v-card>
       <v-card-text>
-        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.2.6</p>
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.2.7</p>
         <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>
@@ -161,7 +168,8 @@
   <v-dialog v-model="state.dialog9" width="auto">
     <v-card>
       <v-card-text>
-        <h3>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten. Als u hier uitlogt stopt u ook de automatische login.</h3>
+        <h3>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten. Als u hier uitlogt stopt u ook de automatische login.
+        </h3>
         <v-btn class="mt-8" @click="logout">Log uit en log opnieuw in</v-btn>
         <h3 class="mt-4" v-if="state.accountIsRemoved">U wordt uitgelogd.</h3>
       </v-card-text>
@@ -174,7 +182,8 @@
   <v-dialog v-model="state.dialog10" width="auto">
     <v-card>
       <v-card-text>
-        <h3>Als u uw gegevens verwijderd kunt u niet meer inloggen. Wel kunt u een nieuwe schuilnaam en pin code kiezen en fris opnieuw beginnen.</h3>
+        <h3>Als u uw gegevens verwijderd kunt u niet meer inloggen. Wel kunt u een nieuwe schuilnaam en pin code kiezen en fris opnieuw
+          beginnen.</h3>
         <h3>UW GEGEVENS WORDEN VERNIETIGD NIEMAND KAN DIE NOG TERUGHALEN</h3>
         <v-btn class="mt-8" @click="removeAccount">Verwijder mijn gegevens</v-btn>
         <h3 class="mt-4" v-if="state.accountIsRemoved">Uw gegevens zijn verwijderd. U wordt uitgelogd.</h3>

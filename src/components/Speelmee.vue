@@ -2,14 +2,20 @@
   <div v-if="showOpeningScreen && !state.showPrivacyScreen">
     <v-row class="d-flex align-center justify-center">
       <v-col cols="auto">
-        <h1>speelmee.app<br><br></h1>
-        <h3>Verbeter spelenderwijs<br>je kennis en conditie<br>en geniet van cultuur.<br><br></h3>
-        <h4>Even aanmelden: kies<br>een schuilnaam en pin code<br><br>
+        <h1>speelmee.app</h1>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="3"></v-col>        
+      <v-col cols="9">
+        <div class="py-2" />
+        <h3>Test spelenderwijs<br>je kennis en conditie<br>en geniet van cultuur.<br><br></h3>
+        <h4>Even aanmelden: kies een<br>schuilnaam en pincode<br><br>
           Dat is alles om te kunnen meedoen!
         </h4>
         <div class="py-4" />
-        <v-btn size="x-small" color="yellow-lighten-3" @click="state.showHowTo = !state.showHowTo">Heb je al een account
-          op een ander apparaat?</v-btn>
+        <v-btn size="x-small" color="yellow-lighten-3" @click="state.showHowTo = !state.showHowTo">Heb al account
+          op ander apparaat?</v-btn>
         <template v-if="state.showHowTo">
           <div class="py-4" />
           <p>Als u al een account hebt op een ander apparaat log dan in met uw schuilnaam en pin code. Die kunt u
@@ -21,7 +27,7 @@
       </v-col>
     </v-row>
 
-    <v-row align="center" justify="start">
+    <v-row justify="start">
       <v-col cols="auto">
         <p>Lees het privacybeleid nu of later.<br>
           Geen gebruikelijke juridische bla bla!</p>
@@ -31,7 +37,7 @@
       </v-col>
     </v-row>
 
-    <div class="py-14" />
+    <div class="py-5" />
     <v-row class="justify-end">
       <v-col cols="auto">
         <v-btn flat append-icon="mdi-arrow-right" @click="emit('exit-opening-screen')">
@@ -60,9 +66,7 @@ const state = reactive({
 </script>
 
 <style scoped>
-.titleLine {
-  background-color: purple;
-  color: white;
-  text-align: center
+h1 {
+  font-size: 50px;
 }
 </style>
