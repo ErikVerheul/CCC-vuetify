@@ -5,10 +5,10 @@
         <h1>speelmee.app</h1>
       </v-col>
     </v-row>
-    <v-row>
+    <div class="py-2" />
+    <v-row class="d-flex align-center justify-center">
       <v-col cols="3"></v-col>        
-      <v-col cols="9">
-        <div class="py-2" />
+      <v-col cols="9">       
         <h3>Test spelenderwijs<br>je kennis en conditie<br>en geniet van cultuur.<br><br></h3>
         <h4>Even aanmelden: kies een<br>schuilnaam en pincode<br><br>
           Dat is alles om te kunnen meedoen!
@@ -22,11 +22,10 @@
             terugvinden op het andere apparaat door op
             <v-icon>mdi-dots-vertical</v-icon> rechtsboven te tikken en 'Inloggen op ander apparaat' te kiezen.
           </p>
-        </template>
-        <div class="py-4" />
+        </template>       
       </v-col>
     </v-row>
-
+    <div class="py-4" />
     <v-row justify="start">
       <v-col cols="auto">
         <p>Lees het privacybeleid nu of later.<br>
