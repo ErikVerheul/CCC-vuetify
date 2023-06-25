@@ -6,7 +6,7 @@
 
       <div v-if="!nowPlaying && !nowOther">
         <div v-if="state.isAuthenticated">
-          <MainMemu @menu-item-selected="doGame"></MainMemu>
+          <MainMenu :firebase-user="state.firebaseUser" @menu-item-selected="doGame"></MainMenu>
         </div>
         <div v-else>
           <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="loginOrSignIn" />
@@ -53,7 +53,7 @@ import { onBeforeMount, reactive, computed } from 'vue'
 import Speelmee from './Speelmee.vue'
 import SelectAlias from './SelectAlias.vue'
 import Cookies from 'universal-cookie'
-import MainMemu from './MainMenu.vue'
+import MainMenu from './MainMenu.vue'
 import SignupUser from './SignupUser.vue'
 import SigninUser from './SigninUser.vue'
 import { dbRef } from '../firebase'
@@ -94,8 +94,7 @@ onBeforeMount(() => {
 
   signInWithEmailAndPassword(auth, sysEmail, sysPw)
     .then((userCredential) => {
-      // Signed in 
-      const user = userCredential.user;
+      // Signed in as system
       get(child(dbRef, `users/`)).then((snapshot) => {
         if (snapshot.exists()) {
           // create the array with already assigned users
@@ -112,10 +111,9 @@ onBeforeMount(() => {
             const fakePassword = retrievedCookie.fpw
             signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
               .then((userCredential) => {
-                // Signed in 
+                // Signed in as user
                 state.firebaseUser = userCredential.user
-                console.log('state.firebaseUser = ' + JSON.stringify(state.firebaseUser, null, 2))
-                console.log('state.firebaseUser.lastLoginAt = ' + state.firebaseUser.lastLoginAt + ' : why undefined?')
+                console.log('state.firebaseUser.metadata.lastLoginAt = ' + state.firebaseUser.metadata.lastLoginAt)
                 // get other user data from the database
                 get(child(dbRef, `users/` + retrievedCookie.user)).then((snapshot) => {
                   if (snapshot.exists()) {
