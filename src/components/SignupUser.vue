@@ -100,6 +100,7 @@ import { computed, reactive } from 'vue'
 import { db } from '../firebase'
 import { ref, set } from "firebase/database"
 import Cookies from 'universal-cookie'
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
 
 const props = defineProps(['alias'])
 const emit = defineEmits(['signup-completed', 'exit-signup'])
@@ -155,25 +156,38 @@ const PINOK = computed(() => {
 })
 
 const newsFeedLabel = computed(() => {
- if (state.newsFeed) return 'Ja'
- return 'Nee'
+  if (state.newsFeed) return 'Ja'
+  return 'Nee'
 })
 
 // an undefined year of birth is stored as 0; an undefined gender as -1
 function doSignupUser() {
-  set(ref(db, 'users/' + props.alias.toUpperCase()), {
-    PIN: state.pinCode,
-    alias: props.alias,
-    subscriptionDate: Date.now(),
-    lastLogin: Date.now(),
-    yearOfBirth: state.yearOfBirth === undefined ? -1 :state.yearOfBirth,
-    gender: state.gender,
-    newsFeed: state.newsFeed
-  })
-  // on success
-  const cookies = new Cookies()
-  cookies.set('speelMee', { user: props.alias.toUpperCase() }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-  emit('signup-completed', props.alias, state.pinCode)
+  // database
+  const fakeEmail = props.alias + '@speelmee.app'
+  const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
+  const auth = getAuth();
+  createUserWithEmailAndPassword(auth, fakeEmail, fakePassword)
+    .then((userCredential) => {
+      // Signed in 
+      const firebaseUser = userCredential.user;
+      // save user data in database
+      set(ref(db, 'users/' + props.alias.toUpperCase()), {
+        PIN: state.pinCode,
+        alias: props.alias,
+        subscriptionDate: Date.now(),
+        yearOfBirth: state.yearOfBirth === undefined ? -1 : state.yearOfBirth,
+        gender: state.gender,
+        newsFeed: state.newsFeed
+      })
+      // set cookie for auto-signin next time
+      const cookies = new Cookies()
+      cookies.set('speelMee', { user: props.alias.toUpperCase(), alias: props.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+      emit('signup-completed', props.alias, state.pinCode, firebaseUser)
+    })
+    .catch((error) => {
+      console.log('Firebase signup: errorCode = ' + error.code)
+      console.log('Firebase signup: errorMessage = ' + error.message)
+    })
 }
 
 </script>

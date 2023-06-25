@@ -12,6 +12,7 @@
 import { computed, reactive } from 'vue'
 import { dbRef } from '../firebase'
 import { get, child } from "firebase/database"
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
 import Cookies from 'universal-cookie'
 const props = defineProps(['assignedUserIds'])
 const emit = defineEmits(['signin-completed', 'change-to-signup'])
@@ -57,24 +58,32 @@ function userId() {
 function doSigninUser() {
   state.PINverifiedOk = false
   if (aliasOK && PINOK) {
-    // get the user's PIN
-    get(child(dbRef, `users/` + userId())).then((snapshot) => {
-      if (snapshot.exists()) {
-        if (snapshot.val().PIN === state.pinCode) {
-          // on success
-          state.alias = snapshot.val().alias
-          state.PINverifiedOk = true
-          // save a cookie for auto login next time
-          const cookies = new Cookies()
-          cookies.set('speelMee', { user: userId() }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-          emit('signin-completed', state.alias, state.pinCode, snapshot.val().lastLogin)
-        }
-      } else {
-        console.log(`No data available. User ${userId()} unknown`)
-      }
-    }).catch((error) => {
-      console.error(`Error while reading child ${userId()} from database: ` + error)
-    })
+    const fakeEmail = state.alias + '@speelmee.app'
+    const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
+    const auth = getAuth();
+    signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
+      .then((userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
+        // get user data from the database
+        get(child(dbRef, `users/` + state.alias.toUpperCase())).then((snapshot) => {
+          if (snapshot.exists()) {
+            //... store user data from database
+            // save a cookie for auto login next time
+            const cookies = new Cookies()
+            cookies.set('speelMee', { user: userId(), alias: state.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+            emit('signin-completed', state.alias, state.pinCode)
+          } else {
+            console.log(`doSigninUser: cannot find user ${tate.alias.toUpperCase()} in the database}`)
+          }
+        }).catch((error) => {
+          console.error(`Error while reading child ${retrievedCookie.user} from database: ` + error)
+        })
+      })
+      .catch((error) => {
+        console.log('Firebase signin: errorCode = ' + error.code)
+        console.log('Firebase signin: errorMessage = ' + error.message)
+      })
   }
 }
 

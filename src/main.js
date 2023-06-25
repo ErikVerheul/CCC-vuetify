@@ -5,7 +5,7 @@
  */
 
 import { createApp } from 'vue'
-import { VueFire, VueFireAuth } from 'vuefire'
+import { VueFire } from 'vuefire'
 import App from './App.vue'
 import { firebaseApp } from './firebase'
 

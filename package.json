@@ -1,6 +1,6 @@
 {
   "name": "ccc-vuetify",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -11,7 +11,7 @@
   "dependencies": {
     "@mdi/font": "7.0.96",
     "core-js": "^3.29.0",
-    "firebase": "^9.22.1",
+    "firebase": "^9.23.0",
     "pinia": "^2.0.0",
     "roboto-fontface": "*",
     "universal-cookie": "^4.0.4",

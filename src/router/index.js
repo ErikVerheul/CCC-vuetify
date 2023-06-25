@@ -14,12 +14,17 @@ const routes = [
         // which is lazy-loaded when the route is visited.
         component: () => import(/* webpackChunkName: "home" */ '@/views/Home.vue'),
       },
+      {
+        path: 'privacybeleid',
+        name: 'PrivacyBeleid',
+        component: () => import('@/views/PrivacyPolicy.vue')
+      }
     ],
   },
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes,
 })
 

@@ -6,13 +6,13 @@ import { getDatabase, ref } from 'firebase/database'
 // see https://jsmobiledev.com/article/hide-firebase-api/ on why it is not a security risk to expose these credentials
 export const firebaseApp = initializeApp({
   // your application settings
-  apiKey: "AIzaSyBSLibHkymxkkXk2b1GdSUMfXPPW6ZyncA",
-  authDomain: "ccc-app-efd90.firebaseapp.com",
-  databaseURL: "https://ccc-app-efd90-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "ccc-app-efd90",
-  storageBucket: "ccc-app-efd90.appspot.com",
-  messagingSenderId: "336065373302",
-  appId: "1:336065373302:web:6dafcbb5dc724c3cdfab57"
+  apiKey: "AIzaSyDxFrSzgD0jV1XQpql2n-6gmUI-ZMABZ4k",
+  authDomain: "speelmee-app.firebaseapp.com",
+  databaseURL: "https://speelmee-app-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "speelmee-app",
+  storageBucket: "speelmee-app.appspot.com",
+  messagingSenderId: "602830233476",
+  appId: "1:602830233476:web:e81b5c6ca2b813816587d1"
 })
 
 export const db = getDatabase()

@@ -2,7 +2,7 @@
   <v-container class="fill-height">
     <v-row>
       <v-col cols="auto">
-        <p v-if="props.lastLogin !== undefined">Laatste login: {{ createDateTimeString() }}</p>
+        <!-- <p>Laatste login: {{ createDateTimeString() }}</p> -->
         <h2>Hoe goed ben ik in</h2>
         <ul>
           <li>
@@ -90,12 +90,12 @@
 </template>
 
 <script setup>
-const props = defineProps(['lastLogin'])
 const emit = defineEmits(['menu-item-selected'])
 
 function createDateTimeString() {
+  // for now return current data/time
   const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }
-  const evt = new Date(Number(props.lastLogin))
+  const evt = new Date(Number(Date.now()))
   return evt.toLocaleDateString('nl-NL', options)
 }
 </script>

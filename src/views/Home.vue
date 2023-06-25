@@ -1,7 +1,7 @@
 <template>
-  <CCCApp />
+  <SpeelmeeApp />
 </template>
 
 <script setup>
-  import CCCApp from '@/components/CCCApp.vue'
+  import SpeelmeeApp from '@/components/SpeelmeeApp.vue'
 </script>

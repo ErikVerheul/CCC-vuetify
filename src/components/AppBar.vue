@@ -11,62 +11,62 @@
       <v-btn icon id="menu-activator">
         <v-icon>mdi-dots-vertical</v-icon>
       </v-btn>
-    </template>
 
-    <v-menu activator="#menu-activator">
-      <v-list>
-        <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog1 = true">
-            Inloggen op ander apparaat
-          </v-btn>
-        </v-list-item>
-        <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog2 = true">
-            Stop automatisch inloggen
-          </v-btn>
-        </v-list-item>
-        <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="emit('app-settings')">
-            Instellingen
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn flat size="small" @click="state.dialog4 = true">
-            Feedback
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn flat size="small" @click="state.dialog5 = true">
-            Contact
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn flat size="small" @click="state.dialog6 = true">
-            Veelgestelde vragen
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn flat size="small" @click="state.dialog7 = true">
-            Over de Speelmee app
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn flat size="small" @click="state.dialog8 = true">
-            Privacybeleid
-          </v-btn>
-        </v-list-item>
-        <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog9 = true">
-            Log uit
-          </v-btn>
-        </v-list-item>
-        <v-list-item v-if="props.isAuthenticated">
-          <v-btn color="red" flat size="small" @click="state.dialog10 = true">
-            Ik speel niet meer mee. Verwijder mijn gegevens
-          </v-btn>
-        </v-list-item>
-      </v-list>
-    </v-menu>
+      <v-menu activator="#menu-activator">
+        <v-list>
+          <v-list-item v-if="props.isAuthenticated">
+            <v-btn flat size="small" @click="state.dialog1 = true">
+              Inloggen op ander apparaat
+            </v-btn>
+          </v-list-item>
+          <v-list-item v-if="props.isAuthenticated">
+            <v-btn flat size="small" @click="state.dialog2 = true">
+              Stop automatisch inloggen
+            </v-btn>
+          </v-list-item>
+          <v-list-item v-if="props.isAuthenticated">
+            <v-btn flat size="small" @click="emit('app-settings')">
+              Instellingen
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn flat size="small" @click="state.dialog4 = true">
+              Feedback
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn flat size="small" @click="state.dialog5 = true">
+              Contact
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn flat size="small" @click="state.dialog6 = true">
+              Veelgestelde vragen
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn flat size="small" @click="state.dialog7 = true">
+              Over de Speelmee app
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn flat size="small" @click="state.dialog8 = true">
+              Privacybeleid
+            </v-btn>
+          </v-list-item>
+          <v-list-item v-if="props.isAuthenticated">
+            <v-btn flat size="small" @click="state.dialog9 = true">
+              Log uit
+            </v-btn>
+          </v-list-item>
+          <v-list-item v-if="props.isAuthenticated">
+            <v-btn color="red" flat size="small" @click="state.dialog10 = true">
+              Ik speel niet meer mee. Verwijder mijn gegevens
+            </v-btn>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </template>
   </v-app-bar>
 
   <v-dialog v-model="state.dialog1" width="auto">
@@ -138,7 +138,7 @@
         <p>Vraag: Is de app wel veilig?</p>
         <p>Ja, de app is veilig omdat er geen persoonlijke gegevens worden bewaard, zoals jouw e-mail adres, of ieder ander naar jou
           indentificerend gegeven.
-          Het ergste wat kan gebeuren is dat iemand anders jouw pin code raadt en namens jou gaat spelen. Mail ons naar contact@speelmij.app
+          Het ergste wat kan gebeuren is dat iemand anders jouw pin code raadt en namens jou gaat spelen. Mail ons naar contact@speelmee.app
           als je vermoedt dat dit is gebeurd.</p>
       </v-card-text>
       <v-card-actions>
@@ -150,7 +150,7 @@
   <v-dialog v-model="state.dialog7" width="auto">
     <v-card>
       <v-card-text>
-        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.2.7</p>
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.3.0</p>
         <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>
@@ -171,7 +171,7 @@
         <h3>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten. Als u hier uitlogt stopt u ook de automatische login.
         </h3>
         <v-btn class="mt-8" @click="logout">Log uit en log opnieuw in</v-btn>
-        <h3 class="mt-4" v-if="state.accountIsRemoved">U wordt uitgelogd.</h3>
+        <h3 class="mt-4" v-if="state.logoutSuccess">U bent uitgelogd.</h3>
       </v-card-text>
       <v-card-actions>
         <v-btn color="purple" block @click="state.dialog9 = false">Sluit</v-btn>
@@ -186,7 +186,10 @@
           beginnen.</h3>
         <h3>UW GEGEVENS WORDEN VERNIETIGD NIEMAND KAN DIE NOG TERUGHALEN</h3>
         <v-btn class="mt-8" @click="removeAccount">Verwijder mijn gegevens</v-btn>
-        <h3 class="mt-4" v-if="state.accountIsRemoved">Uw gegevens zijn verwijderd. U wordt uitgelogd.</h3>
+        <template v-if="state.removeAccountExecuted">
+          <h3 v-if="state.accountIsRemoved" class="mt-4">Uw gegevens zijn verwijderd. U wordt uitgelogd.</h3>
+          <h3 v-else class="mt-4">{{ state.removeAccountErrorMsg }}</h3>
+        </template>
       </v-card-text>
       <v-card-actions>
         <v-btn color="purple" block @click="state.dialog10 = false">Sluit</v-btn>
@@ -218,6 +221,9 @@ const props = defineProps({
   screenName: {
     type: String,
     required: true
+  },
+  firebaseUser: {
+    type: Object
   }
 })
 
@@ -239,7 +245,11 @@ const state = reactive({
   dialog8: false,
   dialog9: false,
   dialog10: false,
+  logoutSuccess: false,
   cookieIsRemoved: false,
+  removeAccountExecuted: false,
+  accountIsRemoved: false,
+  removeAccountErrorMsg: ''
 })
 
 function removeCookie() {
@@ -250,14 +260,22 @@ function removeCookie() {
 
 function logout() {
   removeCookie()
+  state.logoutSuccess = true
   emit('logout-app')
 }
 
 function removeAccount() {
-  removeCookie()
-  remove(child(dbRef, '/users/' + props.userName.toUpperCase()))
-  state.accountIsRemoved = true
-  emit('reset-app')
+  props.firebaseUser.delete().then(() => {
+    removeCookie()
+    remove(child(dbRef, '/users/' + props.userName.toUpperCase()))
+    state.accountIsRemoved = true
+    state.removeAccountExecuted = true
+    emit('reset-app')
+  }).catch((error) => {
+    state.accountIsRemoved = false
+    state.removeAccountErrorMsg = 'Account verwijdering mislukt. De fout is: ' + error
+    state.removeAccountExecuted = true
+  })
 }
 
 </script>
