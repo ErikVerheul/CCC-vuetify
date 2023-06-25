@@ -15,7 +15,7 @@
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
                   <SigninUser :assigned-user-ids="state.assignedUserIds" @signin-completed="finishSignin"
-                    @change-to-signup="switchToSignup" />
+                    @change-to-signup="switchToSignup" @firebase-user="setFirebaseUser"/>
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.alias === undefined">
@@ -156,6 +156,10 @@ onBeforeMount(() => {
       console.error('Error while reading all assignedUserIds from database: ' + error)
     })
 })
+
+function setFirebaseUser(userData) {
+  state.firebaseUser = userData
+} 
 
 const state = reactive({
   screenName: '',

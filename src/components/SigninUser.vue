@@ -4,6 +4,10 @@
     <v-text-field v-model.trim="state.alias" label="Uw schuilnaam" :rules="state.nameRules" />
     <v-text-field v-model.trim="state.pinCode" label="PIN" :rules="state.pinRules" />
     <v-btn class="my-6" v-if="aliasOK && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
+    <template v-if="state.loginErrorMsg !== undefined">
+      <div class="py-4" />
+      <h2>Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
+    </template>
     <v-btn type="button" variant="text" @click="emit('change-to-signup')">Ga naar nieuwe aanmelding</v-btn>
   </v-card>
 </template>
@@ -47,6 +51,7 @@ const state = reactive({
     },
   ],
   PINverifiedOk: false,
+  loginErrorMsg: undefined
 })
 
 // convenience method to derive user id
@@ -64,7 +69,7 @@ function doSigninUser() {
     signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
       .then((userCredential) => {
         // Signed in 
-        const user = userCredential.user;
+        const firebaseUser = userCredential.user
         // get user data from the database
         get(child(dbRef, `users/` + state.alias.toUpperCase())).then((snapshot) => {
           if (snapshot.exists()) {
@@ -72,17 +77,18 @@ function doSigninUser() {
             // save a cookie for auto login next time
             const cookies = new Cookies()
             cookies.set('speelMee', { user: userId(), alias: state.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-            emit('signin-completed', state.alias, state.pinCode)
+            emit('signin-completed', state.alias, state.pinCode, firebaseUser)
           } else {
-            console.log(`doSigninUser: cannot find user ${tate.alias.toUpperCase()} in the database}`)
+            console.log(`doSigninUser: cannot find user ${userId()} in the database}`)
           }
         }).catch((error) => {
-          console.error(`Error while reading child ${retrievedCookie.user} from database: ` + error)
+          console.error(`Error while reading child ${userId()} from database: ` + error)
         })
       })
       .catch((error) => {
         console.log('Firebase signin: errorCode = ' + error.code)
         console.log('Firebase signin: errorMessage = ' + error.message)
+        state.loginErrorMsg = error.message
       })
   }
 }
