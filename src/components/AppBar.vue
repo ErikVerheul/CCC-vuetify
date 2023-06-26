@@ -61,7 +61,7 @@
           </v-list-item>
           <v-list-item v-if="props.isAuthenticated">
             <v-btn color="red" flat size="small" @click="state.dialog10 = true">
-              Ik speel niet meer mee. Verwijder mijn gegevens
+              Ik speel niet meer mee.<br>Verwijder mijn gegevens
             </v-btn>
           </v-list-item>
         </v-list>
