@@ -15,7 +15,7 @@
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
                   <SigninUser :assigned-user-ids="state.assignedUserIds" @signin-completed="finishSignin"
-                    @change-to-signup="switchToSignup" @firebase-user="setFirebaseUser"/>
+                    @change-to-signup="switchToSignup"/>
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.alias === undefined">
@@ -157,10 +157,6 @@ onBeforeMount(() => {
     })
 })
 
-function setFirebaseUser(userData) {
-  state.firebaseUser = userData
-} 
-
 const state = reactive({
   screenName: '',
   isAuthenticated: false,
@@ -262,9 +258,10 @@ function switchToSignup() {
   state.screenName = 'Aanmelden'
 }
 
-function finishSignin(alias, pin) {
+function finishSignin(alias, pin, userData) {
   state.alias = alias
   state.PIN = pin
+  state.firebaseUser = userData
   state.isAuthenticated = true
   state.screenName = 'Menu'
 }

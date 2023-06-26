@@ -94,7 +94,6 @@ const props = defineProps(['firebaseUser'])
 const emit = defineEmits(['menu-item-selected'])
 
 function createDateTimeString() {
-  // for now return current data/time
   const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }
   const evt = new Date(Number(props.firebaseUser.metadata.lastLoginAt))
   return evt.toLocaleDateString('nl-NL', options) + ' u.'
