@@ -148,6 +148,7 @@ const state = reactive({
       return 'Vul 4 cijfers in.'
     }
   ],
+  lastLogin: Date.now(),
   newsFeed: false
 })
 
@@ -174,7 +175,8 @@ function doSignupUser() {
       set(ref(db, 'users/' + props.alias.toUpperCase()), {
         PIN: state.pinCode,
         alias: props.alias,
-        subscriptionDate: Date.now(),
+        subscriptionDate: state.lastLogin,
+        lastLogin: state.lastLogin,
         yearOfBirth: state.yearOfBirth === undefined ? -1 : state.yearOfBirth,
         gender: state.gender,
         newsFeed: state.newsFeed
@@ -182,7 +184,7 @@ function doSignupUser() {
       // set cookie for auto-signin next time
       const cookies = new Cookies()
       cookies.set('speelMee', { user: props.alias.toUpperCase(), alias: props.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-      emit('signup-completed', props.alias, state.pinCode, firebaseUser)
+      emit('signup-completed', props.alias, state.pinCode, firebaseUser, state.lastLogin)
     })
     .catch((error) => {
       console.log('Firebase signup: errorCode = ' + error.code)

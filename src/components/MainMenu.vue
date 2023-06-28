@@ -88,12 +88,12 @@
 </template>
 
 <script setup>
-const props = defineProps(['firebaseUser'])
+const props = defineProps(['lastLogin'])
 const emit = defineEmits(['menu-item-selected'])
 
 function createDateTimeString() {
-  const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' }
-  const evt = new Date(Number(props.firebaseUser.metadata.lastLoginAt))
+  const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }
+  const evt = new Date(Number(props.lastLogin))
   return evt.toLocaleDateString('nl-NL', options) + ' u.'
 }
 </script>

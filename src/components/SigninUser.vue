@@ -15,7 +15,7 @@
 <script setup>
 import { computed, reactive } from 'vue'
 import { dbRef } from '../firebase'
-import { get, child } from "firebase/database"
+import { get, child, update } from "firebase/database"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
 import Cookies from 'universal-cookie'
 const props = defineProps(['assignedUserIds'])
@@ -51,7 +51,8 @@ const state = reactive({
     },
   ],
   PINverifiedOk: false,
-  loginErrorMsg: undefined
+  loginErrorMsg: undefined,
+  lastLogin: Date.now()
 })
 
 // convenience method to derive user id
@@ -77,7 +78,11 @@ function doSigninUser() {
             // save a cookie for auto login next time
             const cookies = new Cookies()
             cookies.set('speelMee', { user: userId(), alias: state.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-            emit('signin-completed', state.alias, state.pinCode, firebaseUser)
+            // save the login date/time
+            const updates = {}
+            updates['/users/' + userId() + '/lastLogin'] = state.lastLogin
+            update(dbRef, updates)
+            emit('signin-completed', state.alias, state.pinCode, firebaseUser, state.lastLogin)
           } else {
             console.log(`doSigninUser: cannot find user ${userId()} in the database}`)
           }

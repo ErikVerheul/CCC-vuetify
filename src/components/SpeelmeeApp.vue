@@ -6,7 +6,7 @@
 
       <div v-if="!nowPlaying && !nowOther">
         <div v-if="state.isAuthenticated">
-          <MainMenu :firebase-user="state.firebaseUser" @menu-item-selected="doGame"></MainMenu>
+          <MainMenu :last-login="state.lastLogin" @menu-item-selected="doGame"></MainMenu>
         </div>
         <div v-else>
           <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="loginOrSignIn" />
@@ -28,7 +28,8 @@
                   </template>
                   <template v-else>
                     <div class="py-2" />
-                    <SignupUser :userId="userId()" :alias="state.alias" @signup-completed="finishSignup" @exit-signup="returnToLogin" />
+                    <SignupUser :userId="userId()" :alias="state.alias" @signup-completed="finishSignup"
+                      @exit-signup="returnToLogin" />
                   </template>
                 </template>
               </v-card>
@@ -71,7 +72,7 @@ onBeforeMount(() => {
 
   signInWithEmailAndPassword(auth, sysEmail, sysPw)
     .then((userCredential) => {
-      // Signed in as system
+      // Signin as system first to get the allready assigned users
       get(child(dbRef, `users/`)).then((snapshot) => {
         if (snapshot.exists()) {
           // create the array with already assigned users
@@ -90,19 +91,23 @@ onBeforeMount(() => {
               .then((userCredential) => {
                 // Signed in as user
                 state.firebaseUser = userCredential.user
-                console.log('state.firebaseUser.metadata.lastLoginAt = ' + state.firebaseUser.metadata.lastLoginAt)
                 // get other user data from the database
                 get(child(dbRef, `users/` + retrievedCookie.user)).then((snapshot) => {
                   if (snapshot.exists()) {
                     state.alias = snapshot.val().alias
                     state.PIN = snapshot.val().PIN
                     state.subscriptionDate = snapshot.val().subscriptionDate
+                    if (snapshot.val().lastLogin !== undefined) state.lastLogin = snapshot.val().lastLogin
                     // the user is authenticated by having this cookie
                     state.isAuthenticated = true
                     // refresh cookie to maintain a year long subscription
                     cookies.remove('speelMee', { sameSite: true })
                     cookies.set('speelMee', { user: retrievedCookie.user, alias: retrievedCookie.alias, fpw: retrievedCookie.fpw }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
                     state.screenName = 'Menu'
+                    // save the login date/time
+                    const updates = {}
+                    updates['/users/' + retrievedCookie.user + '/lastLogin'] = Date.now()
+                    update(dbRef, updates)
                   } else {
                     // No data available; cookie does not match in the database; remove cookie and start manual login or signup
                     cookies.remove('speelMee', { sameSite: true })
@@ -136,12 +141,13 @@ onBeforeMount(() => {
 
 const state = reactive({
   screenName: '',
-  lastScreenMame: '',
+  lastScreenName: '',
   isAuthenticated: false,
   firebaseUser: {},
   showOpeningScreen: undefined,
   alias: undefined,
-  subscriptionDate: undefined,
+  subscriptionDate: undefined, // updated at signup
+  lastLogin: Date.now(), // overwritten at (auto)signin, updated at signout
   alert: false,
   userEntryMode: undefined,
   nameRules: [
@@ -185,9 +191,10 @@ const nowOther = computed(() => {
   return state.userSettingsActive
 })
 
-// save the last screenName in view
-watch(state.screenName, (oldVal, newVal) => {
-  if (oldVal !== undefined) state.lastScreenMame = oldVal
+// save the last screenName before changing
+// See watching a getter in https://vuejs.org/api/reactivity-core.html#watch
+watch(() => state.screenName, (oldVal, newVal) => {
+  state.lastScreenName = oldVal
 })
 
 // convenience method to derive user id
@@ -220,7 +227,7 @@ function returnToLogin() {
       state.PIN = ''
       state.alias = undefined
       state.userEntryMode = 'login'
-      state.screenName = state.lastScreenMame
+      state.screenName = state.lastScreenName
       console.log('Sign-out successful')
     }).catch((error) => {
       console.log('signOut: An error happened, error = ' + error)
@@ -229,7 +236,7 @@ function returnToLogin() {
     state.PIN = ''
     state.alias = undefined
     state.userEntryMode = 'login'
-    state.screenName = state.lastScreenMame
+    state.screenName = state.lastScreenName
   }
 }
 
@@ -240,23 +247,25 @@ function switchToSignup() {
   state.screenName = 'Aanmelden'
 }
 
-function finishSignin(alias, pin, userData) {
+function finishSignin(alias, pin, userData, lastLogin) {
   state.alias = alias
   state.PIN = pin
   state.firebaseUser = userData
+  state.lastLogin = lastLogin
   state.isAuthenticated = true
-  state.screenName = state.lastScreenMame
+  state.screenName = state.lastScreenName
 }
 
-function finishSignup(alias, pin, firebaseUser) {
+function finishSignup(alias, pin, firebaseUser, lastLogin) {
   state.alias = alias
   state.PIN = pin
   state.firebaseUser = firebaseUser
+  state.lastLogin = lastLogin
   // add new alias to current array
   state.assignedUserIds.push(userId())
 
   state.isAuthenticated = true
-  state.screenName = state.lastScreenMame
+  state.screenName = state.lastScreenName
 }
 
 function aliasClicked(tmpAlias) {
