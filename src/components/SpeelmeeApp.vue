@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, reactive, computed } from 'vue'
+import { onBeforeMount, reactive, computed, watch } from 'vue'
 import Speelmee from './Speelmee.vue'
 import SelectAlias from './SelectAlias.vue'
 import Cookies from 'universal-cookie'
@@ -68,29 +68,6 @@ onBeforeMount(() => {
   // get the assigned aliases using system user credentials
   const sysEmail = 'system@speelmee.app'
   const sysPw = 'a7&tegV$ujd'
-
-  // Do not remove: One time function to create sys user authorisation
-  // createUserWithEmailAndPassword(auth, sysEmail, sysPw)
-  //   .then((userCredential) => {
-  //     // Signed in 
-  //     const user = userCredential.user;
-  //     // ...
-  //     console.log('Create sys user: user = ' + JSON.stringify(user, null, 2))
-  //     signOut(auth).then(() => {
-  //       console.log('Sign-out successful')
-  //     }).catch((error) => {
-  //       console.log('signOut: An error happened, error = ' + error)
-  //     });
-  //   })
-  //   .catch((error) => {
-  //     const errorCode = error.code;
-  //     const errorMessage = error.message;
-  //     console.log('Firebase signin: errorCode = ' + errorCode)
-  //     console.log('Firebase signin: errorMessage = ' + errorMessage)
-  //   });
-
-
-
 
   signInWithEmailAndPassword(auth, sysEmail, sysPw)
     .then((userCredential) => {
@@ -159,6 +136,7 @@ onBeforeMount(() => {
 
 const state = reactive({
   screenName: '',
+  lastScreenMame: '',
   isAuthenticated: false,
   firebaseUser: {},
   showOpeningScreen: undefined,
@@ -207,6 +185,11 @@ const nowOther = computed(() => {
   return state.userSettingsActive
 })
 
+// save the last screenName in view
+watch(state.screenName, (oldVal, newVal) => {
+  if (oldVal !== undefined) state.lastScreenMame = oldVal
+})
+
 // convenience method to derive user id
 function userId() {
   if (state.alias === undefined) return undefined
@@ -220,7 +203,6 @@ function doAppSettings() {
 }
 
 function doGame(game) {
-  console.log('doeSpel = ' + game)
   state.screenName = 'Verhalen van Maastricht'
   state.maastrichtStoriesActive = true
 }
@@ -238,7 +220,7 @@ function returnToLogin() {
       state.PIN = ''
       state.alias = undefined
       state.userEntryMode = 'login'
-      state.screenName = 'Inloggen'
+      state.screenName = state.lastScreenMame
       console.log('Sign-out successful')
     }).catch((error) => {
       console.log('signOut: An error happened, error = ' + error)
@@ -247,7 +229,7 @@ function returnToLogin() {
     state.PIN = ''
     state.alias = undefined
     state.userEntryMode = 'login'
-    state.screenName = 'Inloggen'
+    state.screenName = state.lastScreenMame
   }
 }
 
@@ -263,7 +245,7 @@ function finishSignin(alias, pin, userData) {
   state.PIN = pin
   state.firebaseUser = userData
   state.isAuthenticated = true
-  state.screenName = 'Menu'
+  state.screenName = state.lastScreenMame
 }
 
 function finishSignup(alias, pin, firebaseUser) {
@@ -274,7 +256,7 @@ function finishSignup(alias, pin, firebaseUser) {
   state.assignedUserIds.push(userId())
 
   state.isAuthenticated = true
-  state.screenName = 'Menu'
+  state.screenName = state.lastScreenMame
 }
 
 function aliasClicked(tmpAlias) {
@@ -308,6 +290,8 @@ function showMenu() {
 
 function resetApp() {
   state.isAuthenticated = false
+  // remove from assignedUserIds
+  state.assignedUserIds = state.assignedUserIds.filter(a => a !== state.alias.toUpperCase())
   state.alias = undefined
   state.PIN = ''
   state.userEntryMode = undefined
