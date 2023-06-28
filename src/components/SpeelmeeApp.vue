@@ -1,6 +1,6 @@
 <template>
-  <v-container>
-    <v-responsive>
+  <v-sheet max-width="640" width="100%">
+    <v-container>
       <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.alias" :PIN="state.PIN" :screen-name="state.screenName"
         :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp" @app-settings="doAppSettings" />
 
@@ -15,7 +15,7 @@
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
                   <SigninUser :assigned-user-ids="state.assignedUserIds" @signin-completed="finishSignin"
-                    @change-to-signup="switchToSignup"/>
+                    @change-to-signup="switchToSignup" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.alias === undefined">
@@ -44,8 +44,8 @@
           <AppSettings :userId="userId()" @return-to-menu="showMenu"></AppSettings>
         </template>
       </div>
-    </v-responsive>
-  </v-container>
+    </v-container>
+  </v-sheet>
 </template>
 
 <script setup>

@@ -8,7 +8,6 @@
       </v-row>
     </v-card-text>
   </v-card>
-  <div class="py-14" />
   <v-row class="justify-start">
     <v-col cols="9">
       <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
