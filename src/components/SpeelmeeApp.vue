@@ -1,12 +1,12 @@
 <template>
   <v-sheet max-width="640" width="100%">
     <v-container>
-      <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.alias" :PIN="state.PIN" :screen-name="state.screenName"
+      <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.userData.alias" :PIN="state.userData.pinCode" :screen-name="state.screenName"
         :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp" @app-settings="doAppSettings" />
 
       <div v-if="!nowPlaying && !nowOther">
         <div v-if="state.isAuthenticated">
-          <MainMenu :last-login="state.lastLogin" @menu-item-selected="doGame"></MainMenu>
+          <MainMenu :last-login="state.userData.lastLogin" @menu-item-selected="doGame"></MainMenu>
         </div>
         <div v-else>
           <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="loginOrSignIn" />
@@ -18,7 +18,7 @@
                     @change-to-signup="switchToSignup" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
-                  <template v-if="state.alias === undefined">
+                  <template v-if="state.userData.alias === undefined">
                     <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases" @alias-clicked="aliasClicked"
                       @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
                     </SelectAlias>
@@ -28,7 +28,7 @@
                   </template>
                   <template v-else>
                     <div class="py-2" />
-                    <SignupUser :userId="userId()" :alias="state.alias" @signup-completed="finishSignup"
+                    <SignupUser :userId="userId()" :alias="state.userData.alias" @signup-completed="finishSignup"
                       @exit-signup="returnToLogin" />
                   </template>
                 </template>
@@ -39,7 +39,7 @@
       </div>
       <div else>
         <template v-if="state.maastrichtStoriesActive">
-          <MaastrichtStories :user-id="userId()" :alias="state.alias" @return-to-menu="showMenu"></MaastrichtStories>
+          <MaastrichtStories :user-id="userId()" :alias="state.userData.alias" @return-to-menu="showMenu"></MaastrichtStories>
         </template>
         <template v-if="state.userSettingsActive">
           <AppSettings :userId="userId()" @return-to-menu="showMenu"></AppSettings>
@@ -94,10 +94,7 @@ onBeforeMount(() => {
                 // get other user data from the database
                 get(child(dbRef, `users/` + retrievedCookie.user)).then((snapshot) => {
                   if (snapshot.exists()) {
-                    state.alias = snapshot.val().alias
-                    state.PIN = snapshot.val().PIN
-                    state.subscriptionDate = snapshot.val().subscriptionDate
-                    if (snapshot.val().lastLogin !== undefined) state.lastLogin = snapshot.val().lastLogin
+                    state.userData = snapshot.val()
                     // the user is authenticated by having this cookie
                     state.isAuthenticated = true
                     // refresh cookie to maintain a year long subscription
@@ -144,10 +141,8 @@ const state = reactive({
   lastScreenName: '',
   isAuthenticated: false,
   firebaseUser: {},
+  userData: {},
   showOpeningScreen: undefined,
-  alias: undefined,
-  subscriptionDate: undefined, // updated at signup
-  lastLogin: Date.now(), // overwritten at (auto)signin, updated at signout
   alert: false,
   userEntryMode: undefined,
   nameRules: [
@@ -157,7 +152,6 @@ const state = reactive({
       return 'Schuilnaam onbekend.'
     },
   ],
-  PIN: '',
   pinRules: [
     value => {
       if (value) return true
@@ -199,8 +193,8 @@ watch(() => state.screenName, (oldVal, newVal) => {
 
 // convenience method to derive user id
 function userId() {
-  if (state.alias === undefined) return undefined
-  return state.alias.toUpperCase()
+  if (state.userData.alias === undefined) return undefined
+  return state.userData.alias.toUpperCase()
 }
 
 function doAppSettings() {
@@ -224,8 +218,8 @@ function returnToLogin() {
   if (state.isAuthenticated) {
     signOut(auth).then(() => {
       state.isAuthenticated = false
-      state.PIN = ''
-      state.alias = undefined
+      state.userData.pinCode = ''
+      state.userData.alias = undefined
       state.userEntryMode = 'login'
       state.screenName = state.lastScreenName
       console.log('Sign-out successful')
@@ -233,34 +227,34 @@ function returnToLogin() {
       console.log('signOut: An error happened, error = ' + error)
     })
   } else {
-    state.PIN = ''
-    state.alias = undefined
+    state.userData.pinCode = ''
+    state.userData.alias = undefined
     state.userEntryMode = 'login'
     state.screenName = state.lastScreenName
   }
 }
 
 function switchToSignup() {
-  state.PIN = ''
-  state.alias = undefined
+  state.userData.pinCode = ''
+  state.userData.alias = undefined
   state.userEntryMode = 'signup'
   state.screenName = 'Aanmelden'
 }
 
 function finishSignin(alias, pin, userData, lastLogin) {
-  state.alias = alias
-  state.PIN = pin
+  state.userData.alias = alias
+  state.userData.pinCode = pin
   state.firebaseUser = userData
-  state.lastLogin = lastLogin
+  state.userData.lastLogin = lastLogin
   state.isAuthenticated = true
   state.screenName = state.lastScreenName
 }
 
 function finishSignup(alias, pin, firebaseUser, lastLogin) {
-  state.alias = alias
-  state.PIN = pin
+  state.userData.alias = alias
+  state.userData.pinCode = pin
   state.firebaseUser = firebaseUser
-  state.lastLogin = lastLogin
+  state.userData.lastLogin = lastLogin
   // add new alias to current array
   state.assignedUserIds.push(userId())
 
@@ -287,7 +281,7 @@ function aliasClicked(tmpAlias) {
 function setSelectedAlias(alias) {
   if (alias === undefined) return
   if (!state.assignedUserIds.includes(alias.toUpperCase())) {
-    state.alias = alias
+    state.userData.alias = alias
   }
 }
 
@@ -300,9 +294,9 @@ function showMenu() {
 function resetApp() {
   state.isAuthenticated = false
   // remove from assignedUserIds
-  state.assignedUserIds = state.assignedUserIds.filter(a => a !== state.alias.toUpperCase())
-  state.alias = undefined
-  state.PIN = ''
+  state.assignedUserIds = state.assignedUserIds.filter(a => a !== state.userData.alias.toUpperCase())
+  state.userData.alias = undefined
+  state.userData.pinCode = ''
   state.userEntryMode = undefined
   state.showOpeningScreen = true
   state.screenName = 'Welkom'

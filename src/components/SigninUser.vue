@@ -51,8 +51,7 @@ const state = reactive({
     },
   ],
   PINverifiedOk: false,
-  loginErrorMsg: undefined,
-  lastLogin: Date.now()
+  loginErrorMsg: undefined
 })
 
 // convenience method to derive user id
@@ -75,12 +74,13 @@ function doSigninUser() {
         get(child(dbRef, `users/` + state.alias.toUpperCase())).then((snapshot) => {
           if (snapshot.exists()) {
             //... store user data from database
+            state.lastLogin = snapshot.val().lastLogin
             // save a cookie for auto login next time
             const cookies = new Cookies()
             cookies.set('speelMee', { user: userId(), alias: state.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
             // save the login date/time
             const updates = {}
-            updates['/users/' + userId() + '/lastLogin'] = state.lastLogin
+            updates['/users/' + userId() + '/lastLogin'] = Date.now()
             update(dbRef, updates)
             emit('signin-completed', state.alias, state.pinCode, firebaseUser, state.lastLogin)
           } else {

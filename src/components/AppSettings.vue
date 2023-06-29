@@ -56,7 +56,7 @@ function saveAndReturn() {
   const updates = {}
   updates['/users/' + props.userId + '/newsFeed'] = state.newsFeed
   emit('return-to-menu')
-  return update(dbRef, updates)
+  update(dbRef, updates)
 }
 
 const state = reactive({
