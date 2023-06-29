@@ -1,9 +1,13 @@
 <template>
   <v-sheet max-width="640" width="100%">
     <v-container>
-      <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.userData.alias" :PIN="state.userData.pinCode" :screen-name="state.screenName"
-        :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp" @app-settings="doAppSettings" />
-
+      <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.userData.alias" :PIN="state.userData.pinCode"
+        :screen-name="state.screenName" :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp"
+        @app-settings="doAppSettings" />
+      <template v-if="state.loginErrorMsg !== undefined">
+        <div class="py-4" />
+        <h2>Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
+      </template>
       <div v-if="!nowPlaying && !nowOther">
         <div v-if="state.isAuthenticated">
           <MainMenu :last-login="state.userData.lastLogin" @menu-item-selected="doGame"></MainMenu>
@@ -118,6 +122,7 @@ onBeforeMount(() => {
               .catch((error) => {
                 console.log('Firebase auto-signin: errorCode = ' + error.code)
                 console.log('Firebase auto-signin: errorMessage = ' + error.message)
+                state.loginErrorMsg = error.message
               });
           } else {
             // no cookie available; manual login or signup needed
@@ -127,12 +132,13 @@ onBeforeMount(() => {
         }).catch((error) => {
           console.log('Firebase signOut: errorCode = ' + error.code)
           console.log('Firebase signOut: errorMessage = ' + error.message)
+          state.loginErrorMsg = error.message
         })
       }).catch((error) => {
-        console.log('Sign-out system account: An error happened, error = ' + error)
+        console.error('Error while reading all assignedUserIds from database: ' + error)
       });
-    }).catch((error) => {
-      console.error('Error while reading all assignedUserIds from database: ' + error)
+    }).catch((error) => {     
+      state.loginErrorMsg = error.message
     })
 })
 
@@ -173,6 +179,7 @@ const state = reactive({
   assignedUserIds: [], // in uppercase
   maastrichtStoriesActive: false,
   userSettingsActive: false,
+  loginErrorMsg: undefined
 })
 
 // returns true if any of the games is active
