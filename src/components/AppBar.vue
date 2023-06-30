@@ -8,6 +8,8 @@
       <v-app-bar-title v-if="welcomeMsg !== undefined">{{ welcomeMsg }}</v-app-bar-title>
       <v-app-bar-title>{{ props.screenName }}</v-app-bar-title>
 
+      <v-btn v-if="props.isAuthenticated && props.userAlias === 'admin'" size="small" variant="outlined" @click="doSuperAdmin">superAdmin</v-btn>
+
       <v-btn icon id="menu-activator">
         <v-icon>mdi-dots-vertical</v-icon>
       </v-btn>
@@ -59,7 +61,7 @@
               Log uit
             </v-btn>
           </v-list-item>
-          <v-list-item v-if="props.isAuthenticated && props.userName !== 'admin'">
+          <v-list-item v-if="props.isAuthenticated && props.userAlias !== 'admin'">
             <v-btn color="red" flat size="small" @click="state.dialog10 = true">
               Ik speel niet meer mee.<br>Verwijder mijn gegevens
             </v-btn>
@@ -74,7 +76,7 @@
       <v-card-text>
         <h3>Om in te loggen op een ander apparaat hebt u nodig:</h3>
         <ul>
-          <li>Uw schuilnaam: {{ props.userName }}</li>
+          <li>Uw schuilnaam: {{ props.userAlias }}</li>
           <li>Uw pin code: {{ props.PIN }}</li>
         </ul>
         <p>Start de app door speelmee.app in te tikken in het adres veld van uw browser.</p>
@@ -90,7 +92,7 @@
       <v-card-text>
         <h3>Als u automatisch inloggen heeft uitgezet kunt u inloggen met:</h3>
         <ul>
-          <li>Uw schuilnaam: {{ props.userName }}</li>
+          <li>Uw schuilnaam: {{ props.userAlias }}</li>
           <li>Uw pin code: {{ props.PIN }}</li>
         </ul>
         <v-btn class="mt-8" @click="removeCookie">Stop automatisch inloggen</v-btn>
@@ -231,13 +233,14 @@ import Cookies from 'universal-cookie'
 import { dbRef } from '../firebase'
 import { child, remove } from "firebase/database"
 import PrivacyBeleid from './PrivacyBeleid.vue'
+import router from '@/router'
 
 const props = defineProps({
   isAuthenticated: {
     type: Boolean,
     required: true
   },
-  userName: {
+  userAlias: {
     type: String,
     default: undefined
   },
@@ -258,7 +261,7 @@ const emit = defineEmits(['logout-app', 'reset-app', 'app-settings'])
 
 const welcomeMsg = computed(() => {
   if (props.isAuthenticated && props.screenName === 'Menu') {
-    return 'Welkom ' + props.userName
+    return 'Welkom ' + props.userAlias
   } else return undefined
 })
 
@@ -291,13 +294,17 @@ function logout() {
 function removeAccount() {
   props.firebaseUser.delete().then(() => {
     removeCookie()
-    remove(child(dbRef, '/users/' + props.userName.toUpperCase()))
+    remove(child(dbRef, '/users/' + props.userAlias.toUpperCase()))
     state.dialog10 = false
     emit('reset-app')
   }).catch((error) => {
     state.dialog10 = false
     state.removeAccountErrorMsg = 'Account verwijdering mislukt. De fout is: ' + error
   })
+}
+
+function doSuperAdmin() {
+  router.push({ path: 'superadmin'})
 }
 
 </script>
