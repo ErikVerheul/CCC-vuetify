@@ -74,70 +74,81 @@ onBeforeMount(() => {
   const sysEmail = 'system@speelmee.app'
   const sysPw = 'a7&tegV$ujd'
 
+  // Signin as system first
   signInWithEmailAndPassword(auth, sysEmail, sysPw)
-    .then((userCredential) => {
-      // Signin as system first to get the allready assigned users
-      get(child(dbRef, `users/`)).then((snapshot) => {
+    .then(() => {
+      // get all available aliases
+      get(child(dbRef, `aliases/`)).then((snapshot) => {
         if (snapshot.exists()) {
-          // create the array with already assigned users
-          Object.keys(snapshot.val()).forEach(el => state.assignedUserIds.push(el))
+          state.allAliases = snapshot.val()
         } else {
-          console.log("No assigned aliases data available");
+          console.log("No available aliases data available")
         }
-        signOut(auth).then(() => {
-          // automatically signin from cookie, if set
-          const cookies = new Cookies()
-          const retrievedCookie = cookies.get('speelMee')
-          if (retrievedCookie !== undefined) {
-            const fakeEmail = retrievedCookie.alias + '@speelmee.app'
-            const fakePassword = retrievedCookie.fpw
-            signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
-              .then((userCredential) => {
-                // Signed in as user
-                state.firebaseUser = userCredential.user
-                // get other user data from the database
-                get(child(dbRef, `users/` + retrievedCookie.user)).then((snapshot) => {
-                  if (snapshot.exists()) {
-                    state.userData = snapshot.val()
-                    // the user is authenticated by having this cookie
-                    state.isAuthenticated = true
-                    // refresh cookie to maintain a year long subscription
-                    cookies.remove('speelMee', { sameSite: true })
-                    cookies.set('speelMee', { user: retrievedCookie.user, alias: retrievedCookie.alias, fpw: retrievedCookie.fpw }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-                    state.screenName = 'Menu'
-                    // save the login date/time
-                    const updates = {}
-                    updates['/users/' + retrievedCookie.user + '/lastLogin'] = Date.now()
-                    update(dbRef, updates)
-                  } else {
-                    // No data available; cookie does not match in the database; remove cookie and start manual login or signup
-                    cookies.remove('speelMee', { sameSite: true })
-                    state.showOpeningScreen = true
-                    state.screenName = 'Welkom'
-                  }
-                }).catch((error) => {
-                  console.error(`Error while reading child ${retrievedCookie.user} from database: ` + error)
-                })
-              })
-              .catch((error) => {
-                console.log('Firebase auto-signin: errorCode = ' + error.code)
-                console.log('Firebase auto-signin: errorMessage = ' + error.message)
-                state.loginErrorMsg = error.message
-              });
+        // get the allready assigned users
+        get(child(dbRef, `users/`)).then((snapshot) => {
+          if (snapshot.exists()) {
+            // create the array with already assigned users
+            Object.keys(snapshot.val()).forEach(el => state.assignedUserIds.push(el))
           } else {
-            // no cookie available; manual login or signup needed
-            state.showOpeningScreen = true
-            state.screenName = 'Welkom'
+            console.log("No assigned aliases data available")
           }
+          signOut(auth).then(() => {
+            // automatically signin from cookie, if set
+            const cookies = new Cookies()
+            const retrievedCookie = cookies.get('speelMee')
+            if (retrievedCookie !== undefined) {
+              const fakeEmail = retrievedCookie.alias + '@speelmee.app'
+              const fakePassword = retrievedCookie.fpw
+              signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
+                .then((userCredential) => {
+                  // Signed in as user
+                  state.firebaseUser = userCredential.user
+                  // get other user data from the database
+                  get(child(dbRef, `users/` + retrievedCookie.user)).then((snapshot) => {
+                    if (snapshot.exists()) {
+                      state.userData = snapshot.val()
+                      // the user is authenticated by having this cookie
+                      state.isAuthenticated = true
+                      // refresh cookie to maintain a year long subscription
+                      cookies.remove('speelMee', { sameSite: true })
+                      cookies.set('speelMee', { user: retrievedCookie.user, alias: retrievedCookie.alias, fpw: retrievedCookie.fpw }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+                      state.screenName = 'Menu'
+                      // save the login date/time
+                      const updates = {}
+                      updates['/users/' + retrievedCookie.user + '/lastLogin'] = Date.now()
+                      update(dbRef, updates)
+                    } else {
+                      // No data available; cookie does not match in the database; remove cookie and start manual login or signup
+                      cookies.remove('speelMee', { sameSite: true })
+                      state.showOpeningScreen = true
+                      state.screenName = 'Welkom'
+                    }
+                  }).catch((error) => {
+                    console.error(`Error while reading child ${retrievedCookie.user} from database: ` + error)
+                  })
+                })
+                .catch((error) => {
+                  console.log('Firebase auto-signin: errorCode = ' + error.code)
+                  console.log('Firebase auto-signin: errorMessage = ' + error.message)
+                  state.loginErrorMsg = error.message
+                });
+            } else {
+              // no cookie available; manual login or signup needed
+              state.showOpeningScreen = true
+              state.screenName = 'Welkom'
+            }
+          }).catch((error) => {
+            console.log('Firebase signOut: errorCode = ' + error.code)
+            console.log('Firebase signOut: errorMessage = ' + error.message)
+            state.loginErrorMsg = error.message
+          })
         }).catch((error) => {
-          console.log('Firebase signOut: errorCode = ' + error.code)
-          console.log('Firebase signOut: errorMessage = ' + error.message)
-          state.loginErrorMsg = error.message
-        })
+          console.error('Error while reading all assignedUserIds from database: ' + error)
+        });
       }).catch((error) => {
-        console.error('Error while reading all assignedUserIds from database: ' + error)
+        console.error('Error while reading all availablealiases from database: ' + error)
       });
-    }).catch((error) => {     
+    }).catch((error) => {
       state.loginErrorMsg = error.message
     })
 })
@@ -175,7 +186,7 @@ const state = reactive({
       return 'Vul minimaal 4 cijfers in.'
     },
   ],
-  allAliases: ['Alain', 'Alberto', 'Aldo', 'Alessandro', 'Alexander', 'Alfred', 'Alice', 'Alla', 'Anastasiya', 'Anatoliy', 'Andre', 'Andrea', 'Andreas', 'Andrew', 'Andriy', 'Angelo', 'Anne', 'Anthony', 'Antonio', 'Armando', 'Arthur', 'Bartolomeo', 'Bas', 'Benedetto', 'Bernard', 'Bernd', 'Bernhard', 'Bjorn', 'Bohdan', 'Bram', 'Brian', 'Bruno', 'Carl', 'Carlo', 'Caroline', 'Cas', 'Catherine', 'Charles', 'Christian', 'Christine', 'Christopher', 'Claude', 'Claudio', 'Corinne', 'Corrado', 'Daan', 'Daniel', 'Daniele', 'David', 'Davide', 'Denis', 'Dennis', 'Dieter', 'Dirk', 'Dmytro', 'Domenico', 'Donald', 'Douglas', 'Dylan', 'Edward', 'Emanuele', 'Emiliano', 'Emilio', 'Emmanuel', 'Enrico', 'Eric', 'Erich', 'Ernst', 'Fabio', 'Fabrice', 'Federico', 'Filippo', 'Florence', 'Floris', 'Francesco', 'Frank', 'Franz', 'Frederic', 'Freek', 'Fritz', 'Gabriele', 'Gaetano', 'Gary', 'Georg', 'George', 'Gerard', 'Giacomo', 'Gianni', 'Gijs', 'Gilbert', 'Giorgio', 'Giovanni', 'Giuseppe', 'Gregory', 'Günter', 'Gustav', 'Halyna', 'Hanna', 'Hans', 'Hans-Peter', 'Harold', 'Heinz', 'Helmut', 'Hendrik', 'Henk', 'Henry', 'Hermann', 'Horst', 'Ihor', 'Ingo', 'Inna', 'Iryna', 'Isabelle', 'Ivan', 'Jacob', 'Jacques', 'James', 'Jan', 'Jarno', 'Jason', 'Jean', 'Jeffrey', 'Jelle', 'Jelte', 'Jerome', 'Jerry', 'Jesse', 'Joachim', 'Joep', 'Johannes', 'John', 'Joost', 'Joris', 'Jose', 'Josef', 'Joseph', 'Joshua', 'Julie', 'Jürgen', 'Karl', 'Kateryna', 'Kenneth', 'Kevin', 'Khrystyna', 'Klaas', 'Klaus', 'Kurt', 'Larry', 'Lars', 'Larysa', 'Laurence', 'Laurens', 'Lennard', 'Lothar', 'Luc', 'Luca', 'Lucas', 'Luciano', 'Luigi', 'Lyubov', 'Lyudmyla', 'Maarten', 'Manfred', 'Marc', 'Marcello', 'Marco', 'Marie', 'Mario', 'Mariya', 'Mark', 'Markus', 'Martijn', 'Martin', 'Martine', 'Mary', 'Maryna', 'Massimo', 'Matthew', 'Matthias', 'Matthijs', 'Max', 'Michael', 'Michel', 'Milan', 'Monique', 'Mykhailo', 'Mykola', 'Myroslav', 'Nadiya', 'Nataliya', 'Nathalie', 'Nicolas', 'Nicolo', 'Niels', 'Oksana', 'Oleh', 'Oleksandr', 'Oleksiy', 'Olha', 'Orest', 'Otto', 'Paolo', 'Patrick', 'Paul', 'Pavlo', 'Peter', 'Petro', 'Philippe', 'Pierre', 'Pieter', 'Pietro', 'Raffaele', 'Raymond', 'Reinhold', 'Riccardo', 'Richard', 'Robert', 'Roberto', 'Robin', 'Roger', 'Roland', 'Rolf', 'Roman', 'Ronald', 'Ruben', 'Rudolf', 'Ryan', 'Salvatore', 'Sam', 'Sandrine', 'Scott', 'Sebastien', 'Sem', 'Sergio', 'Serhiy', 'Simone', 'Sophie', 'Stefan', 'Stefano', 'Stepan', 'Stephane', 'Stephen', 'Steven', 'Stijn', 'Sven', 'Svitlana', 'Taras', 'Tetyana', 'Teun', 'Thijs', 'Thomas', 'Tim', 'Timothy', 'Tom', 'Tommaso', 'Uliana', 'Umberto', 'Uwe', 'Vasyl', 'Viktor', 'Viktoriya', 'Vincenzo', 'Virginie', 'Volker', 'Volodymyr', 'Walter', 'Werner', 'Willem', 'Willi', 'William', 'Wolfgang', 'Wouter', 'Xavier', 'Yana', 'Yevhen', 'Yosyp', 'Yuliana', 'Yuliya', 'Yuriy', 'Yves'],
+  allAliases: [],
   assignedUserIds: [], // in uppercase
   maastrichtStoriesActive: false,
   userSettingsActive: false,
