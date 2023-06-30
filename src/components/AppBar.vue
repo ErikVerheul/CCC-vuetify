@@ -59,7 +59,7 @@
               Log uit
             </v-btn>
           </v-list-item>
-          <v-list-item v-if="props.isAuthenticated">
+          <v-list-item v-if="props.isAuthenticated && props.userName !== 'admin'">
             <v-btn color="red" flat size="small" @click="state.dialog10 = true">
               Ik speel niet meer mee.<br>Verwijder mijn gegevens
             </v-btn>
@@ -168,13 +168,28 @@
   <v-dialog v-model="state.dialog9" width="auto">
     <v-card>
       <v-card-text>
-        <h3>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten. Als u hier uitlogt stopt u ook de automatische login.
-        </h3>
-        <v-btn class="mt-8" @click="logout">Log uit en log opnieuw in</v-btn>
-        <h3 class="mt-4" v-if="state.logoutSuccess">U bent uitgelogd.</h3>
+        <p>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten.
+          Als u hier uitlogt stopt u ook de automatische login.</p>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="purple" block @click="state.dialog9 = false">Sluit</v-btn>
+        <v-row>
+          <v-col>
+            <v-btn flat prepend-icon="mdi-arrow-left" @click="state.dialog9 = false">
+              <template v-slot:prepend>
+                <v-icon size="x-large" color="purple"></v-icon>
+              </template>
+              Terug
+            </v-btn>
+          </v-col>
+          <v-col>
+            <v-btn flat append-icon="mdi-arrow-right" @click="logout">
+              Log uit en log opnieuw in
+              <template v-slot:append>
+                <v-icon size="x-large" color="purple"></v-icon>
+              </template>
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -185,14 +200,26 @@
         <h3>Als u uw gegevens verwijderd kunt u niet meer inloggen. Wel kunt u een nieuwe schuilnaam en pin code kiezen en fris opnieuw
           beginnen.</h3>
         <h3>UW GEGEVENS WORDEN VERNIETIGD NIEMAND KAN DIE NOG TERUGHALEN</h3>
-        <v-btn class="mt-8" @click="removeAccount">Verwijder mijn gegevens</v-btn>
-        <template v-if="state.removeAccountExecuted">
-          <h3 v-if="state.accountIsRemoved" class="mt-4">Uw gegevens zijn verwijderd. U wordt uitgelogd.</h3>
-          <h3 v-else class="mt-4">{{ state.removeAccountErrorMsg }}</h3>
-        </template>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="purple" block @click="state.dialog10 = false">Sluit</v-btn>
+        <v-row>
+          <v-col>
+            <v-btn flat prepend-icon="mdi-arrow-left" @click="state.dialog10 = false">
+              <template v-slot:prepend>
+                <v-icon size="x-large" color="purple"></v-icon>
+              </template>
+              Terug
+            </v-btn>
+          </v-col>
+          <v-col>
+            <v-btn color="red" flat append-icon="mdi-arrow-right" @click="removeAccount">
+              Vernietig mijn gegevens
+              <template v-slot:append>
+                <v-icon size="x-large" color="purple"></v-icon>
+              </template>
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -245,10 +272,7 @@ const state = reactive({
   dialog8: false,
   dialog9: false,
   dialog10: false,
-  logoutSuccess: false,
   cookieIsRemoved: false,
-  removeAccountExecuted: false,
-  accountIsRemoved: false,
   removeAccountErrorMsg: ''
 })
 
@@ -260,7 +284,7 @@ function removeCookie() {
 
 function logout() {
   removeCookie()
-  state.logoutSuccess = true
+  state.dialog9 = false
   emit('logout-app')
 }
 
@@ -268,13 +292,11 @@ function removeAccount() {
   props.firebaseUser.delete().then(() => {
     removeCookie()
     remove(child(dbRef, '/users/' + props.userName.toUpperCase()))
-    state.accountIsRemoved = true
-    state.removeAccountExecuted = true
+    state.dialog10 = false
     emit('reset-app')
   }).catch((error) => {
-    state.accountIsRemoved = false
+    state.dialog10 = false
     state.removeAccountErrorMsg = 'Account verwijdering mislukt. De fout is: ' + error
-    state.removeAccountExecuted = true
   })
 }
 
