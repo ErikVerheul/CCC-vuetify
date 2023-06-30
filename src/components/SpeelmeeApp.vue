@@ -1,7 +1,7 @@
 <template>
   <v-sheet max-width="640" width="100%">
     <v-container>
-      <AppBar :is-authenticated="state.isAuthenticated" :user-name="state.userData.alias" :PIN="state.userData.pinCode"
+      <AppBar :is-authenticated="state.isAuthenticated" :user-alias="state.userData.alias" :PIN="state.userData.pinCode"
         :screen-name="state.screenName" :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp"
         @app-settings="doAppSettings" />
       <template v-if="state.loginErrorMsg !== undefined">
