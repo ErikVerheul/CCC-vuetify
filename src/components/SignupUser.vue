@@ -177,8 +177,8 @@ function doSignupUser() {
         alias: props.alias,
         subscriptionDate: state.lastLogin,
         lastLogin: state.lastLogin,
-        yearOfBirth: state.yearOfBirth === undefined ? -1 : state.yearOfBirth,
-        gender: state.gender,
+        yearOfBirth: state.yearOfBirth === undefined ? -1 : Number(state.yearOfBirth),
+        gender: Number(state.gender),
         newsFeed: state.newsFeed
       })
       // set cookie for auto-signin next time

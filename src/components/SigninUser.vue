@@ -25,9 +25,10 @@ const PINOK = computed(() => {
   return !isNaN(state.pinCode) && state.pinCode.length >= 4
 })
 
+// user must have an assigned userId or the user is 'admin'
 const aliasOK = computed(() => {
   if (state.alias === undefined) return false
-  return state.alias.length > 0 && props.assignedUserIds.includes(userId())
+  return state.alias.length > 0 && props.assignedUserIds.includes(userId()) || state.alias === 'admin'
 })
 
 const state = reactive({
@@ -50,7 +51,6 @@ const state = reactive({
       return 'Vul minimaal 4 cijfers in.'
     },
   ],
-  PINverifiedOk: false,
   loginErrorMsg: undefined
 })
 
@@ -61,7 +61,6 @@ function userId() {
 }
 
 function doSigninUser() {
-  state.PINverifiedOk = false
   if (aliasOK && PINOK) {
     const fakeEmail = state.alias + '@speelmee.app'
     const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
