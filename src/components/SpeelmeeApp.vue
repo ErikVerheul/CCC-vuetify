@@ -23,8 +23,8 @@
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.userData.alias === undefined">
-                    <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases" @alias-clicked="aliasClicked"
-                      @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
+                    <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases" :alias-occupied="state.alert"
+                      @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
                     </SelectAlias>
                     <v-alert v-model="state.alert" border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
                       Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
@@ -65,7 +65,7 @@ import { dbRef } from '../firebase'
 import { child, get, update } from "firebase/database"
 import MaastrichtStories from './MaastrichtStories.vue'
 import AppSettings from './AppSettings.vue'
-import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth"
+import { getAuth, signInWithEmailAndPassword, signOut, fetchSignInMethodsForEmail } from "firebase/auth"
 
 const auth = getAuth()
 
@@ -280,20 +280,18 @@ function finishSignup(alias, pin, firebaseUser, lastLogin) {
   state.screenName = state.lastScreenName
 }
 
-function aliasClicked(tmpAlias) {
-  // check for newly assigned aliases since login
+// check for newly assigned aliases since login
+async function aliasClicked(tmpAlias) {
   const tmpUserId = tmpAlias.toUpperCase()
-  get(child(dbRef, `users/` + tmpUserId)).then((snapshot) => {
-    if (snapshot.exists()) {
-      state.assignedUserIds.push(tmpUserId)
-    }
-    state.alert = state.assignedUserIds.includes(tmpUserId)
-    if (state.alert) {
-      state.screenName = 'Schuilnaam bezet'
-    } else state.screenName = 'Schuilnaam geselecteerd'
-  }).catch((error) => {
-    console.error(`Error while reading child ${tmpUserId} from database: ` + error)
-  })
+  let signInMethods = await fetchSignInMethodsForEmail(auth, tmpAlias + '@speelmee.app')
+  if (signInMethods.length > 0) {
+    state.assignedUserIds.push(tmpUserId)
+  }
+
+  state.alert = state.assignedUserIds.includes(tmpUserId)
+  if (state.alert) {
+    state.screenName = 'Schuilnaam bezet'
+  } else state.screenName = 'Schuilnaam geselecteerd'
 }
 
 function setSelectedAlias(alias) {

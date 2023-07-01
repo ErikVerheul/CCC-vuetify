@@ -18,7 +18,7 @@
           </v-btn>
         </v-col>
         <v-col cols="3">
-          <v-btn v-if="state.aliasSelected !== undefined" flat append-icon="mdi-arrow-right"
+          <v-btn v-if="state.aliasSelected !== undefined && !props.aliasOccupied" flat append-icon="mdi-arrow-right"
             @click="emit('alias-selected', state.aliasSelected)">
             Door
             <template v-slot:append>
@@ -34,7 +34,7 @@
 <script setup>
 import { onBeforeMount, reactive, watch } from 'vue'
 import SelectAliasRow from './SelectAliasRow.vue'
-const props = defineProps(['assignedUserIds', 'allAliases'])
+const props = defineProps(['assignedUserIds', 'allAliases', 'aliasOccupied'])
 const emit = defineEmits(['alias-clicked', 'alias-selected', 'reset-signup'])
 
 onBeforeMount(() => {
