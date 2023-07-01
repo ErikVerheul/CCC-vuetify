@@ -292,9 +292,10 @@ function logout() {
 }
 
 function removeAccount() {
+  // must remove user data before user is no more authenticated
+  remove(child(dbRef, '/users/' + props.userAlias.toUpperCase()))
   props.firebaseUser.delete().then(() => {
-    removeCookie()
-    remove(child(dbRef, '/users/' + props.userAlias.toUpperCase()))
+    removeCookie()   
     state.dialog10 = false
     emit('reset-app')
   }).catch((error) => {
