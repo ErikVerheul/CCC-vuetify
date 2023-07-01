@@ -8,6 +8,8 @@ import { createApp } from 'vue'
 import { VueFire } from 'vuefire'
 import App from './App.vue'
 import { firebaseApp } from './firebase'
+import VueGtag from "vue-gtag"
+import router from './router/index'
 
 // Plugins
 import { registerPlugins } from '@/plugins'
@@ -22,6 +24,10 @@ app.use(VueFire, {
         // VueFireAuth(),
     ],
 })
+
+app.use(VueGtag, {
+    config: { id: "G-JYFV02BZH6" }
+}, router)
 
 // Global components
 import AppBarImplementation from './components/AppBar.vue'
