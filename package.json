@@ -1,6 +1,6 @@
 {
-  "name": "ccc-vuetify",
-  "version": "0.3.7",
+  "name": "speelmee.app",
+  "version": "0.3.8",
   "private": true,
   "scripts": {
     "dev": "vite",

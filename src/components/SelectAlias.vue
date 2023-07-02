@@ -93,7 +93,6 @@ watch(state.aliasButtonSelections, (rowValue, oldRowValue) => {
 
   let index = newIndex * state.rowLength + state.aliasButtonSelections[newIndex]
   state.aliasSelected = state.randomNames[index]
-  console.log('watch: state.aliasSelected = ' + state.aliasSelected)
   if (state.aliasSelected !== undefined) emit('alias-clicked', state.aliasSelected)
 })
 </script>
