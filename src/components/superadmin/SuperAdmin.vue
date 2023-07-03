@@ -1,12 +1,16 @@
 <template>
-  <ToolBar></ToolBar>
+  <ToolBar @aliassen-onderhouden="maintainAliases"></ToolBar>
+  <MaintainAliases></MaintainAliases>
 </template>
 
 <script setup>
-import { onBeforeMount, reactive, computed, watch } from 'vue'
-import { dbRef } from '../../firebase'
-import { child, get, update } from "firebase/database"
 import ToolBar from './ToolBar.vue'
+import MaintainAliases from './MaintainAliases'
+
+
+function maintainAliases() {
+  console.log('maintainAliases')
+}
 
 
 </script>

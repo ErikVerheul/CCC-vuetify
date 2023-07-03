@@ -166,7 +166,7 @@ function doSignupUser() {
   // database
   const fakeEmail = props.alias + '@speelmee.app'
   const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
-  const auth = getAuth();
+  const auth = getAuth()
   createUserWithEmailAndPassword(auth, fakeEmail, fakePassword)
     .then((userCredential) => {
       // Signed in 

@@ -1,7 +1,7 @@
 <template>
   <v-card variant="text">
     <v-card-title>Login met schuilnaam en PIN code</v-card-title>
-    <v-text-field v-model.trim="state.alias" label="Uw schuilnaam" :rules="state.nameRules" />
+    <v-text-field v-model.trim="state.alias" label="Uw schuilnaam" />
     <v-text-field v-model.trim="state.pinCode" label="PIN" :rules="state.pinRules" />
     <v-btn class="my-6" v-if="aliasOK && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
     <template v-if="state.loginErrorMsg !== undefined">
@@ -64,7 +64,7 @@ function doSigninUser() {
   if (aliasOK && PINOK) {
     const fakeEmail = state.alias + '@speelmee.app'
     const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
-    const auth = getAuth();
+    const auth = getAuth()
     signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
       .then((userCredential) => {
         // Signed in 
