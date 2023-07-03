@@ -12,8 +12,7 @@ export const firebaseApp = initializeApp({
   projectId: "speelmee-bed3e",
   storageBucket: "speelmee-bed3e.appspot.com",
   messagingSenderId: "1092615279012",
-  appId: "1:1092615279012:web:221ab82922c83c831d3131",
-  measurementId: "G-RN9L4PC2FQ"
+  appId: "1:1092615279012:web:221ab82922c83c831d3131"
 })
 
 export const db = getDatabase()
