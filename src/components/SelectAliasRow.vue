@@ -1,7 +1,7 @@
 <template>
   <v-btn-toggle v-model="aliasButtonSelections[row]" mandatory>
     <template v-for="(num, index) in rowLength">
-      <template v-if="!assignedUserIds.includes(randomNames[indexOffset + index].toUpperCase())">
+      <template v-if="!assignedUserIds.includes(randomNames[indexOffset + index])">
         <v-btn size="small">
           {{ randomNames[indexOffset + index] }}
         </v-btn>

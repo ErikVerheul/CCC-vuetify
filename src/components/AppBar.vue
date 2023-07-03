@@ -152,7 +152,7 @@
   <v-dialog v-model="state.dialog7" width="auto">
     <v-card>
       <v-card-text>
-        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.3.8</p>
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.4.0</p>
         <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>
@@ -293,7 +293,7 @@ function logout() {
 
 function removeAccount() {
   // must remove user data before user is no more authenticated
-  remove(child(dbRef, '/users/' + props.userAlias.toUpperCase()))
+  remove(child(dbRef, '/users/' + props.userAlias))
   props.firebaseUser.delete().then(() => {
     removeCookie()   
     state.dialog10 = false

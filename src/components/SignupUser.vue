@@ -172,7 +172,7 @@ function doSignupUser() {
       // Signed in 
       const firebaseUser = userCredential.user;
       // save user data in database
-      set(ref(db, 'users/' + props.alias.toUpperCase()), {
+      set(ref(db, 'users/' + props.alias), {
         PIN: state.pinCode,
         alias: props.alias,
         subscriptionDate: state.lastLogin,
@@ -183,7 +183,7 @@ function doSignupUser() {
       })
       // set cookie for auto-signin next time
       const cookies = new Cookies()
-      cookies.set('speelMee', { user: props.alias.toUpperCase(), alias: props.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+      cookies.set('speelMee', { user: props.alias, alias: props.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
       emit('signup-completed', props.alias, state.pinCode, firebaseUser, state.lastLogin)
     })
     .catch((error) => {

@@ -164,7 +164,7 @@ const state = reactive({
   userEntryMode: undefined,
   nameRules: [
     value => {
-      if (state.assignedUserIds.includes(value.toUpperCase())) return true
+      if (state.assignedUserIds.includes(value)) return true
 
       return 'Schuilnaam onbekend.'
     },
@@ -212,7 +212,7 @@ watch(() => state.screenName, (oldVal, newVal) => {
 // convenience method to derive user id
 function userId() {
   if (state.userData.alias === undefined) return undefined
-  return state.userData.alias.toUpperCase()
+  return state.userData.alias
 }
 
 function doAppSettings() {
@@ -282,7 +282,7 @@ function finishSignup(alias, pin, firebaseUser, lastLogin) {
 
 // check for newly assigned aliases since login
 async function aliasClicked(tmpAlias) {
-  const tmpUserId = tmpAlias.toUpperCase()
+  const tmpUserId = tmpAlias
   let signInMethods = await fetchSignInMethodsForEmail(auth, tmpAlias + '@speelmee.app')
   if (signInMethods.length > 0) {
     state.assignedUserIds.push(tmpUserId)
@@ -296,7 +296,7 @@ async function aliasClicked(tmpAlias) {
 
 function setSelectedAlias(alias) {
   if (alias === undefined) return
-  if (!state.assignedUserIds.includes(alias.toUpperCase())) {
+  if (!state.assignedUserIds.includes(alias)) {
     state.userData.alias = alias
   }
 }
@@ -310,7 +310,7 @@ function showMenu() {
 function resetApp() {
   state.isAuthenticated = false
   // remove from assignedUserIds
-  state.assignedUserIds = state.assignedUserIds.filter(a => a !== state.userData.alias.toUpperCase())
+  state.assignedUserIds = state.assignedUserIds.filter(a => a !== state.userData.alias)
   state.userData.alias = undefined
   state.userData.pinCode = ''
   state.userEntryMode = undefined

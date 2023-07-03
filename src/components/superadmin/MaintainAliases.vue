@@ -1,4 +1,6 @@
 <template>
+  userInput = {{ state.userInput }}
+  alias = {{ alias }}
   <v-card variant="tonal">
     <v-card-title>Schuilnamen onderhouden (niet af!)</v-card-title>
     <v-radio-group inline v-model="state.action">
@@ -10,7 +12,7 @@
     <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="6">
-        <v-text-field v-model.trim="state.alias" :label="textFieldLabel" :rules="state.nameRules" />
+        <v-text-field v-model.trim="state.userInput" :label="textFieldLabel" :rules="state.nameRules" />
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
@@ -39,7 +41,7 @@
     <v-row v-if="aliasInUse">
       <v-col cols="auto">
           <h3>LET OP</h3>
-          <p>Schuilnaam {{ state.alias }} is in gebruik</p>
+          <p>Schuilnaam {{ alias }} is in gebruik</p>
       </v-col>
     </v-row>
 
@@ -57,7 +59,6 @@ onBeforeMount(() => {
   get(child(dbRef, `aliases/`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.allAliases = snapshot.val()
-      state.upperCaseAliases = state.allAliases.map((el) => el.toUpperCase())
     } else {
       console.log("No aliases data available")
     }
@@ -75,6 +76,10 @@ onBeforeMount(() => {
   }).catch((error) => {
     console.error('Error while reading all available aliases from database: ' + error)
   })
+})
+
+const alias = computed(() => {
+  return state.userInput.toUpperCase()
 })
 
 const textFieldLabel = computed(() => {
@@ -97,15 +102,15 @@ const saveButtonColor = computed(() => {
 })
 
 const aliasEnteredOk = computed(() => {
-  return (state.alias.length >= 2)
+  return (alias.value.length >= 2)
 })
 
 const aliasExists = computed(() => {
-  return state.upperCaseAliases.includes(state.alias.toUpperCase())
+  return state.allAliases.includes(alias.value)
 })
 
 const aliasInUse = computed(() => {
-  return state.assignedUserIds.includes(state.alias.toUpperCase())
+  return state.assignedUserIds.includes(alias.value)
 })
 
 const allowSave = computed(() => {
@@ -117,26 +122,23 @@ const allowSave = computed(() => {
 
 function saveChange() {
   if (state.action === '1') {
-    state.allAliases.push(state.alias)
+    state.allAliases.push(alias.value)
     state.allAliases.sort()
-    state.upperCaseAliases.push(state.alias.toUpperCase())
-    state.upperCaseAliases.sort()
   }
   if (state.action === '2') {
 
   }
   if (state.action === '3') {
-    state.allAliases = state.allAliases.filter(a => a !== state.alias)
+    state.allAliases = state.allAliases.filter(a => a !== alias.value)
 
   }
 }
 
 const state = reactive({
   allAliases: [],
-  upperCaseAliases: [],
   assignedUserIds: [],
   action: "1",
-  alias: '',
+  userInput: '',
   nameRules: [
     value => {
       if (value) return true
