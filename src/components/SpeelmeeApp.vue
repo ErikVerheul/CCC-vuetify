@@ -82,7 +82,7 @@ onBeforeMount(() => {
         if (snapshot.exists()) {
           state.allAliases = snapshot.val()
         } else {
-          console.log("No available aliases data available")
+          console.log("No aliases data available")
         }
         // get the allready assigned users
         get(child(dbRef, `users/`)).then((snapshot) => {
