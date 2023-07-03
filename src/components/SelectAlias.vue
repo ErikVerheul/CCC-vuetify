@@ -60,7 +60,7 @@ onBeforeMount(() => {
 })
 
 const state = reactive({
-  numberOfRows: 20,
+  numberOfRows: 12,
   rowLength: 4,
   aliasButtonSelections: [],
   selectedButtonInRows: [],
