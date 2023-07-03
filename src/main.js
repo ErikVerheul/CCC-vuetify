@@ -5,7 +5,7 @@
  */
 
 import { createApp } from 'vue'
-import { VueFire } from 'vuefire'
+import { VueFire, VueFireAuth } from 'vuefire'
 import App from './App.vue'
 import { firebaseApp } from './firebase'
 import VueGtag from "vue-gtag"
@@ -21,7 +21,7 @@ app.use(VueFire, {
     firebaseApp,
     modules: [
         // we will see other modules later on
-        // VueFireAuth(),
+        VueFireAuth(),
     ],
 })
 
