@@ -8,7 +8,8 @@
       <v-app-bar-title v-if="welcomeMsg !== undefined">{{ welcomeMsg }}</v-app-bar-title>
       <v-app-bar-title>{{ props.screenName }}</v-app-bar-title>
 
-      <v-btn v-if="props.isAuthenticated && props.userAlias === 'admin'" size="small" variant="outlined" @click="doSuperAdmin">superAdmin</v-btn>
+      <v-btn v-if="props.isAuthenticated && props.userAlias === 'admin'" size="small" variant="outlined"
+        @click="doSuperAdmin">superAdmin</v-btn>
 
       <v-btn icon id="menu-activator">
         <v-icon>mdi-dots-vertical</v-icon>
@@ -152,7 +153,7 @@
   <v-dialog v-model="state.dialog7" width="auto">
     <v-card>
       <v-card-text>
-        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.4.0</p>
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.4.1</p>
         <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>
@@ -231,7 +232,7 @@
 import { computed, reactive } from 'vue'
 import Cookies from 'universal-cookie'
 import { dbRef } from '../firebase'
-import { child, remove } from "firebase/database"
+import { child, update, remove } from "firebase/database"
 import PrivacyBeleid from './PrivacyBeleid.vue'
 import router from '@/router'
 
@@ -293,9 +294,13 @@ function logout() {
 
 function removeAccount() {
   // must remove user data before user is no more authenticated
-  remove(child(dbRef, '/users/' + props.userAlias))
+  remove(child(dbRef, '/users/' + props.firebaseUser.uid))
+  // update alias in use now we are sttil authenticated
+  const updates = {}
+  updates['aliases/' + props.userAlias + '/inUse'] = false
+  update(dbRef, updates)
   props.firebaseUser.delete().then(() => {
-    removeCookie()   
+    removeCookie()
     state.dialog10 = false
     emit('reset-app')
   }).catch((error) => {
@@ -305,7 +310,7 @@ function removeAccount() {
 }
 
 function doSuperAdmin() {
-  router.push({ path: 'superadmin'})
+  router.push({ path: 'superadmin' })
 }
 
 </script>

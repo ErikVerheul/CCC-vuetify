@@ -1,9 +1,7 @@
 <template>
-  state.userInput = {{ state.userInput }} ====
-  alias = {{ alias }}
   <v-card variant="text">
     <v-card-title>Login met schuilnaam en PIN code</v-card-title>
-    <v-text-field v-model.trim="state.userInput" label="Uw schuilnaam" />
+    <v-text-field v-model.trim="state.userAliasInput" label="Uw schuilnaam" />
     <v-text-field v-model.trim="state.pinCode" label="PIN" :rules="state.pinRules" />
     <v-btn class="my-6" v-if="aliasOK && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
     <template v-if="state.loginErrorMsg !== undefined">
@@ -20,25 +18,31 @@ import { dbRef } from '../firebase'
 import { get, child, update } from "firebase/database"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
 import Cookies from 'universal-cookie'
-const props = defineProps(['assignedUserIds'])
+const props = defineProps(['aliasesInUse'])
 const emit = defineEmits(['signin-completed', 'change-to-signup'])
-
-const alias = computed(() => {
-  return state.userInput.toUpperCase()
-})
 
 const PINOK = computed(() => {
   return !isNaN(state.pinCode) && state.pinCode.length >= 4
 })
 
-// user must have an assigned userId or the user is 'admin'
+// user must have an assigned userId or the user is ADMIN
 const aliasOK = computed(() => {
-  if (alias.value === '') return false
-  return alias.value.length > 0 && props.assignedUserIds.includes(alias.value) || alias.value === 'admin'
+  if (state.userAliasInput === '') return false
+  return isKnownAlias(state.userAliasInput)
 })
 
+function isKnownAlias(input) {
+  for (const el of props.aliasesInUse) {
+    if (el === input.toUpperCase()) {
+      return true
+    }
+  }
+  return state.alias = 'admin'
+}
+
 const state = reactive({
-  userInput: '',
+  userAliasInput: '',
+  alias: undefined,
   pinCode: '',
   pinRules: [
     value => {
@@ -62,7 +66,7 @@ const state = reactive({
 
 function doSigninUser() {
   if (aliasOK && PINOK) {
-    const fakeEmail = alias.value + '@speelmee.app'
+    const fakeEmail = state.userAliasInput + '@speelmee.app'
     const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
     const auth = getAuth()
     signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
@@ -70,23 +74,25 @@ function doSigninUser() {
         // Signed in 
         const firebaseUser = userCredential.user
         // get user data from the database
-        get(child(dbRef, `users/` + alias.value)).then((snapshot) => {
+        get(child(dbRef, `users/` + firebaseUser.uid)).then((snapshot) => {
           if (snapshot.exists()) {
             //... store user data from database
             state.lastLogin = snapshot.val().lastLogin
+            // set the alias as written in the users record
+            state.alias = snapshot.val().alias
             // save a cookie for auto login next time
             const cookies = new Cookies()
-            cookies.set('speelMee', { user: alias.value, alias: alias.value, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+            cookies.set('speelMee', { alias: state.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
             // save the login date/time
             const updates = {}
-            updates['/users/' + alias.value + '/lastLogin'] = Date.now()
+            updates['/users/' + firebaseUser.uid + '/lastLogin'] = Date.now()
             update(dbRef, updates)
-            emit('signin-completed', alias.value, state.pinCode, firebaseUser, state.lastLogin)
+            emit('signin-completed', state.alias, state.pinCode, firebaseUser, state.lastLogin)
           } else {
-            console.log(`doSigninUser: cannot find user ${alias.value} in the database}`)
+            console.log(`doSigninUser: cannot find user ${state.alias} in the database}`)
           }
         }).catch((error) => {
-          console.error(`Error while reading child ${alias.value} from database: ` + error)
+          console.error(`Error while reading child ${state.alias} from database: ` + error)
         })
       })
       .catch((error) => {

@@ -3,7 +3,7 @@
     <v-card-title align="center">Blader, en kies een schuilnaam</v-card-title>
     <v-card-text>
       <v-row align="center" justify="center">
-        <SelectAliasRow v-for="(num, index) in state.numberOfRows" :assigned-user-ids="assignedUserIds" :random-names="state.randomNames"
+        <SelectAliasRow v-for="(num, index) in state.numberOfRows" :aliases-in-use="aliasesInUse" :random-names="state.randomNames"
           :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
       </v-row>
     </v-card-text>
@@ -34,7 +34,7 @@
 <script setup>
 import { onBeforeMount, reactive, watch } from 'vue'
 import SelectAliasRow from './SelectAliasRow.vue'
-const props = defineProps(['assignedUserIds', 'allAliases', 'aliasOccupied'])
+const props = defineProps(['aliasesInUse', 'allAliases', 'aliasOccupied'])
 const emit = defineEmits(['alias-clicked', 'alias-selected', 'reset-signup'])
 
 onBeforeMount(() => {
@@ -51,7 +51,7 @@ onBeforeMount(() => {
       itemsSet++
     }
   } while (itemsSet < numberOfButtons)
-
+  console.log('state.randomNames = ' + state.randomNames)
 
   // initialize button selection
   for (let i = 0; i < state.numberOfRows; i++) {

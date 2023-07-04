@@ -1,4 +1,5 @@
 <template>
+  state.userData.alias = {{ state.userData.alias }}
   <v-sheet max-width="640" width="100%">
     <v-container>
       <AppBar :is-authenticated="state.isAuthenticated" :user-alias="state.userData.alias" :PIN="state.userData.pinCode"
@@ -18,12 +19,11 @@
             <v-col cols="auto">
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
-                  <SigninUser :assigned-user-ids="state.assignedUserIds" @signin-completed="finishSignin"
-                    @change-to-signup="switchToSignup" />
+                  <SigninUser :aliases-in-use="state.aliasesInUse" @signin-completed="finishSignin" @change-to-signup="switchToSignup" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.userData.alias === undefined">
-                    <SelectAlias :assigned-user-ids="state.assignedUserIds" :all-aliases="state.allAliases" :alias-occupied="state.alert"
+                    <SelectAlias :aliases-in-use="state.aliasesInUse" :all-aliases="state.allAliases" :alias-occupied="state.alert"
                       @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
                     </SelectAlias>
                     <v-alert v-model="state.alert" border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
@@ -32,7 +32,7 @@
                   </template>
                   <template v-else>
                     <div class="py-2" />
-                    <SignupUser :userId="userId()" :alias="state.userData.alias" @signup-completed="finishSignup"
+                    <SignupUser :userId="state.userData.alias" :alias="state.userData.alias" @signup-completed="finishSignup"
                       @exit-signup="returnToLogin" />
                   </template>
                 </template>
@@ -43,10 +43,10 @@
       </div>
       <div else>
         <template v-if="state.maastrichtStoriesActive">
-          <MaastrichtStories :user-id="userId()" :alias="state.userData.alias" @return-to-menu="showMenu"></MaastrichtStories>
+          <MaastrichtStories :user-id="state.userData.alias" :alias="state.userData.alias" @return-to-menu="showMenu"></MaastrichtStories>
         </template>
         <template v-if="state.userSettingsActive">
-          <AppSettings :userId="userId()" @return-to-menu="showMenu"></AppSettings>
+          <AppSettings :userId="state.userData.alias" @return-to-menu="showMenu"></AppSettings>
         </template>
       </div>
     </v-container>
@@ -80,74 +80,70 @@ onBeforeMount(() => {
       // get all available aliases
       get(child(dbRef, `aliases/`)).then((snapshot) => {
         if (snapshot.exists()) {
-          state.allAliases = snapshot.val()
+          const aliasObject = snapshot.val()
+          state.allAliases = Object.keys(aliasObject)
+          // extract the aliases in use
+          state.aliasesInUse = []
+          state.allAliases.forEach(el => {
+            if (aliasObject[el].inUse) state.aliasesInUse.push(el.toUpperCase())
+          })
         } else {
           console.log("No aliases data available")
         }
-        // get the allready assigned users
-        get(child(dbRef, `users/`)).then((snapshot) => {
-          if (snapshot.exists()) {
-            // create the array with already assigned users
-            Object.keys(snapshot.val()).forEach(el => state.assignedUserIds.push(el))
-          } else {
-            console.log("No assigned aliases data available")
-          }
-          signOut(auth).then(() => {
-            // automatically signin from cookie, if set
-            const cookies = new Cookies()
-            const retrievedCookie = cookies.get('speelMee')
-            if (retrievedCookie !== undefined) {
-              const fakeEmail = retrievedCookie.alias + '@speelmee.app'
-              const fakePassword = retrievedCookie.fpw
-              signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
-                .then((userCredential) => {
-                  // Signed in as user
-                  state.firebaseUser = userCredential.user
-                  // get other user data from the database
-                  get(child(dbRef, `users/` + retrievedCookie.user)).then((snapshot) => {
-                    if (snapshot.exists()) {
-                      state.userData = snapshot.val()
-                      // the user is authenticated by having this cookie
-                      state.isAuthenticated = true
-                      // refresh cookie to maintain a year long subscription
-                      cookies.remove('speelMee', { sameSite: true })
-                      cookies.set('speelMee', { user: retrievedCookie.user, alias: retrievedCookie.alias, fpw: retrievedCookie.fpw }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-                      state.screenName = 'Menu'
-                      // save the login date/time
-                      const updates = {}
-                      updates['/users/' + retrievedCookie.user + '/lastLogin'] = Date.now()
-                      update(dbRef, updates)
-                    } else {
-                      // No data available; cookie does not match in the database; remove cookie and start manual login or signup
-                      cookies.remove('speelMee', { sameSite: true })
-                      state.showOpeningScreen = true
-                      state.screenName = 'Welkom'
-                    }
-                  }).catch((error) => {
-                    console.error(`Error while reading child ${retrievedCookie.user} from database: ` + error)
-                  })
+        signOut(auth).then(() => {
+          // automatically signin from cookie, if set
+          const cookies = new Cookies()
+          const retrievedCookie = cookies.get('speelMee')
+          if (retrievedCookie !== undefined) {
+            const fakeEmail = retrievedCookie.alias + '@speelmee.app'
+            const fakePassword = retrievedCookie.fpw
+            signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
+              .then((userCredential) => {
+                // Signed in as user
+                state.firebaseUser = userCredential.user
+                // get other user data from the database
+                get(child(dbRef, `users/` + state.firebaseUser.uid)).then((snapshot) => {
+                  if (snapshot.exists()) {
+                    state.userData = snapshot.val()
+                    // the user is authenticated by having this cookie
+                    state.isAuthenticated = true
+                    // refresh cookie to maintain a year long subscription
+                    cookies.remove('speelMee', { sameSite: true })
+                    cookies.set('speelMee', { alias: retrievedCookie.alias, fpw: retrievedCookie.fpw }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+                    state.screenName = 'Menu'
+                    // save the login date/time
+                    const updates = {}
+                    updates['/users/' + state.firebaseUser.uid + '/lastLogin'] = Date.now()
+                    update(dbRef, updates)
+                  } else {
+                    // No data available; cookie does not match in the database; remove cookie and start manual login or signup
+                    cookies.remove('speelMee', { sameSite: true })
+                    state.showOpeningScreen = true
+                    state.screenName = 'Welkom'
+                  }
+                }).catch((error) => {
+                  console.error(`Error while reading child ${state.firebaseUser.uid} from database: ` + error)
                 })
-                .catch((error) => {
-                  console.log('Firebase auto-signin: errorCode = ' + error.code)
-                  console.log('Firebase auto-signin: errorMessage = ' + error.message)
-                  state.loginErrorMsg = error.message
-                });
-            } else {
-              // no cookie available; manual login or signup needed
-              state.showOpeningScreen = true
-              state.screenName = 'Welkom'
-            }
-          }).catch((error) => {
-            console.log('Firebase signOut: errorCode = ' + error.code)
-            console.log('Firebase signOut: errorMessage = ' + error.message)
-            state.loginErrorMsg = error.message
-          })
+              })
+              .catch((error) => {
+                console.log('Firebase auto-signin: errorCode = ' + error.code)
+                console.log('Firebase auto-signin: errorMessage = ' + error.message)
+                state.loginErrorMsg = error.message
+              });
+          } else {
+            console.log('No cookie found')
+            // no cookie available; manual login or signup needed
+            state.showOpeningScreen = true
+            state.screenName = 'Welkom'
+          }
         }).catch((error) => {
-          console.error('Error while reading all assignedUserIds from database: ' + error)
-        });
+          console.log('Firebase signOut: errorCode = ' + error.code)
+          console.log('Firebase signOut: errorMessage = ' + error.message)
+          state.loginErrorMsg = error.message
+        })
       }).catch((error) => {
-        console.error('Error while reading all availablealiases from database: ' + error)
-      });
+        console.error('Error while reading all available aliases from database: ' + error)
+      })
     }).catch((error) => {
       state.loginErrorMsg = error.message
     })
@@ -164,7 +160,7 @@ const state = reactive({
   userEntryMode: undefined,
   nameRules: [
     value => {
-      if (state.assignedUserIds.includes(value)) return true
+      if (state.aliasesInUse.includes(value)) return true
 
       return 'Schuilnaam onbekend.'
     },
@@ -187,7 +183,7 @@ const state = reactive({
     },
   ],
   allAliases: [],
-  assignedUserIds: [], // in uppercase
+  aliasesInUse: [], // in uppercase
   maastrichtStoriesActive: false,
   userSettingsActive: false,
   loginErrorMsg: undefined
@@ -208,12 +204,6 @@ const nowOther = computed(() => {
 watch(() => state.screenName, (oldVal, newVal) => {
   state.lastScreenName = oldVal
 })
-
-// convenience method to derive user id
-function userId() {
-  if (state.userData.alias === undefined) return undefined
-  return state.userData.alias
-}
 
 function doAppSettings() {
   console.log('doAppSettings selected')
@@ -274,7 +264,7 @@ function finishSignup(alias, pin, firebaseUser, lastLogin) {
   state.firebaseUser = firebaseUser
   state.userData.lastLogin = lastLogin
   // add new alias to current array
-  state.assignedUserIds.push(userId())
+  state.aliasesInUse.push(alias.toUpperCase())
 
   state.isAuthenticated = true
   state.screenName = state.lastScreenName
@@ -282,13 +272,12 @@ function finishSignup(alias, pin, firebaseUser, lastLogin) {
 
 // check for newly assigned aliases since login
 async function aliasClicked(tmpAlias) {
-  const tmpUserId = tmpAlias
   let signInMethods = await fetchSignInMethodsForEmail(auth, tmpAlias + '@speelmee.app')
   if (signInMethods.length > 0) {
-    state.assignedUserIds.push(tmpUserId)
+    state.aliasesInUse.push(tmpAlias.toUpperCase())
   }
 
-  state.alert = state.assignedUserIds.includes(tmpUserId)
+  state.alert = state.aliasesInUse.includes(tmpAlias.toUpperCase())
   if (state.alert) {
     state.screenName = 'Schuilnaam bezet'
   } else state.screenName = 'Schuilnaam geselecteerd'
@@ -296,7 +285,7 @@ async function aliasClicked(tmpAlias) {
 
 function setSelectedAlias(alias) {
   if (alias === undefined) return
-  if (!state.assignedUserIds.includes(alias)) {
+  if (!state.aliasesInUse.includes(alias.toUpperCase())) {
     state.userData.alias = alias
   }
 }
@@ -309,8 +298,8 @@ function showMenu() {
 
 function resetApp() {
   state.isAuthenticated = false
-  // remove from assignedUserIds
-  state.assignedUserIds = state.assignedUserIds.filter(a => a !== state.userData.alias)
+  // remove from aliasesInUse
+  state.aliasesInUse = state.aliasesInUse.filter(a => a !== state.userData.alias.toUpperCase())
   state.userData.alias = undefined
   state.userData.pinCode = ''
   state.userEntryMode = undefined

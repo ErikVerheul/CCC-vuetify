@@ -40,8 +40,8 @@
 
     <v-row v-if="aliasInUse">
       <v-col cols="auto">
-          <h3>LET OP</h3>
-          <p>Schuilnaam {{ alias }} is in gebruik</p>
+        <h3>LET OP</h3>
+        <p>Schuilnaam {{ alias }} is in gebruik</p>
       </v-col>
     </v-row>
 
@@ -53,26 +53,20 @@ import { onBeforeMount, reactive, computed } from 'vue'
 import { dbRef } from '../../firebase'
 import { child, get, update } from 'firebase/database'
 
-// note: refreshing this page will void your authorisation
 onBeforeMount(() => {
   // get all available aliases
   get(child(dbRef, `aliases/`)).then((snapshot) => {
     if (snapshot.exists()) {
-      state.allAliases = snapshot.val()
+      const aliasObject = snapshot.val()
+      state.allAliases = Object.keys(aliasObject)
+      // extract the aliases in use
+      state.aliasesInUse = []
+      state.allAliases.forEach(el => {
+        if (aliasObject[el].inUse) state.aliasesInUse.push(el.toUpperCase())
+      })
     } else {
       console.log("No aliases data available")
     }
-    // get the allready assigned users
-    get(child(dbRef, `users/`)).then((snapshot) => {
-      if (snapshot.exists()) {
-        // create the array with already assigned users
-        Object.keys(snapshot.val()).forEach(el => state.assignedUserIds.push(el))
-      } else {
-        console.log("No assigned aliases data available")
-      }
-    }).catch((error) => {
-      console.error('Error while reading all assigned UserIds from database: ' + error)
-    })
   }).catch((error) => {
     console.error('Error while reading all available aliases from database: ' + error)
   })
@@ -110,7 +104,7 @@ const aliasExists = computed(() => {
 })
 
 const aliasInUse = computed(() => {
-  return state.assignedUserIds.includes(alias.value)
+  return state.aliasesInUse.includes(alias.value)
 })
 
 const allowSave = computed(() => {
@@ -136,7 +130,7 @@ function saveChange() {
 
 const state = reactive({
   allAliases: [],
-  assignedUserIds: [],
+  aliasesInUse: [],
   action: "1",
   userInput: '',
   nameRules: [
@@ -156,9 +150,7 @@ const state = reactive({
 </script>
 
 <style scoped>
-
 h3 {
   color: orange
 }
-
 </style>

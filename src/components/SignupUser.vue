@@ -97,8 +97,8 @@
 
 <script setup>
 import { computed, reactive } from 'vue'
-import { db } from '../firebase'
-import { ref, set } from "firebase/database"
+import { db, dbRef } from '../firebase'
+import { ref, set, update } from "firebase/database"
 import Cookies from 'universal-cookie'
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
 
@@ -172,7 +172,7 @@ function doSignupUser() {
       // Signed in 
       const firebaseUser = userCredential.user;
       // save user data in database
-      set(ref(db, 'users/' + props.alias), {
+      set(ref(db, 'users/' + firebaseUser.uid), {
         PIN: state.pinCode,
         alias: props.alias,
         subscriptionDate: state.lastLogin,
@@ -181,9 +181,13 @@ function doSignupUser() {
         gender: Number(state.gender),
         newsFeed: state.newsFeed
       })
+      // set this alias as in use
+      const updates = {}
+      updates['aliases/' + props.alias + '/inUse'] = true
+      update(dbRef, updates)
       // set cookie for auto-signin next time
       const cookies = new Cookies()
-      cookies.set('speelMee', { user: props.alias, alias: props.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+      cookies.set('speelMee', { alias: props.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
       emit('signup-completed', props.alias, state.pinCode, firebaseUser, state.lastLogin)
     })
     .catch((error) => {
