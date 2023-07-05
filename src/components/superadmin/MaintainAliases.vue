@@ -1,18 +1,23 @@
 <template>
-  userInput = {{ state.userInput }}
-  alias = {{ alias }}
   <v-card variant="tonal">
     <v-card-title>Schuilnamen onderhouden (niet af!)</v-card-title>
     <v-radio-group inline v-model="state.action">
-      <v-radio label="Toevoegen" value="1"></v-radio>
-      <v-radio label="Veranderen" value="2"></v-radio>
-      <v-radio label="Verwijderen" value="3"></v-radio>
+      <v-radio @change="resetInput" label="Toevoegen" value="1"></v-radio>
+      <v-radio @change="resetInput" label="Veranderen" value="2"></v-radio>
+      <v-radio @change="resetInput" label="Verwijderen" value="3"></v-radio>
     </v-radio-group>
 
     <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="6">
-        <v-text-field v-model.trim="state.userInput" :label="textFieldLabel" :rules="state.nameRules" />
+        <v-text-field v-model.trim="state.userAliasInput" :label="textFieldLabel" :rules="state.nameRules" />
+      </v-col>
+      <v-col cols="3"></v-col>
+    </v-row>
+    <v-row v-if="state.action === '2' && aliasExists(alias) && !isAliasInUse(alias)">
+      <v-col cols="3"></v-col>
+      <v-col cols="6">
+        <v-text-field v-model.trim="state.userNewAliasInput" label="Nieuwe schuilnaam" :rules="state.newNameRules" />
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
@@ -20,7 +25,7 @@
     <v-card-actions>
       <v-row>
         <v-col>
-          <v-btn flat prepend-icon="mdi-arrow-left" @click="">
+          <v-btn flat prepend-icon="mdi-arrow-left" @click="router.push({ path: '/' })">
             <template v-slot:prepend>
               <v-icon size="x-large" color="purple"></v-icon>
             </template>
@@ -37,14 +42,6 @@
         </v-col>
       </v-row>
     </v-card-actions>
-
-    <v-row v-if="aliasInUse">
-      <v-col cols="auto">
-        <h3>LET OP</h3>
-        <p>Schuilnaam {{ alias }} is in gebruik</p>
-      </v-col>
-    </v-row>
-
   </v-card>
 </template>
 
@@ -52,12 +49,15 @@
 import { onBeforeMount, reactive, computed } from 'vue'
 import { dbRef } from '../../firebase'
 import { child, get, update } from 'firebase/database'
+import router from '@/router'
+import { watch } from 'vue';
 
 onBeforeMount(() => {
   // get all available aliases
   get(child(dbRef, `aliases/`)).then((snapshot) => {
     if (snapshot.exists()) {
       const aliasObject = snapshot.val()
+      console.log('aliasObject = ' + JSON.stringify(aliasObject, null, 2))
       state.allAliases = Object.keys(aliasObject)
       // extract the aliases in use
       state.aliasesInUse = []
@@ -72,9 +72,90 @@ onBeforeMount(() => {
   })
 })
 
-const alias = computed(() => {
-  return state.userInput.toUpperCase()
+const state = reactive({
+  allAliases: [],
+  aliasesInUse: [],
+  action: "1",
+  userAliasInput: '',
+  userNewAliasInput: '',
+  nameRules: [
+    value => {
+      if (value) return true
+
+      return 'Vul 2 of meer letters in.'
+    },
+    value => {
+      if (value.length >= 2) return true
+
+      return 'Vul minimaal 2 letters in.'
+    },
+    value => {
+      if ((state.action === '2' || state.action === '3') && isAliasInUse(value)) {
+        return 'Deze schuilnaam is in gebruik'
+      }
+      return true
+    },
+    value => {
+      if ((state.action === '1') && aliasExists(value)) {
+        return 'Deze schuilnaam bestaat al'
+      }
+      return true
+    }
+  ],
+  newNameRules: [
+    value => {
+      if (value) return true
+
+      return 'Vul 2 of meer letters in.'
+    },
+    value => {
+      if (value.length >= 2) return true
+
+      return 'Vul minimaal 2 letters in.'
+    },
+    value => {
+      if (isAliasInUse(value)) {
+        return 'Deze schuilnaam is in gebruik'
+      }
+      return true
+    },
+    value => {
+      if (aliasExists(value)) {
+        return 'Deze schuilnaam bestaat al'
+      }
+      return true
+    }
+  ]
 })
+
+// replace the user input with the known alias if there is a match
+const alias = computed(() => {
+  for (const el of state.allAliases) {
+    if (el.toUpperCase() === state.userAliasInput.toUpperCase()) {
+      return el
+    }
+  }
+  return state.userAliasInput
+})
+
+function isAliasInUse(alias) {
+  for (const el of state.aliasesInUse) {
+    if (el.toUpperCase() === alias.toUpperCase()) {
+      return true
+    }
+  }
+  return false
+}
+
+function aliasExists(alias) {
+  if (alias.toUpperCase() === 'SYSTEM' || alias.toUpperCase() === 'ADMIN') return true
+  for (const el of state.allAliases) {
+    if (el.toUpperCase() === alias.toUpperCase()) {
+      return true
+    }
+  }
+  return false
+}
 
 const textFieldLabel = computed(() => {
   if (state.action === '1') return 'Nieuwe schuilnaam'
@@ -95,22 +176,20 @@ const saveButtonColor = computed(() => {
   return ''
 })
 
-const aliasEnteredOk = computed(() => {
-  return (alias.value.length >= 2)
+const userAliasInputOk = computed(() => {
+  if (state.userAliasInput.length < 2 || alias.value.toUpperCase() === 'ADMIN' || alias.value.toUpperCase() === 'SYSTEM') return false
+  return true
 })
 
-const aliasExists = computed(() => {
-  return state.allAliases.includes(alias.value)
-})
-
-const aliasInUse = computed(() => {
-  return state.aliasesInUse.includes(alias.value)
+const userNewAliasInputOk = computed(() => {
+  if (state.userNewAliasInput.length < 2 || state.userNewAliasInput.toUpperCase() === 'ADMIN' || state.userNewAliasInput.toUpperCase() === 'SYSTEM') return false
+  return true
 })
 
 const allowSave = computed(() => {
-  if (state.action === '1') return aliasEnteredOk.value && !aliasExists.value && !aliasInUse.value
-  if (state.action === '2') return aliasEnteredOk.value && aliasExists.value && !aliasInUse.value
-  if (state.action === '3') return aliasEnteredOk.value && aliasExists.value && !aliasInUse.value
+  if (state.action === '1') return userAliasInputOk.value && !aliasExists(alias.value) && !isAliasInUse(alias.value)
+  if (state.action === '2') return userAliasInputOk.value && userNewAliasInputOk.value && !aliasExists(state.userNewAliasInput) && !isAliasInUse(state.userNewAliasInput)
+  if (state.action === '3') return userAliasInputOk.value && aliasExists(alias.value) && !isAliasInUse(alias.value)
   return false
 })
 
@@ -128,24 +207,11 @@ function saveChange() {
   }
 }
 
-const state = reactive({
-  allAliases: [],
-  aliasesInUse: [],
-  action: "1",
-  userInput: '',
-  nameRules: [
-    value => {
-      if (value) return true
-
-      return 'Vul 2 of meer letters in.'
-    },
-    value => {
-      if (value.length >= 2) return true
-
-      return 'Vul minimaal 2 letters in.'
-    },
-  ],
-})
+// reset the user input when changing action
+function resetInput() {
+  state.userAliasInput = ''
+  state.userNewAliasInput = ''
+}
 
 </script>
 
