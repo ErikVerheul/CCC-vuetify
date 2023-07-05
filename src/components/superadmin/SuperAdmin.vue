@@ -1,6 +1,12 @@
 <template>
   <ToolBar @aliassen-onderhouden="maintainAliases"></ToolBar>
-  <MaintainAliases></MaintainAliases>
+  <v-row align="start" no-gutters>
+    <v-container>
+      <v-col cols="auto">
+        <MaintainAliases></MaintainAliases>
+      </v-col>
+    </v-container>
+  </v-row>
 </template>
 
 <script setup>
