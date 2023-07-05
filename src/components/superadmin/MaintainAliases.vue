@@ -32,6 +32,12 @@
             Terug
           </v-btn>
         </v-col>
+        <v-col v-if="state.saveSuccess === 1">
+          {{ saveButtonText }} is gelukt
+        </v-col>
+        <v-col v-if="!state.saveSuccess === 2">
+          {{ saveButtonText }} is mislukt
+        </v-col>
         <v-col>
           <v-btn :disabled="!allowSave" :color="saveButtonColor" flat append-icon="mdi-arrow-right" @click="saveChange">
             {{ saveButtonText }}
@@ -50,6 +56,7 @@ import { onBeforeMount, reactive, computed } from 'vue'
 import { dbRef } from '../../firebase'
 import { child, get, update } from 'firebase/database'
 import router from '@/router'
+import { watch } from 'vue';
 
 onBeforeMount(() => {
   loadAliasData()
@@ -109,7 +116,8 @@ const state = reactive({
       }
       return true
     }
-  ]
+  ],
+  saveSuccess: 0
 })
 
 function loadAliasData() {
@@ -162,8 +170,8 @@ function aliasExists(alias) {
 
 const textFieldLabel = computed(() => {
   if (state.action === '1') return 'Nieuwe schuilnaam'
-  if (state.action === '2') return 'Te veranderen schuilnaam'
-  if (state.action === '3') return 'Te verwijderen schuilnaam'
+  if (state.action === '2') return 'Te veranderen'
+  if (state.action === '3') return 'Te verwijderen'
   return ''
 })
 
@@ -223,9 +231,11 @@ function saveChange() {
   const updates = {}
   updates['aliases/'] = state.aliasObject
   update(dbRef, updates).then(() => {
+    state.saveSuccess = 1
     // and read back with any changes made by other users
     loadAliasData()
   }).catch((error) => {
+    state.saveSuccess = 2
     console.log('The write failed, error = ' + error)
   })
 }
@@ -234,7 +244,12 @@ function saveChange() {
 function resetInput() {
   state.userAliasInput = ''
   state.userNewAliasInput = ''
+  state.saveSuccess = 0
 }
+
+watch(() => state.userAliasInput, (oldVal, newVal) => {
+  state.saveSuccess = 0
+})
 
 </script>
 
