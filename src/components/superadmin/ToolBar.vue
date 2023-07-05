@@ -1,5 +1,5 @@
 <template>
-  <v-card color="grey-lighten-4" flat height="200px" rounded="0">
+  <v-card color="grey-lighten-4" flat rounded="0">
     <v-toolbar density="compact" color="purple">
 
       <v-toolbar-title>Welkom SuperAdmin</v-toolbar-title>
