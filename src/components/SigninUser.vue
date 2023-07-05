@@ -7,6 +7,7 @@
     <template v-if="state.loginErrorMsg !== undefined">
       <div class="py-4" />
       <h2>Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
+      <v-btn @click="resetLogin">Click om opnieuw te proberen</v-btn>
     </template>
     <v-btn type="button" variant="text" @click="emit('change-to-signup')">Ga naar nieuwe aanmelding</v-btn>
   </v-card>
@@ -38,6 +39,12 @@ function isKnownAlias(input) {
     }
   }
   return state.alias = 'admin'
+}
+
+function resetLogin() {
+  state.userAliasInput = ''
+  state.pinCode = ''
+  state.loginErrorMsg = undefined
 }
 
 const state = reactive({
