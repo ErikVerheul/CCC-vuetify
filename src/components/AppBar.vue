@@ -186,7 +186,7 @@
           </v-col>
           <v-col>
             <v-btn flat append-icon="mdi-arrow-right" @click="logout">
-              Log uit en log opnieuw in
+              Log uit
               <template v-slot:append>
                 <v-icon size="x-large" color="purple"></v-icon>
               </template>
