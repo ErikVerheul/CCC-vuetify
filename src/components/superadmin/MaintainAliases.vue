@@ -1,6 +1,6 @@
 <template>
   <v-card variant="tonal">
-    <v-card-title>Schuilnamen onderhouden (niet af!)</v-card-title>
+    <v-card-title>Schuilnamen onderhouden</v-card-title>
     <v-radio-group inline v-model="state.action">
       <v-radio @change="resetInput" label="Toevoegen" value="1"></v-radio>
       <v-radio @change="resetInput" label="Veranderen" value="2"></v-radio>
@@ -50,19 +50,18 @@ import { onBeforeMount, reactive, computed } from 'vue'
 import { dbRef } from '../../firebase'
 import { child, get, update } from 'firebase/database'
 import router from '@/router'
-import { watch } from 'vue';
 
 onBeforeMount(() => {
   // get all available aliases
   get(child(dbRef, `aliases/`)).then((snapshot) => {
     if (snapshot.exists()) {
-      const aliasObject = snapshot.val()
-      console.log('aliasObject = ' + JSON.stringify(aliasObject, null, 2))
-      state.allAliases = Object.keys(aliasObject)
+      state.aliasObject = snapshot.val()
+      console.log('state.aliasObject - loaded = ' + JSON.stringify(state.aliasObject))
+      state.allAliases = Object.keys(state.aliasObject)
       // extract the aliases in use
       state.aliasesInUse = []
       state.allAliases.forEach(el => {
-        if (aliasObject[el].inUse) state.aliasesInUse.push(el.toUpperCase())
+        if (state.aliasObject[el].inUse) state.aliasesInUse.push(el.toUpperCase())
       })
     } else {
       console.log("No aliases data available")
@@ -73,6 +72,7 @@ onBeforeMount(() => {
 })
 
 const state = reactive({
+  aliasObject: {},
   allAliases: [],
   aliasesInUse: [],
   action: "1",
@@ -195,16 +195,51 @@ const allowSave = computed(() => {
 
 function saveChange() {
   if (state.action === '1') {
-    state.allAliases.push(alias.value)
-    state.allAliases.sort()
+    state.aliasObject[alias.value] = {
+      "inUse": false
+    }
   }
   if (state.action === '2') {
-
+    for (let key in state.aliasObject) {
+      if (key.toUpperCase() === alias.value.toUpperCase()) {
+        delete state.aliasObject[key]
+      }
+    }
+    state.aliasObject[state.userNewAliasInput] = {
+      "inUse": false
+    }
   }
   if (state.action === '3') {
-    state.allAliases = state.allAliases.filter(a => a !== alias.value)
-
+    for (let key in state.aliasObject) {
+      if (key.toUpperCase() === alias.value.toUpperCase()) {
+        delete state.aliasObject[key]
+      }
+    }
   }
+  // save the data
+  const updates = {}
+  updates['aliases/'] = state.aliasObject
+  update(dbRef, updates).then(() => {
+    // and read back with any changes made by other users
+    get(child(dbRef, `aliases/`)).then((snapshot) => {
+      if (snapshot.exists()) {
+        state.aliasObject = snapshot.val()
+        console.log('state.aliasObject - result = ' + JSON.stringify(state.aliasObject))
+        state.allAliases = Object.keys(state.aliasObject)
+        // extract the aliases in use
+        state.aliasesInUse = []
+        state.allAliases.forEach(el => {
+          if (state.aliasObject[el].inUse) state.aliasesInUse.push(el.toUpperCase())
+        })
+      } else {
+        console.log("No aliases data available")
+      }
+    }).catch((error) => {
+      console.error('Error while reading all available aliases from database: ' + error)
+    })
+  }).catch((error) => {
+    console.log('The write failed, error = ' + error)
+  })
 }
 
 // reset the user input when changing action
