@@ -52,23 +52,7 @@ import { child, get, update } from 'firebase/database'
 import router from '@/router'
 
 onBeforeMount(() => {
-  // get all available aliases
-  get(child(dbRef, `aliases/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      state.aliasObject = snapshot.val()
-      console.log('state.aliasObject - loaded = ' + JSON.stringify(state.aliasObject))
-      state.allAliases = Object.keys(state.aliasObject)
-      // extract the aliases in use
-      state.aliasesInUse = []
-      state.allAliases.forEach(el => {
-        if (state.aliasObject[el].inUse) state.aliasesInUse.push(el.toUpperCase())
-      })
-    } else {
-      console.log("No aliases data available")
-    }
-  }).catch((error) => {
-    console.error('Error while reading all available aliases from database: ' + error)
-  })
+  loadAliasData()
 })
 
 const state = reactive({
@@ -127,6 +111,25 @@ const state = reactive({
     }
   ]
 })
+
+function loadAliasData() {
+  // get all available aliases
+  get(child(dbRef, `aliases/`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      state.aliasObject = snapshot.val()
+      state.allAliases = Object.keys(state.aliasObject)
+      // extract the aliases in use
+      state.aliasesInUse = []
+      state.allAliases.forEach(el => {
+        if (state.aliasObject[el].inUse) state.aliasesInUse.push(el.toUpperCase())
+      })
+    } else {
+      console.log("No aliases data available")
+    }
+  }).catch((error) => {
+    console.error('Error while reading all available aliases from database: ' + error)
+  })
+}
 
 // replace the user input with the known alias if there is a match
 const alias = computed(() => {
@@ -221,22 +224,7 @@ function saveChange() {
   updates['aliases/'] = state.aliasObject
   update(dbRef, updates).then(() => {
     // and read back with any changes made by other users
-    get(child(dbRef, `aliases/`)).then((snapshot) => {
-      if (snapshot.exists()) {
-        state.aliasObject = snapshot.val()
-        console.log('state.aliasObject - result = ' + JSON.stringify(state.aliasObject))
-        state.allAliases = Object.keys(state.aliasObject)
-        // extract the aliases in use
-        state.aliasesInUse = []
-        state.allAliases.forEach(el => {
-          if (state.aliasObject[el].inUse) state.aliasesInUse.push(el.toUpperCase())
-        })
-      } else {
-        console.log("No aliases data available")
-      }
-    }).catch((error) => {
-      console.error('Error while reading all available aliases from database: ' + error)
-    })
+    loadAliasData()
   }).catch((error) => {
     console.log('The write failed, error = ' + error)
   })
