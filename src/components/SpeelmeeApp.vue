@@ -1,5 +1,4 @@
 <template>
-  state.userData.alias = {{ state.userData.alias }}
   <v-sheet max-width="640" width="100%">
     <v-container>
       <AppBar :is-authenticated="state.isAuthenticated" :user-alias="state.userData.alias" :PIN="state.userData.pinCode"
