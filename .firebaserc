@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "speelmee-bed3e"
-  }
+  },
+  "targets": {
+    "speelmee-bed3e": {
+      "hosting": {
+        "app": [
+          "speelmee"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

@@ -15,6 +15,7 @@
     "template": "remoteconfig.template.json"
   },
   "hosting": {
+    "target": "app",
     "public": "dist",
     "ignore": [
       "firebase.json",
