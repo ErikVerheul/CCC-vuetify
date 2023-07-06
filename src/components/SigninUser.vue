@@ -24,8 +24,8 @@ const emit = defineEmits(['signin-completed', 'change-to-signup'])
 
 const state = reactive({
   userAliasInput: '',
+  alias: undefined,
   aliasOk: false,
-  matches: [],
   pinCode: '',
   pinRules: [
     value => {
@@ -51,23 +51,6 @@ const PINOK = computed(() => {
   return !isNaN(state.pinCode) && state.pinCode.length >= 4
 })
 
-// replace the user input with the known alias if there is only one match
-const alias = computed(() => {
-  const inputLen = state.userAliasInput.length
-  state.matches = []
-  for (const el of props.allAliases) {
-    if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
-      state.matches.push(el)
-    }
-  }
-  if (state.matches.length === 1) {
-    // unique match found
-    state.aliasOk = true
-    return state.matches[0]
-  }
-  return state.userAliasInput
-})
-
 function replaceSpacesForHyphen(name) {
   return name.replaceAll(' ', '-')
 }
@@ -78,14 +61,26 @@ function resetLogin() {
   state.loginErrorMsg = undefined
 }
 
-watch(() => alias.value, (newVal, oldVal) => {
+// replace the user input with the known alias if there is only one match
+watch(() => state.userAliasInput, (newVal, oldVal) => {
   // show the match in the input field
-  if (state.aliasOk) state.userAliasInput = state.matches[0]
+  const inputLen = state.userAliasInput.length
+  const matches = []
+  for (const el of props.allAliases) {
+    if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
+      matches.push(el)
+    }
+  }
+  if (matches.length === 1) {
+    // unique match found
+    state.aliasOk = true
+    state.userAliasInput = matches[0]
+  }
 })
 
 function doSigninUser() {
   if (PINOK) {
-    const fakeEmail = replaceSpacesForHyphen(alias.value) + '@speelmee.app'
+    const fakeEmail = replaceSpacesForHyphen(state.userAliasInput) + '@speelmee.app'
     const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
     const auth = getAuth()
     signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
@@ -99,17 +94,17 @@ function doSigninUser() {
             state.lastLogin = snapshot.val().lastLogin
             // save a cookie for auto login next time
             const cookies = new Cookies()
-            cookies.set('speelMee', { alias: alias.value, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+            cookies.set('speelMee', { alias: state.userAliasInput, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
             // save the login date/time
             const updates = {}
             updates['/users/' + firebaseUser.uid + '/lastLogin'] = Date.now()
             update(dbRef, updates)
-            emit('signin-completed', alias.value, state.pinCode, firebaseUser, state.lastLogin)
+            emit('signin-completed', state.userAliasInput, state.pinCode, firebaseUser, state.lastLogin)
           } else {
-            console.log(`doSigninUser: cannot find user ${alias.value} in the database}`)
+            console.log(`doSigninUser: cannot find user ${state.userAliasInput} in the database}`)
           }
         }).catch((error) => {
-          console.error(`Error while reading child ${alias.value} from database: ` + error)
+          console.error(`Error while reading child ${state.userAliasInput} from database: ` + error)
         })
       })
       .catch((error) => {
