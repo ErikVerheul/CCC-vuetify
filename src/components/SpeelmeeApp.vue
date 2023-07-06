@@ -94,7 +94,7 @@ onBeforeMount(() => {
           const cookies = new Cookies()
           const retrievedCookie = cookies.get('speelMee')
           if (retrievedCookie !== undefined) {
-            const fakeEmail = retrievedCookie.alias + '@speelmee.app'
+            const fakeEmail = replaceSpacesForHyphen(retrievedCookie.alias) + '@speelmee.app'
             const fakePassword = retrievedCookie.fpw
             signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
               .then((userCredential) => {
@@ -269,9 +269,13 @@ function finishSignup(alias, pin, firebaseUser, lastLogin) {
   state.screenName = state.lastScreenName
 }
 
+function replaceSpacesForHyphen(name) {
+  return name.replaceAll(' ', '-')
+}
+
 // check for newly assigned aliases since login
 async function aliasClicked(tmpAlias) {
-  let signInMethods = await fetchSignInMethodsForEmail(auth, tmpAlias + '@speelmee.app')
+  let signInMethods = await fetchSignInMethodsForEmail(auth, replaceSpacesForHyphen(tmpAlias) + '@speelmee.app')
   if (signInMethods.length > 0) {
     state.aliasesInUse.push(tmpAlias.toUpperCase())
   }

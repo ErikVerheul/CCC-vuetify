@@ -161,10 +161,14 @@ const newsFeedLabel = computed(() => {
   return 'Nee'
 })
 
+function replaceSpacesForHyphen(name) {
+  return name.replaceAll(' ', '-')
+}
+
 // an undefined year of birth is stored as 0; an undefined gender as -1
 function doSignupUser() {
   // database
-  const fakeEmail = props.alias + '@speelmee.app'
+  const fakeEmail = replaceSpacesForHyphen(props.alias) + '@speelmee.app'
   const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
   const auth = getAuth()
   createUserWithEmailAndPassword(auth, fakeEmail, fakePassword)

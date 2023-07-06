@@ -41,6 +41,10 @@ function isKnownAlias(input) {
   return state.alias = 'admin'
 }
 
+function replaceSpacesForHyphen(name) {
+  return name.replaceAll(' ', '-')
+}
+
 function resetLogin() {
   state.userAliasInput = ''
   state.pinCode = ''
@@ -73,7 +77,7 @@ const state = reactive({
 
 function doSigninUser() {
   if (aliasOK && PINOK) {
-    const fakeEmail = state.userAliasInput + '@speelmee.app'
+    const fakeEmail = replaceSpacesForHyphen(state.userAliasInput) + '@speelmee.app'
     const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
     const auth = getAuth()
     signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
