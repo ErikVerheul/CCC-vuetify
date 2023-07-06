@@ -50,8 +50,7 @@ onBeforeMount(() => {
       state.randomNames.push(alias)
       itemsSet++
     }
-  } while (itemsSet < numberOfButtons)
-  console.log('state.randomNames = ' + state.randomNames)
+  } while (itemsSet < numberOfButtons && itemsSet < props.allAliases.length)
 
   // initialize button selection
   for (let i = 0; i < state.numberOfRows; i++) {
