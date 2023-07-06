@@ -129,7 +129,7 @@ function loadAliasData() {
       // extract the aliases in use
       state.aliasesInUse = []
       state.allAliases.forEach(el => {
-        if (state.aliasObject[el].inUse) state.aliasesInUse.push(el.toUpperCase())
+        if (state.aliasObject[el].inUse) state.aliasesInUse.push(el)
       })
     } else {
       console.log("No aliases data available")

@@ -18,7 +18,7 @@
             <v-col cols="auto">
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
-                  <SigninUser :aliases-in-use="state.aliasesInUse" @signin-completed="finishSignin" @change-to-signup="switchToSignup" />
+                  <SigninUser :all-aliases="state.allAliases" :aliases-in-use="state.aliasesInUse" @signin-completed="finishSignin" @change-to-signup="switchToSignup" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.userData.alias === undefined">
@@ -84,7 +84,7 @@ onBeforeMount(() => {
           // extract the aliases in use
           state.aliasesInUse = []
           state.allAliases.forEach(el => {
-            if (aliasObject[el].inUse) state.aliasesInUse.push(el.toUpperCase())
+            if (aliasObject[el].inUse) state.aliasesInUse.push(el)
           })
         } else {
           console.log("No aliases data available")
@@ -157,32 +157,8 @@ const state = reactive({
   showOpeningScreen: undefined,
   alert: false,
   userEntryMode: undefined,
-  nameRules: [
-    value => {
-      if (state.aliasesInUse.includes(value)) return true
-
-      return 'Schuilnaam onbekend.'
-    },
-  ],
-  pinRules: [
-    value => {
-      if (value) return true
-
-      return 'Vul 4 of meer cijfers in.'
-    },
-    value => {
-      if (!isNaN(value)) return true
-
-      return 'Vul alleen cijfers in.'
-    },
-    value => {
-      if (value.length >= 4) return true
-
-      return 'Vul minimaal 4 cijfers in.'
-    },
-  ],
   allAliases: [],
-  aliasesInUse: [], // in uppercase
+  aliasesInUse: [],
   maastrichtStoriesActive: false,
   userSettingsActive: false,
   loginErrorMsg: undefined
@@ -263,7 +239,7 @@ function finishSignup(alias, pin, firebaseUser, lastLogin) {
   state.firebaseUser = firebaseUser
   state.userData.lastLogin = lastLogin
   // add new alias to current array
-  state.aliasesInUse.push(alias.toUpperCase())
+  state.aliasesInUse.push(alias)
 
   state.isAuthenticated = true
   state.screenName = state.lastScreenName
@@ -273,14 +249,23 @@ function replaceSpacesForHyphen(name) {
   return name.replaceAll(' ', '-')
 }
 
+function isAliasInUse(alias) {
+  for (const el of state.aliasesInUse) {
+    if (el.toUpperCase() === alias.toUpperCase()) {
+      return true
+    }
+  }
+  return false
+}
+
 // check for newly assigned aliases since login
 async function aliasClicked(tmpAlias) {
   let signInMethods = await fetchSignInMethodsForEmail(auth, replaceSpacesForHyphen(tmpAlias) + '@speelmee.app')
   if (signInMethods.length > 0) {
-    state.aliasesInUse.push(tmpAlias.toUpperCase())
+    state.aliasesInUse.push(tmpAlias)
   }
 
-  state.alert = state.aliasesInUse.includes(tmpAlias.toUpperCase())
+  state.alert = isAliasInUse(tmpAlias)
   if (state.alert) {
     state.screenName = 'Schuilnaam bezet'
   } else state.screenName = 'Schuilnaam geselecteerd'
@@ -288,7 +273,7 @@ async function aliasClicked(tmpAlias) {
 
 function setSelectedAlias(alias) {
   if (alias === undefined) return
-  if (!state.aliasesInUse.includes(alias.toUpperCase())) {
+  if (!isAliasInUse(alias)) {
     state.userData.alias = alias
   }
 }
@@ -302,7 +287,7 @@ function showMenu() {
 function resetApp() {
   state.isAuthenticated = false
   // remove from aliasesInUse
-  state.aliasesInUse = state.aliasesInUse.filter(a => a !== state.userData.alias.toUpperCase())
+  state.aliasesInUse = state.aliasesInUse.filter(a => a !== state.userData.alias)
   state.userData.alias = undefined
   state.userData.pinCode = ''
   state.userEntryMode = undefined
