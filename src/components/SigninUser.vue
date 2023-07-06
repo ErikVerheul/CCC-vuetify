@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { dbRef } from '../firebase'
 import { get, child, update } from "firebase/database"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
@@ -22,41 +22,10 @@ import Cookies from 'universal-cookie'
 const props = defineProps(['allAliases', 'aliasesInUse'])
 const emit = defineEmits(['signin-completed', 'change-to-signup'])
 
-const PINOK = computed(() => {
-  return !isNaN(state.pinCode) && state.pinCode.length >= 4
-})
-
-// replace the user input with the known alias if there is only one match
-const alias = computed(() => {
-  const inputLen = state.userAliasInput.length
-  const matches = []
-  for (const el of props.allAliases) {
-    if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
-      matches.push(el)
-    }
-  }
-  if (matches.length === 1) {
-    // unique match found; show the match in the input field
-    state.userAliasInput = matches[0]
-    state.aliasOk = true
-    return matches[0]
-  }
-  return state.userAliasInput
-})
-
-function replaceSpacesForHyphen(name) {
-  return name.replaceAll(' ', '-')
-}
-
-function resetLogin() {
-  state.userAliasInput = ''
-  state.pinCode = ''
-  state.loginErrorMsg = undefined
-}
-
 const state = reactive({
   userAliasInput: '',
   aliasOk: false,
+  matches: [],
   pinCode: '',
   pinRules: [
     value => {
@@ -76,6 +45,42 @@ const state = reactive({
     },
   ],
   loginErrorMsg: undefined
+})
+
+const PINOK = computed(() => {
+  return !isNaN(state.pinCode) && state.pinCode.length >= 4
+})
+
+// replace the user input with the known alias if there is only one match
+const alias = computed(() => {
+  const inputLen = state.userAliasInput.length
+  state.matches = []
+  for (const el of props.allAliases) {
+    if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
+      state.matches.push(el)
+    }
+  }
+  if (state.matches.length === 1) {
+    // unique match found
+    state.aliasOk = true
+    return state.matches[0]
+  }
+  return state.userAliasInput
+})
+
+function replaceSpacesForHyphen(name) {
+  return name.replaceAll(' ', '-')
+}
+
+function resetLogin() {
+  state.userAliasInput = ''
+  state.pinCode = ''
+  state.loginErrorMsg = undefined
+}
+
+watch(() => alias.value, (newVal, oldVal) => {
+  // show the match in the input field
+  if (state.aliasOk) state.userAliasInput = state.matches[0]
 })
 
 function doSigninUser() {
