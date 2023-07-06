@@ -3,7 +3,7 @@
     <v-card-title>Login met schuilnaam en PIN code</v-card-title>
     <v-text-field v-model.trim="state.userAliasInput" label="Uw schuilnaam" />
     <v-text-field v-model.trim="state.pinCode" label="PIN" :rules="state.pinRules" />
-    <v-btn class="my-6" v-if="aliasOK && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
+    <v-btn class="my-6" v-if="state.aliasOk && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
     <template v-if="state.loginErrorMsg !== undefined">
       <div class="py-4" />
       <h2>Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
@@ -19,27 +19,30 @@ import { dbRef } from '../firebase'
 import { get, child, update } from "firebase/database"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
 import Cookies from 'universal-cookie'
-const props = defineProps(['aliasesInUse'])
+const props = defineProps(['allAliases', 'aliasesInUse'])
 const emit = defineEmits(['signin-completed', 'change-to-signup'])
 
 const PINOK = computed(() => {
   return !isNaN(state.pinCode) && state.pinCode.length >= 4
 })
 
-// user must have an assigned userId or the user is ADMIN
-const aliasOK = computed(() => {
-  if (state.userAliasInput === '') return false
-  return isKnownAlias(state.userAliasInput)
-})
-
-function isKnownAlias(input) {
-  for (const el of props.aliasesInUse) {
-    if (el === input.toUpperCase()) {
-      return true
+// replace the user input with the known alias if there is only one match
+const alias = computed(() => {
+  const inputLen = state.userAliasInput.length
+  const matches = []
+  for (const el of props.allAliases) {
+    if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
+      matches.push(el)
     }
   }
-  return state.alias = 'admin'
-}
+  if (matches.length === 1) {
+    // unique match found; show the match in the input field
+    state.userAliasInput = matches[0]
+    state.aliasOk = true
+    return matches[0]
+  }
+  return state.userAliasInput
+})
 
 function replaceSpacesForHyphen(name) {
   return name.replaceAll(' ', '-')
@@ -53,7 +56,7 @@ function resetLogin() {
 
 const state = reactive({
   userAliasInput: '',
-  alias: undefined,
+  aliasOk: false,
   pinCode: '',
   pinRules: [
     value => {
@@ -76,8 +79,8 @@ const state = reactive({
 })
 
 function doSigninUser() {
-  if (aliasOK && PINOK) {
-    const fakeEmail = replaceSpacesForHyphen(state.userAliasInput) + '@speelmee.app'
+  if (PINOK) {
+    const fakeEmail = replaceSpacesForHyphen(alias.value) + '@speelmee.app'
     const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
     const auth = getAuth()
     signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
@@ -89,21 +92,19 @@ function doSigninUser() {
           if (snapshot.exists()) {
             //... store user data from database
             state.lastLogin = snapshot.val().lastLogin
-            // set the alias as written in the users record
-            state.alias = snapshot.val().alias
             // save a cookie for auto login next time
             const cookies = new Cookies()
-            cookies.set('speelMee', { alias: state.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+            cookies.set('speelMee', { alias: alias.value, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
             // save the login date/time
             const updates = {}
             updates['/users/' + firebaseUser.uid + '/lastLogin'] = Date.now()
             update(dbRef, updates)
-            emit('signin-completed', state.alias, state.pinCode, firebaseUser, state.lastLogin)
+            emit('signin-completed', alias.value, state.pinCode, firebaseUser, state.lastLogin)
           } else {
-            console.log(`doSigninUser: cannot find user ${state.alias} in the database}`)
+            console.log(`doSigninUser: cannot find user ${alias.value} in the database}`)
           }
         }).catch((error) => {
-          console.error(`Error while reading child ${state.alias} from database: ` + error)
+          console.error(`Error while reading child ${alias.value} from database: ` + error)
         })
       })
       .catch((error) => {
