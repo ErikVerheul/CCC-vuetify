@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, watch } from 'vue'
+import { onMounted, computed, reactive, watch } from 'vue'
 import { dbRef } from '../firebase'
 import { get, child, update } from "firebase/database"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
@@ -25,6 +25,7 @@ const emit = defineEmits(['signin-completed', 'change-to-signup'])
 const state = reactive({
   userAliasInput: '',
   aliasOk: false,
+  allNames: [],
   pinCode: '',
   pinRules: [
     value => {
@@ -46,6 +47,12 @@ const state = reactive({
   loginErrorMsg: undefined
 })
 
+// allow autocomplete for admin
+onMounted(() => {
+  state.allNames = props.allAliases
+  state.allNames.push('admin')
+})
+
 const PINOK = computed(() => {
   return !isNaN(state.pinCode) && state.pinCode.length >= 4
 })
@@ -62,12 +69,10 @@ function resetLogin() {
 
 // autocomplete the alias name
 watch(() => state.userAliasInput, () => {
-  const allNames = props.allAliases
-  allNames.push('admin')
   const inputLen = state.userAliasInput.length
   let lastMatch = undefined
   let matchcount = 0
-  for (const el of allNames) {
+  for (const el of state.allNames) {
     if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
       lastMatch = el
       matchcount++
