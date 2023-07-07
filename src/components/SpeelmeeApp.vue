@@ -1,5 +1,5 @@
 <template>
-  <v-sheet max-width="640" width="100%">
+  <v-sheet width="100%">
     <v-container>
       <AppBar :is-authenticated="state.isAuthenticated" :user-alias="state.userData.alias" :PIN="state.userData.pinCode"
         :screen-name="state.screenName" :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp"
@@ -18,7 +18,7 @@
             <v-col cols="auto">
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
-                  <SigninUser :all-aliases="state.allAliases" :aliases-in-use="state.aliasesInUse" @signin-completed="finishSignin" @change-to-signup="switchToSignup" />
+                  <SigninUser :all-aliases-incl-admin="state.allAliasesInclAdmin" :aliases-in-use="state.aliasesInUse" @signin-completed="finishSignin" @change-to-signup="switchToSignup" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.userData.alias === undefined">
@@ -81,6 +81,8 @@ onBeforeMount(() => {
         if (snapshot.exists()) {
           const aliasObject = snapshot.val()
           state.allAliases = Object.keys(aliasObject)
+          state.allAliasesInclAdmin = [...state.allAliases]
+          state.allAliasesInclAdmin.push('admin')
           // extract the aliases in use
           state.aliasesInUse = []
           state.allAliases.forEach(el => {
@@ -158,6 +160,7 @@ const state = reactive({
   alert: false,
   userEntryMode: undefined,
   allAliases: [],
+  allAliasesInclAdmin: [],
   aliasesInUse: [],
   maastrichtStoriesActive: false,
   userSettingsActive: false,
