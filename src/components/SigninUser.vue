@@ -24,7 +24,6 @@ const emit = defineEmits(['signin-completed', 'change-to-signup'])
 
 const state = reactive({
   userAliasInput: '',
-  alias: undefined,
   aliasOk: false,
   pinCode: '',
   pinRules: [
@@ -61,58 +60,59 @@ function resetLogin() {
   state.loginErrorMsg = undefined
 }
 
-// replace the user input with the known alias if there is only one match
-watch(() => state.userAliasInput, (newVal, oldVal) => {
-  // show the match in the input field
+// autocomplete the alias name
+watch(() => state.userAliasInput, () => {
+  const allNames = props.allAliases
+  allNames.push('admin')
   const inputLen = state.userAliasInput.length
-  const matches = []
-  for (const el of props.allAliases) {
+  let lastMatch = undefined
+  let matchcount = 0
+  for (const el of allNames) {
     if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
-      matches.push(el)
+      lastMatch = el
+      matchcount++
     }
   }
-  if (matches.length === 1) {
+  if (matchcount === 1) {
     // unique match found
     state.aliasOk = true
-    state.userAliasInput = matches[0]
+    state.userAliasInput = lastMatch
   }
 })
 
 function doSigninUser() {
-  if (PINOK) {
-    const fakeEmail = replaceSpacesForHyphen(state.userAliasInput) + '@speelmee.app'
-    const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
-    const auth = getAuth()
-    signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
-      .then((userCredential) => {
-        // Signed in 
-        const firebaseUser = userCredential.user
-        // get user data from the database
-        get(child(dbRef, `users/` + firebaseUser.uid)).then((snapshot) => {
-          if (snapshot.exists()) {
-            //... store user data from database
-            state.lastLogin = snapshot.val().lastLogin
-            // save a cookie for auto login next time
-            const cookies = new Cookies()
-            cookies.set('speelMee', { alias: state.userAliasInput, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-            // save the login date/time
-            const updates = {}
-            updates['/users/' + firebaseUser.uid + '/lastLogin'] = Date.now()
-            update(dbRef, updates)
-            emit('signin-completed', state.userAliasInput, state.pinCode, firebaseUser, state.lastLogin)
-          } else {
-            console.log(`doSigninUser: cannot find user ${state.userAliasInput} in the database}`)
-          }
-        }).catch((error) => {
-          console.error(`Error while reading child ${state.userAliasInput} from database: ` + error)
-        })
+  const fakeEmail = replaceSpacesForHyphen(state.userAliasInput) + '@speelmee.app'
+  const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
+  const auth = getAuth()
+  signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
+    .then((userCredential) => {
+      // Signed in 
+      const firebaseUser = userCredential.user
+      // get user data from the database
+      get(child(dbRef, `users/` + firebaseUser.uid)).then((snapshot) => {
+        if (snapshot.exists()) {
+          //... store user data from database
+          state.lastLogin = snapshot.val().lastLogin
+          // save a cookie for auto login next time
+          const cookies = new Cookies()
+          cookies.set('speelMee', { alias: state.userAliasInput, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+          // save the login date/time
+          const updates = {}
+          updates['/users/' + firebaseUser.uid + '/lastLogin'] = Date.now()
+          update(dbRef, updates)
+          emit('signin-completed', state.userAliasInput, state.pinCode, firebaseUser, state.lastLogin)
+        } else {
+          console.log(`doSigninUser: cannot find user ${state.userAliasInput} in the database}`)
+        }
+      }).catch((error) => {
+        console.error(`Error while reading child ${state.userAliasInput} from database: ` + error)
       })
-      .catch((error) => {
-        console.log('Firebase signin: errorCode = ' + error.code)
-        console.log('Firebase signin: errorMessage = ' + error.message)
-        state.loginErrorMsg = error.message
-      })
-  }
+    })
+    .catch((error) => {
+      console.log('Firebase signin: errorCode = ' + error.code)
+      console.log('Firebase signin: errorMessage = ' + error.message)
+      state.loginErrorMsg = error.message
+    })
 }
 
 </script>
