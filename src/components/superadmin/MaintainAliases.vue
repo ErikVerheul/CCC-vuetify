@@ -56,7 +56,7 @@ import { onBeforeMount, reactive, computed } from 'vue'
 import { dbRef } from '../../firebase'
 import { child, get, update } from 'firebase/database'
 import router from '@/router'
-import { watch } from 'vue';
+import { watch } from 'vue'
 
 onBeforeMount(() => {
   loadAliasData()
@@ -247,8 +247,26 @@ function resetInput() {
   state.saveSuccess = 0
 }
 
-watch(() => state.userAliasInput, (oldVal, newVal) => {
+// autocomplete the alias name
+watch(() => state.userAliasInput, () => {
+  // undo the saveSuccess message
   state.saveSuccess = 0
+  if (state.action === '2' || state.action === '3') {
+    const inputLen = state.userAliasInput.length
+    let lastMatch = undefined
+    let matchcount = 0
+    for (const el of state.allAliases) {
+      if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
+        lastMatch = el
+        matchcount++
+      }
+    }
+    if (matchcount === 1) {
+      // unique match found
+      state.aliasOk = true
+      state.userAliasInput = lastMatch
+    }
+  }
 })
 
 </script>
