@@ -23,7 +23,7 @@ import { computed } from 'vue'
 const props = defineProps(['aliasesInUse', 'randomNames', 'rowLength', 'row', 'aliasButtonSelections'])
 
 const indexOffset = computed(() => {
-  return props.row * 4
+  return props.row * props.rowLength
 })
 
 function nameIsInUse(index) {

@@ -22,12 +22,12 @@
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.userData.alias === undefined">
-                    <SelectAlias :aliases-in-use="state.aliasesInUse" :all-aliases="state.allAliases" :alias-occupied="state.alert"
-                      @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
-                    </SelectAlias>
                     <v-alert v-model="state.alert" border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
                       Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
                     </v-alert>
+                    <SelectAlias :aliases-in-use="state.aliasesInUse" :all-aliases="state.allAliases" :alias-occupied="state.alert"
+                      @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
+                    </SelectAlias>                   
                   </template>
                   <template v-else>
                     <div class="py-2" />

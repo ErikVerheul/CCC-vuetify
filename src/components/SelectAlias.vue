@@ -1,34 +1,36 @@
 <template>
-  <v-card flat>
-    <v-card-title align="center">Blader, en kies een schuilnaam</v-card-title>
-    <v-card-text>
-      <v-row align="center" justify="center">
-        <SelectAliasRow v-for="(num, index) in state.numberOfRows" :aliases-in-use="aliasesInUse" :random-names="state.randomNames"
-          :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
-      </v-row>
-    </v-card-text>
-    <v-card-actions>
-      <v-row class="justify-start">
-        <v-col cols="9">
-          <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
-            <template v-slot:prepend>
-              <v-icon size="x-large" color="purple"></v-icon>
-            </template>
-            Terug
-          </v-btn>
-        </v-col>
-        <v-col cols="3">
-          <v-btn v-if="state.aliasSelected !== undefined && !props.aliasOccupied" flat append-icon="mdi-arrow-right"
-            @click="emit('alias-selected', state.aliasSelected)">
-            Door
-            <template v-slot:append>
-              <v-icon size="x-large" color="purple"></v-icon>
-            </template>
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card-actions>
-  </v-card>
+  <v-row>
+    <v-card flat>
+      <v-card-title align="center">Blader, en kies een schuilnaam</v-card-title>
+      <v-card-text>
+        <v-row class="scrollable text-center overflow-auto" align="center" justify="center" style="display: flex; height: 500px">
+          <SelectAliasRow v-for="(num, index) in state.numberOfRows" :aliases-in-use="aliasesInUse" :random-names="state.randomNames"
+            :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
+        </v-row>
+      </v-card-text>
+    </v-card>
+  </v-row>
+  <v-sheet>
+    <v-row class="justify-start">
+      <v-col cols="9">
+        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
+          <template v-slot:prepend>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+          Terug
+        </v-btn>
+      </v-col>
+      <v-col cols="3">
+        <v-btn v-if="state.aliasSelected !== undefined && !props.aliasOccupied" flat append-icon="mdi-arrow-right"
+          @click="emit('alias-selected', state.aliasSelected)">
+          Door
+          <template v-slot:append>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-sheet>
 </template>
 
 <script setup>
@@ -59,8 +61,8 @@ onBeforeMount(() => {
 })
 
 const state = reactive({
-  numberOfRows: 12,
-  rowLength: 4,
+  numberOfRows: 20,
+  rowLength: 1,
   aliasButtonSelections: [],
   selectedButtonInRows: [],
   lastSelectedRow: undefined,
@@ -95,3 +97,9 @@ watch(state.aliasButtonSelections, (rowValue, oldRowValue) => {
   if (state.aliasSelected !== undefined) emit('alias-clicked', state.aliasSelected)
 })
 </script>
+
+<style scoped>
+  .scrollable {
+   overflow-y: scroll;
+}
+</style>
