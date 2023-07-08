@@ -3,7 +3,7 @@
     <v-card flat>
       <v-card-title align="center">Blader, en kies een schuilnaam</v-card-title>
       <v-card-text>
-        <v-row class="scrollable text-center overflow-auto" align="center" justify="center" style="display: flex; height: 500px">
+        <v-row class="scrollable text-center overflow-auto" align="center" justify="center" style="display: flex; height: 600px">
           <SelectAliasRow v-for="(num, index) in state.numberOfRows" :aliases-in-use="aliasesInUse" :random-names="state.randomNames"
             :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
         </v-row>
