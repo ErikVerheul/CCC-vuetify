@@ -8,49 +8,7 @@
       </v-col>
     </v-row>
     <div class="py-3" />
-    <v-row>
-      <v-col cols="12" class="text-left">
 
-        <p>De volgende vragen zijn optioneel:</p>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="8" class="text-left">
-        <v-text-field density="compact" label="Geboorte Jaar" v-model.trim="state.yearOfBirth" :rules="state.yearOfBirthRules" />
-      </v-col>
-      <v-col cols="4">
-        <v-btn density="compact" icon="mdi-open-in-new"></v-btn>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <v-btn-toggle v-model="state.gender" rounded="0" color="deep-purple-accent-3" group>
-          <v-btn value="0">
-            Man
-          </v-btn>
-          <v-btn value="1">
-            Vrouw
-          </v-btn>
-          <v-btn value="2">
-            Anders
-          </v-btn>
-          <v-btn value="3">
-            Niet opgegeven
-          </v-btn>
-        </v-btn-toggle>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="8">
-        <p> Wil je maandelijks via de app op de<br>
-          hoogte gehouden worden van nieuws<br>
-          over het speelmee.app platform?
-        </p>
-      </v-col>
-      <v-col cols="4">
-        <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
-      </v-col>
-    </v-row>
     <v-row>
       <v-col cols="12">
         <p>De speelmee.app neemt Privacy serieus;<br>
@@ -69,8 +27,8 @@
         </v-btn>
       </v-col>
       <v-col cols="7">
-        <v-btn v-if="PINOK" flat append-icon="mdi-arrow-right" @click="doSignupUser">
-          Sla op en ga door
+        <v-btn v-if="PINOK" flat append-icon="mdi-arrow-right" @click="emit('signup-continue', props.alias, state.pinCode)">
+          Door
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
           </template>
@@ -97,13 +55,9 @@
 
 <script setup>
 import { computed, reactive } from 'vue'
-import { db, dbRef } from '../firebase'
-import { ref, set, update } from "firebase/database"
-import Cookies from 'universal-cookie'
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
 
 const props = defineProps(['alias'])
-const emit = defineEmits(['signup-completed', 'exit-signup'])
+const emit = defineEmits(['signup-continue', 'exit-signup'])
 
 const state = reactive({
   pinCode: '',
@@ -123,33 +77,7 @@ const state = reactive({
 
       return 'Vul minimaal 4 cijfers in.'
     },
-  ],
-  yearOfBirth: undefined,
-  gender: -1,
-  yearOfBirthRules: [
-    value => {
-      if (value) return true
-
-      return 'Vul 4 cijfers in.'
-    },
-    value => {
-      if (!isNaN(value)) return true
-
-      return 'Vul alleen cijfers in.'
-    },
-    value => {
-      if (value > 0) return true
-
-      return 'Kan niet negatief zijn.'
-    },
-    value => {
-      if (value.length === 4) return true
-
-      return 'Vul 4 cijfers in.'
-    }
-  ],
-  lastLogin: Date.now(),
-  newsFeed: false
+  ]
 })
 
 const PINOK = computed(() => {
@@ -160,45 +88,6 @@ const newsFeedLabel = computed(() => {
   if (state.newsFeed) return 'Ja'
   return 'Nee'
 })
-
-function replaceSpacesForHyphen(name) {
-  return name.replaceAll(' ', '-')
-}
-
-// an undefined year of birth is stored as 0; an undefined gender as -1
-function doSignupUser() {
-  // database
-  const fakeEmail = replaceSpacesForHyphen(props.alias) + '@speelmee.app'
-  const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
-  const auth = getAuth()
-  createUserWithEmailAndPassword(auth, fakeEmail, fakePassword)
-    .then((userCredential) => {
-      // Signed in 
-      const firebaseUser = userCredential.user;
-      // save user data in database
-      set(ref(db, 'users/' + firebaseUser.uid), {
-        PIN: state.pinCode,
-        alias: props.alias,
-        subscriptionDate: state.lastLogin,
-        lastLogin: state.lastLogin,
-        yearOfBirth: state.yearOfBirth === undefined ? -1 : Number(state.yearOfBirth),
-        gender: Number(state.gender),
-        newsFeed: state.newsFeed
-      })
-      // set this alias as in use
-      const updates = {}
-      updates['aliases/' + props.alias + '/inUse'] = true
-      update(dbRef, updates)
-      // set cookie for auto-signin next time
-      const cookies = new Cookies()
-      cookies.set('speelMee', { alias: props.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-      emit('signup-completed', props.alias, state.pinCode, firebaseUser, state.lastLogin)
-    })
-    .catch((error) => {
-      console.log('Firebase signup: errorCode = ' + error.code)
-      console.log('Firebase signup: errorMessage = ' + error.message)
-    })
-}
 
 </script>
 

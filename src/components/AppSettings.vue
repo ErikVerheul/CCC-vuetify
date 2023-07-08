@@ -29,20 +29,20 @@
 import { onBeforeMount, computed, reactive } from 'vue'
 import { dbRef } from '../firebase'
 import { child, get, update } from "firebase/database"
-const props = defineProps(['userId'])
+const props = defineProps(['firebaseUser', 'userAlias'])
 const emit = defineEmits(['return-to-menu'])
 
 // get user's profile from database
 onBeforeMount(() => {
-  get(child(dbRef, `users/` + props.userId)).then((snapshot) => {
+  get(child(dbRef, `users/` + props.firebaseUser.uid)).then((snapshot) => {
     if (snapshot.exists()) {
       state.newsFeed = snapshot.val().newsFeed
     } else {
       state.newsFeed = false
-      console.log(`No data available. User ${props.userId} unknown`)
+      console.log(`No data available. User "${props.userAlias}" unknown`)
     }
   }).catch((error) => {
-    console.error(`Error while reading child ${props.userId} from database: ` + error)
+    console.error(`Error while reading child "${props.userAlias}" from database: ` + error)
   })
 })
 
@@ -54,7 +54,7 @@ const newsFeedLabel = computed(() => {
 function saveAndReturn() {
   // save the selected value
   const updates = {}
-  updates['/users/' + props.userId + '/newsFeed'] = state.newsFeed
+  updates['/users/' + props.firebaseUser.uid + '/newsFeed'] = state.newsFeed
   emit('return-to-menu')
   update(dbRef, updates)
 }

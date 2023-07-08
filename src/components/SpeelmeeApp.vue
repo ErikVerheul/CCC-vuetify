@@ -18,7 +18,8 @@
             <v-col cols="auto">
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
-                  <SigninUser :all-aliases-incl-admin="state.allAliasesInclAdmin" :aliases-in-use="state.aliasesInUse" @signin-completed="finishSignin" @change-to-signup="switchToSignup" />
+                  <SigninUser :all-aliases-incl-admin="state.allAliasesInclAdmin" :aliases-in-use="state.aliasesInUse"
+                    @signin-completed="finishSignin" @change-to-signup="switchToSignup" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.userData.alias === undefined">
@@ -27,12 +28,18 @@
                     </v-alert>
                     <SelectAlias :aliases-in-use="state.aliasesInUse" :all-aliases="state.allAliases" :alias-occupied="state.alert"
                       @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
-                    </SelectAlias>                   
+                    </SelectAlias>
                   </template>
                   <template v-else>
                     <div class="py-2" />
-                    <SignupUser :userId="state.userData.alias" :alias="state.userData.alias" @signup-completed="finishSignup"
-                      @exit-signup="returnToLogin" />
+                    <template v-if="state.signupStep === 1">
+                      <SignupUser :alias="state.userData.alias" @signup-continue="continueSignup"
+                        @exit-signup="returnToLogin" />
+                    </template>
+                    <template v-if="state.signupStep === 2">
+                      <SignupUser2 :userData="state.userData" @signup-completed="finishSignup"
+                        @exit-signup="returnToLogin" />
+                    </template>
                   </template>
                 </template>
               </v-card>
@@ -45,7 +52,7 @@
           <MaastrichtStories :user-id="state.userData.alias" :alias="state.userData.alias" @return-to-menu="showMenu"></MaastrichtStories>
         </template>
         <template v-if="state.userSettingsActive">
-          <AppSettings :userId="state.userData.alias" @return-to-menu="showMenu"></AppSettings>
+          <AppSettings :firebase-user="state.firebaseUser" :userAlias="state.userData.alias" @return-to-menu="showMenu"></AppSettings>
         </template>
       </div>
     </v-container>
@@ -59,6 +66,7 @@ import SelectAlias from './SelectAlias.vue'
 import Cookies from 'universal-cookie'
 import MainMenu from './MainMenu.vue'
 import SignupUser from './SignupUser.vue'
+import SignupUser2 from './SignupUser2.vue'
 import SigninUser from './SigninUser.vue'
 import { dbRef } from '../firebase'
 import { child, get, update } from "firebase/database"
@@ -153,6 +161,7 @@ onBeforeMount(() => {
 const state = reactive({
   screenName: '',
   lastScreenName: '',
+  signupStep: 1,
   isAuthenticated: false,
   firebaseUser: {},
   userData: {},
@@ -236,14 +245,19 @@ function finishSignin(alias, pin, userData, lastLogin) {
   state.screenName = state.lastScreenName
 }
 
-function finishSignup(alias, pin, firebaseUser, lastLogin) {
+function continueSignup(alias, pin) {
   state.userData.alias = alias
   state.userData.pinCode = pin
+  state.signupStep = 2
+}
+
+function finishSignup(firebaseUser, lastLogin) {
   state.firebaseUser = firebaseUser
   state.userData.lastLogin = lastLogin
   // add new alias to current array
-  state.aliasesInUse.push(alias)
-
+  state.aliasesInUse.push(state.userData.alias)
+  // reset signup step
+  state.signupStep = 1
   state.isAuthenticated = true
   state.screenName = state.lastScreenName
 }
@@ -262,13 +276,13 @@ function isAliasInUse(alias) {
 }
 
 // check for newly assigned aliases since login
-async function aliasClicked(tmpAlias) {
-  let signInMethods = await fetchSignInMethodsForEmail(auth, replaceSpacesForHyphen(tmpAlias) + '@speelmee.app')
+async function aliasClicked(aliasClicked) {
+  let signInMethods = await fetchSignInMethodsForEmail(auth, replaceSpacesForHyphen(aliasClicked) + '@speelmee.app')
   if (signInMethods.length > 0) {
-    state.aliasesInUse.push(tmpAlias)
+    state.aliasesInUse.push(aliasClicked)
   }
 
-  state.alert = isAliasInUse(tmpAlias)
+  state.alert = isAliasInUse(aliasClicked)
   if (state.alert) {
     state.screenName = 'Schuilnaam bezet'
   } else state.screenName = 'Schuilnaam geselecteerd'
