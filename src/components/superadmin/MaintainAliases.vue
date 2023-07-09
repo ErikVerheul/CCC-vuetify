@@ -10,11 +10,11 @@
     <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="6">
-        <v-text-field v-model.trim="state.userAliasInput" :label="textFieldLabel" :rules="state.nameRules" />
+        <v-text-field v-model="state.userAliasInput" :label="textFieldLabel" :rules="state.nameRules" />
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
-    <v-row v-if="state.action === '2' && aliasExists(alias) && !isAliasInUse(alias)">
+    <v-row v-if="state.action === '2' && aliasExists(state.userAliasInput) && !isAliasInUse(state.userAliasInput)">
       <v-col cols="3"></v-col>
       <v-col cols="6">
         <v-text-field v-model.trim="state.userNewAliasInput" label="Nieuwe schuilnaam" :rules="state.newNameRules" />
@@ -139,16 +139,6 @@ function loadAliasData() {
   })
 }
 
-// replace the user input with the known alias if there is a match
-const alias = computed(() => {
-  for (const el of state.allAliases) {
-    if (el.toUpperCase() === state.userAliasInput.toUpperCase()) {
-      return el
-    }
-  }
-  return state.userAliasInput
-})
-
 function isAliasInUse(alias) {
   for (const el of state.aliasesInUse) {
     if (el.toUpperCase() === alias.toUpperCase()) {
@@ -188,7 +178,7 @@ const saveButtonColor = computed(() => {
 })
 
 const userAliasInputOk = computed(() => {
-  if (state.userAliasInput.length < 2 || alias.value.toUpperCase() === 'ADMIN' || alias.value.toUpperCase() === 'SYSTEM') return false
+  if (state.userAliasInput.length < 2 || state.userAliasInput.toUpperCase() === 'ADMIN' || state.userAliasInput.toUpperCase() === 'SYSTEM') return false
   return true
 })
 
@@ -198,34 +188,43 @@ const userNewAliasInputOk = computed(() => {
 })
 
 const allowSave = computed(() => {
-  if (state.action === '1') return userAliasInputOk.value && !aliasExists(alias.value) && !isAliasInUse(alias.value)
+  if (state.action === '1') return userAliasInputOk.value && !aliasExists(state.userAliasInput) && !isAliasInUse(state.userAliasInput)
   if (state.action === '2') return userAliasInputOk.value && userNewAliasInputOk.value && !aliasExists(state.userNewAliasInput) && !isAliasInUse(state.userNewAliasInput)
-  if (state.action === '3') return userAliasInputOk.value && aliasExists(alias.value) && !isAliasInUse(alias.value)
+  if (state.action === '3') return userAliasInputOk.value && aliasExists(state.userAliasInput) && !isAliasInUse(state.userAliasInput)
   return false
 })
 
 function saveChange() {
   if (state.action === '1') {
-    state.aliasObject[alias.value] = {
+    const trimmedAlias = state.userAliasInput.trim()
+    state.aliasObject[trimmedAlias] = {
       "inUse": false
     }
+    // add the alias to the local array
+    state.allAliases.push(trimmedAlias)
   }
   if (state.action === '2') {
     for (let key in state.aliasObject) {
-      if (key.toUpperCase() === alias.value.toUpperCase()) {
+      if (key.toUpperCase() === state.userAliasInput.toUpperCase()) {
         delete state.aliasObject[key]
       }
     }
+    // remove the changed alias from the local array
+    state.allAliases = state.allAliases.filter(a => a !== state.userAliasInput)
     state.aliasObject[state.userNewAliasInput] = {
       "inUse": false
     }
+    // add the changed alias to the local array
+    state.allAliases.push(state.userNewAliasInput.trim())
   }
   if (state.action === '3') {
     for (let key in state.aliasObject) {
-      if (key.toUpperCase() === alias.value.toUpperCase()) {
+      if (key.toUpperCase() === state.userAliasInput.toUpperCase()) {
         delete state.aliasObject[key]
       }
     }
+    // remove the alias from the local array
+    state.allAliases = state.allAliases.filter(a => a !== state.userAliasInput)
   }
   // save the data
   const updates = {}
@@ -248,22 +247,25 @@ function resetInput() {
 }
 
 // autocomplete the alias name
-watch(() => state.userAliasInput, () => {
+watch(() => state.userAliasInput, () => { 
   // undo the saveSuccess message
   state.saveSuccess = 0
   if (state.action === '2' || state.action === '3') {
-    const inputLen = state.userAliasInput.length
+    const trimmedInput = state.userAliasInput.trim()
+    const inputLen = trimmedInput.length
     let lastMatch = undefined
+    let exactMatch = false
     let matchcount = 0
     for (const el of state.allAliases) {
-      if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
+      if (el.substring(0, inputLen).toUpperCase() === trimmedInput.toUpperCase()) {
         lastMatch = el
         matchcount++
         // test on exact match
-        if (el.length === inputLen) break
+        exactMatch = el.length === inputLen
+        if (exactMatch) break
       }
     }
-    if (matchcount === 1) {
+    if (exactMatch || matchcount === 1) {
       // unique match found
       state.aliasOk = true
       state.userAliasInput = lastMatch
