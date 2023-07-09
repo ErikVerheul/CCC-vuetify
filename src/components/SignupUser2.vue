@@ -13,11 +13,14 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="8" class="text-left">
+      <v-col cols="12" class="text-left">
         <v-text-field density="compact" label="Geboorte Jaar" v-model.trim="state.yearOfBirth" :rules="state.yearOfBirthRules" />
       </v-col>
-      <v-col cols="4">
-        <v-btn density="compact" icon="mdi-open-in-new"></v-btn>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <p class="infoColor">Het geboortejaar is nodig om uw prestaties in een leeftijdscategorie te plaatsen. Zonder geboortejaar komt u
+          terecht in de categorie 'Alle leeftijden'. Om de zelfde reden willen we weten of u man, vrouw of iets anders bent.</p>
       </v-col>
     </v-row>
     <v-row>
@@ -55,7 +58,7 @@
       </v-col>
     </v-row>
     <v-row class="justify-start">
-      <v-col cols="5">
+      <v-col>
         <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
           <template v-slot:prepend>
             <v-icon size="x-large" color="purple"></v-icon>
@@ -63,8 +66,8 @@
           Terug
         </v-btn>
       </v-col>
-      <v-col cols="7">
-        <v-btn flat append-icon="mdi-arrow-right" @click="doSignupUser">
+      <v-col class="text-right">
+        <v-btn :disabled="!yearOfBirthOk" flat append-icon="mdi-arrow-right" @click="doSignupUser">
           Door
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
@@ -86,6 +89,7 @@ const props = defineProps(['userData'])
 const emit = defineEmits(['signup-completed', 'exit-signup'])
 
 const state = reactive({
+  currentYear: new Date().getFullYear(),
   yearOfBirth: undefined,
   gender: -1,
   yearOfBirthRules: [
@@ -108,10 +112,24 @@ const state = reactive({
       if (value.length === 4) return true
 
       return 'Vul 4 cijfers in.'
-    }
+    },
+    value => {
+      if (Number((state.currentYear) - Number(value)) <= 130) return true
+
+      return 'U bent meer dan 130 jaar oud?'
+    },
+    value => {
+      if (Number(value) <= Number(state.currentYear)) return true
+
+      return 'U bent nog niet geboren'
+    }   
   ],
   lastLogin: Date.now(),
   newsFeed: false
+})
+
+const yearOfBirthOk = computed(() => {
+  return state.yearOfBirth === undefined || (Number((state.currentYear) - state.yearOfBirth <= 130) && state.yearOfBirth <= Number(state.currentYear))
 })
 
 const newsFeedLabel = computed(() => {
@@ -162,5 +180,9 @@ function doSignupUser() {
 <style scoped>
 .titleLine {
   text-align: left;
+}
+
+.infoColor {
+  background-color: #FFF59D
 }
 </style>
