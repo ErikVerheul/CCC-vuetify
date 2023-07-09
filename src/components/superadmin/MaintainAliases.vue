@@ -259,6 +259,8 @@ watch(() => state.userAliasInput, () => {
       if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
         lastMatch = el
         matchcount++
+        // test on exact match
+        if (el.length === inputLen) break
       }
     }
     if (matchcount === 1) {
