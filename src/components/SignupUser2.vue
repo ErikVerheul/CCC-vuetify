@@ -1,5 +1,5 @@
 <template>
-  <v-sheet width="window.innerWidth">
+  <v-sheet width="100%">
     <v-row>
       <v-col cols="12">
         <h1 class="titleLine">Hallo -{{ props.userData.alias }} </h1>

@@ -1,20 +1,40 @@
 <template>
   <v-sheet width="window.innerWidth">
-    <v-row>
-      <v-col v-if="PINOK" cols="auto">
-        <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" max-width="400">
-          <v-card-title class="text-h5">
-            Welkom in de Speelmee.app
-          </v-card-title>
-          <v-card-text>
-            Uw schuilnaam is <b>{{ props.alias }}</b><br>
-            Uw PIN is <b>{{ state.pinCode }}</b><br>
-            Gebruik deze schuilnaam en pin code om op een ander apparaat in te loggen.
-            Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt.
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+    <template v-if="PINOK">
+      <v-row>
+        <v-col cols="auto">
+          <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" max-width="400">
+            <v-card-title class="text-h5">
+              Welkom in de Speelmee.app
+            </v-card-title>
+            <v-card-text>
+              Uw schuilnaam is <b>{{ props.alias }}</b><br>
+              Uw PIN is <b>{{ state.pinCode }}</b><br>
+              Gebruik deze schuilnaam en pin code om op een ander apparaat in te loggen.
+              Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt.
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row class="justify-start">
+        <v-col cols="5">
+          <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
+            <template v-slot:prepend>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+            Terug
+          </v-btn>
+        </v-col>
+        <v-col cols="7">
+          <v-btn :disabled="!PINOK" flat append-icon="mdi-arrow-right" @click="emit('signup-continue', props.alias, state.pinCode)">
+            Door
+            <template v-slot:append>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </template>
     <v-row>
       <v-col cols="12">
         <h1 class="titleLine">Hallo -{{ props.alias }} </h1>
@@ -31,24 +51,26 @@
           gebruik meer wil maken van de app.</p>
       </v-col>
     </v-row>
-    <v-row class="justify-start">
-      <v-col cols="5">
-        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
-          <template v-slot:prepend>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-          Terug
-        </v-btn>
-      </v-col>
-      <v-col cols="7">
-        <v-btn :disabled="!PINOK" flat append-icon="mdi-arrow-right" @click="emit('signup-continue', props.alias, state.pinCode)">
-          Door
-          <template v-slot:append>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-        </v-btn>
-      </v-col>
-    </v-row>
+    <template v-if="!PINOK">
+      <v-row class="justify-start">
+        <v-col cols="5">
+          <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
+            <template v-slot:prepend>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+            Terug
+          </v-btn>
+        </v-col>
+        <v-col cols="7">
+          <v-btn :disabled="!PINOK" flat append-icon="mdi-arrow-right" @click="emit('signup-continue', props.alias, state.pinCode)">
+            Door
+            <template v-slot:append>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </template>
   </v-sheet>
 </template>
 

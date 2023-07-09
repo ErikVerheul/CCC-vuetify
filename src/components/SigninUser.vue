@@ -1,7 +1,7 @@
 <template>
   <v-card variant="text">
     <v-card-title>Login met schuilnaam en PIN code</v-card-title>
-    <v-text-field v-model.trim="state.userAliasInput" label="Uw schuilnaam" />
+    <v-text-field v-model="state.userAliasInput" label="Uw schuilnaam" />
     <v-text-field v-model.trim="state.pinCode" label="PIN" :rules="state.pinRules" />
     <v-btn class="my-6" v-if="state.aliasOk && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
     <template v-if="state.loginErrorMsg !== undefined">
@@ -19,7 +19,7 @@ import { dbRef } from '../firebase'
 import { get, child, update } from "firebase/database"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
 import Cookies from 'universal-cookie'
-const props = defineProps(['allAliasesInclAdmin', 'aliasesInUse'])
+const props = defineProps(['aliasesInUseInclAdmin'])
 const emit = defineEmits(['signin-completed', 'change-to-signup'])
 
 const state = reactive({
@@ -62,18 +62,21 @@ function resetLogin() {
 
 // autocomplete the alias name
 watch(() => state.userAliasInput, () => {
-  const inputLen = state.userAliasInput.length
+  const trimmedInput = state.userAliasInput.trim()
+  const inputLen = trimmedInput.length
   let lastMatch = undefined
+  let exactMatch = false
   let matchcount = 0
-  for (const el of props.allAliasesInclAdmin) {
-    if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
+  for (const el of props.aliasesInUseInclAdmin) {
+    if (el.substring(0, inputLen).toUpperCase() === trimmedInput.toUpperCase()) {
       lastMatch = el
       matchcount++
       // test on exact match
-      if (el.length === inputLen) break     
+      exactMatch = el.length === inputLen
+      if (exactMatch) break
     }
   }
-  if (matchcount === 1) {
+  if (exactMatch || matchcount === 1) {
     // unique match found
     state.aliasOk = true
     state.userAliasInput = lastMatch

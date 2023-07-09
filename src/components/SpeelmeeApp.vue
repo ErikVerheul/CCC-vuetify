@@ -18,8 +18,8 @@
             <v-col cols="auto">
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
-                  <SigninUser :all-aliases-incl-admin="state.allAliasesInclAdmin" :aliases-in-use="state.aliasesInUse"
-                    @signin-completed="finishSignin" @change-to-signup="switchToSignup" />
+                  <SigninUser :aliases-in-use-incl-admin="state.aliasesInUseInclAdmin" @signin-completed="finishSignin"
+                    @change-to-signup="switchToSignup" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.userData.alias === undefined">
@@ -33,12 +33,10 @@
                   <template v-else>
                     <div class="py-2" />
                     <template v-if="state.signupStep === 1">
-                      <SignupUser :alias="state.userData.alias" @signup-continue="continueSignup"
-                        @exit-signup="returnToLogin" />
+                      <SignupUser :alias="state.userData.alias" @signup-continue="continueSignup" @exit-signup="returnToLogin" />
                     </template>
                     <template v-if="state.signupStep === 2">
-                      <SignupUser2 :userData="state.userData" @signup-completed="finishSignup"
-                        @exit-signup="returnToLogin" />
+                      <SignupUser2 :userData="state.userData" @signup-completed="finishSignup" @exit-signup="returnToLogin" />
                     </template>
                   </template>
                 </template>
@@ -89,13 +87,14 @@ onBeforeMount(() => {
         if (snapshot.exists()) {
           const aliasObject = snapshot.val()
           state.allAliases = Object.keys(aliasObject)
-          state.allAliasesInclAdmin = [...state.allAliases]
-          state.allAliasesInclAdmin.push('admin')
           // extract the aliases in use
           state.aliasesInUse = []
           state.allAliases.forEach(el => {
             if (aliasObject[el].inUse) state.aliasesInUse.push(el)
           })
+          // make a shallow copy
+          state.aliasesInUseInclAdmin = [...state.aliasesInUse]
+          state.aliasesInUseInclAdmin.push('admin')
         } else {
           console.log("No aliases data available")
         }
@@ -169,7 +168,7 @@ const state = reactive({
   alert: false,
   userEntryMode: undefined,
   allAliases: [],
-  allAliasesInclAdmin: [],
+  aliasesInUseInclAdmin: [],
   aliasesInUse: [],
   maastrichtStoriesActive: false,
   userSettingsActive: false,
@@ -188,7 +187,7 @@ const nowOther = computed(() => {
 
 // save the last screenName before changing
 // See watching a getter in https://vuejs.org/api/reactivity-core.html#watch
-watch(() => state.screenName, (oldVal, newVal) => {
+watch(() => state.screenName, (oldVal) => {
   state.lastScreenName = oldVal
 })
 
@@ -216,7 +215,6 @@ function returnToLogin() {
       state.userData.pinCode = ''
       state.userData.alias = undefined
       state.userEntryMode = 'login'
-      state.screenName = state.lastScreenName
       console.log('Sign-out successful')
     }).catch((error) => {
       console.log('signOut: An error happened, error = ' + error)
@@ -225,8 +223,9 @@ function returnToLogin() {
     state.userData.pinCode = ''
     state.userData.alias = undefined
     state.userEntryMode = 'login'
-    state.screenName = state.lastScreenName
   }
+  state.signupStep = 1
+  state.screenName = state.lastScreenName
 }
 
 function switchToSignup() {
@@ -254,8 +253,9 @@ function continueSignup(alias, pin) {
 function finishSignup(firebaseUser, lastLogin) {
   state.firebaseUser = firebaseUser
   state.userData.lastLogin = lastLogin
-  // add new alias to current array
+  // add new alias to current arrays
   state.aliasesInUse.push(state.userData.alias)
+  state.aliasesInUseInclAdmin.push(state.userData.alias)
   // reset signup step
   state.signupStep = 1
   state.isAuthenticated = true
@@ -281,18 +281,11 @@ async function aliasClicked(aliasClicked) {
   if (signInMethods.length > 0) {
     state.aliasesInUse.push(aliasClicked)
   }
-
   state.alert = isAliasInUse(aliasClicked)
-  if (state.alert) {
-    state.screenName = 'Schuilnaam bezet'
-  } else state.screenName = 'Schuilnaam geselecteerd'
 }
 
 function setSelectedAlias(alias) {
-  if (alias === undefined) return
-  if (!isAliasInUse(alias)) {
-    state.userData.alias = alias
-  }
+  state.userData.alias = alias
 }
 
 function showMenu() {
