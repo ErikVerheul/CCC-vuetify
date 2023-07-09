@@ -21,7 +21,7 @@
         </v-btn>
       </v-col>
       <v-col cols="3">
-        <v-btn v-if="state.aliasSelected !== undefined && !props.aliasOccupied" flat append-icon="mdi-arrow-right"
+        <v-btn :disabled="state.aliasSelected === undefined || props.aliasOccupied" flat append-icon="mdi-arrow-right"
           @click="emit('alias-selected', state.aliasSelected)">
           Door
           <template v-slot:append>
