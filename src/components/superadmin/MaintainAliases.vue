@@ -25,7 +25,7 @@
     <v-card-actions>
       <v-row>
         <v-col>
-          <v-btn flat prepend-icon="mdi-arrow-left" @click="router.push({ path: '/' })">
+          <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('m-done')">
             <template v-slot:prepend>
               <v-icon size="x-large" color="purple"></v-icon>
             </template>
@@ -55,8 +55,9 @@
 import { onBeforeMount, reactive, computed } from 'vue'
 import { dbRef } from '../../firebase'
 import { child, get, update } from 'firebase/database'
-import router from '@/router'
 import { watch } from 'vue'
+
+const emit = defineEmits(['m-done'])
 
 onBeforeMount(() => {
   loadAliasData()
