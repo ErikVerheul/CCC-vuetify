@@ -1,19 +1,44 @@
 <template>
-  <v-card variant="text">
-    <v-card-title>Login met schuilnaam en PIN code</v-card-title>
-    <v-text-field v-model="state.userAliasInput" label="Uw schuilnaam" />
-    <v-text-field v-model.trim="state.pinCode" label="PIN" :rules="state.pinRules" />
-    <v-btn class="my-6" v-if="state.aliasOk && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l" size="large">Login</v-btn>
-    <template v-if="state.loginErrorMsg !== undefined">
-      <div class="py-4" />
-      <h2>Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
-      <div class="py-4" />
-      <h3>Controleer of uw schuilnaam en pincode kloppen en probeer opnieuw. Of kies een andere schuilnaam en pincode met de knop hieronder.
-      </h3>
-      <div class="py-4" />
+  <v-row>
+    <v-col cols="auto">
+      <v-card variant="text">
+        <v-card-title>Login met schuilnaam en PIN code</v-card-title>
+        <v-text-field v-model="state.userAliasInput" label="Uw schuilnaam" />
+        <v-text-field v-model.trim="state.pinCode" label="PIN" :rules="state.pinRules" />
+        <v-btn class="my-6" v-if="state.aliasOk && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l"
+          size="large">Login</v-btn>
+        <template v-if="state.loginErrorMsg !== undefined">
+          <div class="py-4" />
+          <h2>Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
+          <div class="py-4" />
+          <h3>Controleer of uw schuilnaam en pincode kloppen en probeer opnieuw. Of kies een andere schuilnaam en pincode met de knop
+            hieronder.
+          </h3>
+        </template>
+      </v-card>
+    </v-col>
+  </v-row>
+  <v-row v-if="state.loginErrorMsg === undefined" class="d-flex align-center justify-center">
+    <v-col cols="auto">
+      <p>of</p>
+    </v-col>
+  </v-row>
+  <v-row class="d-flex align-center justify-center">
+    <v-col cols="auto">
       <v-btn type="button" @click="emit('change-to-signup')">Ga naar nieuwe aanmelding</v-btn>
-    </template>
-  </v-card>
+    </v-col>
+  </v-row>
+  <div class="py-12" />
+  <v-row class="justify-end">
+    <v-col>
+      <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signin')">
+        <template v-slot:prepend>
+          <v-icon size="x-large" color="purple"></v-icon>
+        </template>
+        Terug
+      </v-btn>
+    </v-col>
+  </v-row>
 </template>
 
 <script setup>
@@ -23,7 +48,7 @@ import { get, child, update } from "firebase/database"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
 import Cookies from 'universal-cookie'
 const props = defineProps(['aliasesInUseInclAdmin'])
-const emit = defineEmits(['signin-completed', 'change-to-signup'])
+const emit = defineEmits(['signin-completed', 'change-to-signup', 'exit-signin'])
 
 const state = reactive({
   userAliasInput: '',

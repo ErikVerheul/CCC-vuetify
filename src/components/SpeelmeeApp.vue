@@ -19,7 +19,7 @@
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
                   <SigninUser :aliases-in-use-incl-admin="state.aliasesInUseInclAdmin" @signin-completed="finishSignin"
-                    @change-to-signup="switchToSignup" />
+                    @change-to-signup="switchToSignup" @exit-signin="resetApp"/>
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.userData.alias === undefined">

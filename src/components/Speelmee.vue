@@ -7,8 +7,7 @@
     </v-row>
     <div class="py-2" />
     <v-row class="d-flex align-center justify-center">
-      <v-col cols="3"></v-col>        
-      <v-col cols="9">       
+      <v-col cols="auto">
         <h3>Test spelenderwijs<br>je kennis en conditie<br>en geniet van cultuur.<br><br></h3>
         <h4>Even aanmelden: kies een<br>schuilnaam en pincode<br><br>
           Dat is alles om te kunnen meedoen!
@@ -16,17 +15,18 @@
         <div class="py-4" />
         <v-btn size="x-small" color="yellow-lighten-3" @click="state.showHowTo = !state.showHowTo">Heb al account
           op ander apparaat?</v-btn>
-        <template v-if="state.showHowTo">
-          <div class="py-4" />
-          <p>Als u al een account hebt op een ander apparaat log dan in met uw schuilnaam en pin code. Die kunt u
-            terugvinden op het andere apparaat door op
-            <v-icon>mdi-dots-vertical</v-icon> rechtsboven te tikken en 'Inloggen op ander apparaat' te kiezen.
-          </p>
-        </template>       
       </v-col>
     </v-row>
-    <div class="py-4" />
-    <v-row justify="start">
+    <v-row v-if="state.showHowTo" class="d-flex align-center justify-center">
+      <v-col cols="auto">
+        <p>Als u al een account hebt op een ander apparaat log dan in met uw schuilnaam en pin code. Die kunt u
+          terugvinden op het andere apparaat door op
+          <v-icon>mdi-dots-vertical</v-icon> rechtsboven te tikken en 'Inloggen op ander apparaat' te kiezen.
+        </p>
+      </v-col>
+    </v-row>
+    <v-row class="d-flex align-center justify-center">
+      <div class="py-4" />
       <v-col cols="auto">
         <p>Lees het <router-link to="/Privacybeleid">privacybeleid</router-link> nu of later.<br>
           Geen gebruikelijke juridische bla bla!</p>
