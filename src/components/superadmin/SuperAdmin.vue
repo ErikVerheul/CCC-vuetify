@@ -11,7 +11,7 @@
 
         <template v-slot:append>
           <div class="pa-2">
-            <v-btn block @click="router.push({ path: '/' })">
+            <v-btn block @click="router.replace({ path: '/' })">
               Terug
             </v-btn>
           </div>
