@@ -1,5 +1,5 @@
 <template>
-  <div v-if="showOpeningScreen && !state.showPrivacyScreen">
+  <div v-if="showOpeningScreen">
     <v-row class="d-flex align-center justify-center">
       <v-col cols="auto">
         <h1>speelmee.app</h1>
@@ -28,11 +28,8 @@
     <div class="py-4" />
     <v-row justify="start">
       <v-col cols="auto">
-        <p>Lees het privacybeleid nu of later.<br>
+        <p>Lees het <router-link to="/Privacybeleid">privacybeleid</router-link> nu of later.<br>
           Geen gebruikelijke juridische bla bla!</p>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn icon="mdi-open-in-new" size="x-small" @click="state.showPrivacyScreen = true"></v-btn>
       </v-col>
     </v-row>
 
@@ -49,17 +46,14 @@
     </v-row>
     <div class="py-14" />
   </div>
-  <PrivacyBeleid :show-privacy-screen="state.showPrivacyScreen" @exit-privacy-screen="state.showPrivacyScreen = false" />
 </template>
 
 <script setup>
 import { reactive } from 'vue'
-import PrivacyBeleid from './PrivacyBeleid.vue'
 const props = defineProps(['showOpeningScreen'])
 const emit = defineEmits(['exit-opening-screen'])
 
 const state = reactive({
-  showPrivacyScreen: false,
   showHowTo: false
 })
 </script>

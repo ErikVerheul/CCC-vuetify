@@ -1,5 +1,5 @@
 <template>
-  <div v-if="showPrivacyScreen">
+  <v-sheet class="mx-5">
     <h2>Privacy functies</h2>
 
     <h3>Verwijder alle gegevens</h3>
@@ -35,7 +35,7 @@
     <div class="py-5" />
     <v-row class="justify-start">
       <v-col cols="auto">
-        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-privacy-screen')">
+        <v-btn flat prepend-icon="mdi-arrow-left" @click="router.go(-1)">
           <template v-slot:prepend>
             <v-icon size="x-large" color="purple"></v-icon>
           </template>
@@ -43,12 +43,11 @@
         </v-btn>
       </v-col>
     </v-row>
-  </div>
+  </v-sheet>
 </template>
 
 <script setup>
-const props = defineProps(['showPrivacyScreen'])
-const emit = defineEmits(['exit-privacy-screen'])
+import router from '@/router'
 </script>
 
 <style scoped>

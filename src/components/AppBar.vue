@@ -53,7 +53,7 @@
             </v-btn>
           </v-list-item>
           <v-list-item>
-            <v-btn flat size="small" @click="state.dialog8 = true">
+            <v-btn flat size="small" @click="router.push({ path: '/Privacybeleid' })">
               Privacybeleid
             </v-btn>
           </v-list-item>
@@ -162,12 +162,6 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog8" width="auto">
-    <v-card class="pa-3">
-      <PrivacyBeleid :show-privacy-screen="state.dialog8" @exit-privacy-screen="state.dialog8 = false" />
-    </v-card>
-  </v-dialog>
-
   <v-dialog v-model="state.dialog9" width="auto">
     <v-card>
       <v-card-text>
@@ -233,7 +227,6 @@ import { computed, reactive } from 'vue'
 import Cookies from 'universal-cookie'
 import { dbRef } from '../firebase'
 import { child, update, remove } from "firebase/database"
-import PrivacyBeleid from './PrivacyBeleid.vue'
 import router from '@/router'
 
 const props = defineProps({
@@ -273,7 +266,6 @@ const state = reactive({
   dialog5: false,
   dialog6: false,
   dialog7: false,
-  dialog8: false,
   dialog9: false,
   dialog10: false,
   cookieIsRemoved: false,
