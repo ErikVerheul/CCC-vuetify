@@ -7,9 +7,12 @@
     <template v-if="state.loginErrorMsg !== undefined">
       <div class="py-4" />
       <h2>Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
-      <v-btn @click="resetLogin">Click om opnieuw te proberen</v-btn>
+      <div class="py-4" />
+      <h3>Controleer of uw schuilnaam en pincode kloppen en probeer opnieuw. Of kies een andere schuilnaam en pincode met de knop hieronder.
+      </h3>
+      <div class="py-4" />
+      <v-btn type="button" @click="emit('change-to-signup')">Ga naar nieuwe aanmelding</v-btn>
     </template>
-    <v-btn type="button" variant="text" @click="emit('change-to-signup')">Ga naar nieuwe aanmelding</v-btn>
   </v-card>
 </template>
 
@@ -117,5 +120,10 @@ function doSigninUser() {
       state.loginErrorMsg = error.message
     })
 }
-
 </script>
+
+<style scoped>
+h3 {
+  color: #311B92
+}
+</style>

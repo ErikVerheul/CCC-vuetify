@@ -225,7 +225,7 @@ function returnToLogin() {
     state.userEntryMode = 'login'
   }
   state.signupStep = 1
-  state.screenName = state.lastScreenName
+  state.screenName = 'Inloggen'
 }
 
 function switchToSignup() {

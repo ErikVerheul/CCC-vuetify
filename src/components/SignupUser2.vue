@@ -25,7 +25,7 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-btn-toggle v-model="state.gender" rounded="0" color="deep-purple-accent-3" group>
+        <v-btn-toggle v-model="state.gender" variant="outlined" group>
           <v-btn value="0">
             Man
           </v-btn>

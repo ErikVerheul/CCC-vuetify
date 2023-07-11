@@ -5,8 +5,8 @@
       <v-app-bar-title class="flex text-center">{{ props.screenName }}</v-app-bar-title>
     </template>
     <template v-else>
-      <v-app-bar-title v-if="welcomeMsg !== undefined">{{ welcomeMsg }}</v-app-bar-title>
-      <v-app-bar-title>{{ props.screenName }}</v-app-bar-title>
+      <v-app-bar-title v-if="props.isAuthenticated">Welkom {{ props.userAlias }}</v-app-bar-title>
+      <v-app-bar-title v-else>{{ props.screenName }}</v-app-bar-title>
 
       <v-btn v-if="props.isAuthenticated && props.userAlias === 'admin'" size="small" variant="outlined"
         @click="doSuperAdmin">superAdmin</v-btn>
@@ -252,12 +252,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['logout-app', 'reset-app', 'app-settings'])
-
-const welcomeMsg = computed(() => {
-  if (props.isAuthenticated && props.screenName === 'Menu') {
-    return 'Welkom ' + props.userAlias
-  } else return undefined
-})
 
 const state = reactive({
   dialog1: false,
