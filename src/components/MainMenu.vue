@@ -1,5 +1,5 @@
 <template>
-  <v-row>
+  <v-row class="d-flex align-center justify-center">
     <v-col cols="auto">
       <p>Laatste login: {{ createDateTimeString() }}</p>
       <h2>Hoe goed ben ik in</h2>
@@ -58,7 +58,7 @@
     </v-col>
   </v-row>
 
-  <v-row>
+  <v-row class="d-flex align-center justify-center">
     <v-col cols="auto">
       <h2>Hoe goed ken ik</h2>
       <ul>
