@@ -18,7 +18,7 @@
       </v-col>
     </v-row>
     <v-row v-if="state.showHowTo" class="d-flex align-center justify-center">
-      <v-col cols="auto">
+      <v-col cols="6" offset="1">
         <p>Als u al een account hebt op een ander apparaat log dan in met uw schuilnaam en pin code. Die kunt u
           terugvinden op het andere apparaat door op
           <v-icon>mdi-dots-vertical</v-icon> rechtsboven te tikken en 'Inloggen op ander apparaat' te kiezen.
