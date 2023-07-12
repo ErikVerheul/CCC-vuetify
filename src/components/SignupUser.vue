@@ -1,7 +1,7 @@
 <template>
   <v-sheet width="window.innerWidth">
     <template v-if="PINOK">
-      <v-row>
+      <v-row class="d-flex align-center justify-center">
         <v-col cols="auto">
           <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" max-width="400">
             <v-card-title class="text-h5">
@@ -17,7 +17,7 @@
         </v-col>
       </v-row>
       <v-row class="justify-start">
-        <v-col cols="5">
+        <v-col>
           <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
             <template v-slot:prepend>
               <v-icon size="x-large" color="purple"></v-icon>
@@ -25,7 +25,8 @@
             Terug
           </v-btn>
         </v-col>
-        <v-col cols="7">
+        <v-spacer></v-spacer>
+        <v-col>
           <v-btn :disabled="!PINOK" flat append-icon="mdi-arrow-right" @click="emit('signup-continue', props.alias, state.pinCode)">
             Door
             <template v-slot:append>
@@ -35,7 +36,7 @@
         </v-col>
       </v-row>
     </template>
-    <v-row>
+    <v-row class="d-flex align-center justify-center">
       <v-col cols="12">
         <h1 class="titleLine">Hallo -{{ props.alias }} </h1>
         <h3>Kies een pin code</h3>
@@ -43,7 +44,7 @@
       </v-col>
     </v-row>
     <div class="py-3" />
-    <v-row>
+    <v-row class="d-flex align-center justify-center">
       <v-col cols="12">
         <p>De speelmee.app neemt Privacy serieus;<br>
           daarom maken we het mogelijk alle<br>
@@ -53,7 +54,7 @@
     </v-row>
     <template v-if="!PINOK">
       <v-row class="justify-start">
-        <v-col cols="5">
+        <v-col>
           <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
             <template v-slot:prepend>
               <v-icon size="x-large" color="purple"></v-icon>
@@ -61,7 +62,8 @@
             Terug
           </v-btn>
         </v-col>
-        <v-col cols="7">
+        <v-spacer></v-spacer>
+        <v-col>
           <v-btn :disabled="!PINOK" flat append-icon="mdi-arrow-right" @click="emit('signup-continue', props.alias, state.pinCode)">
             Door
             <template v-slot:append>

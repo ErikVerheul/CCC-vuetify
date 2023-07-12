@@ -1,29 +1,21 @@
 <template>
-  <v-sheet width="100%">
-    <v-row>
+  <v-sheet>
+    <v-row class="d-flex align-center justify-center">
       <v-col cols="12">
         <h1 class="titleLine">Hallo -{{ props.userData.alias }} </h1>
         <h3>Vervolg aanmelding</h3>
       </v-col>
-    </v-row>
-    <div class="py-3" />
-    <v-row>
+      <div class="py-3" />
       <v-col cols="12" class="text-left">
         <p>De volgende vragen zijn optioneel:</p>
       </v-col>
-    </v-row>
-    <v-row>
       <v-col cols="12" class="text-left">
         <v-text-field density="compact" label="Geboorte Jaar" v-model.trim="state.yearOfBirth" :rules="state.yearOfBirthRules" />
       </v-col>
-    </v-row>
-    <v-row>
       <v-col cols="12">
         <p class="infoColor">Het geboortejaar is nodig om uw prestaties in een leeftijdscategorie te plaatsen. Zonder geboortejaar komt u
           terecht in de categorie 'Alle leeftijden'. Om de zelfde reden willen we weten of u man, vrouw of iets anders bent.</p>
       </v-col>
-    </v-row>
-    <v-row>
       <v-col cols="12">
         <v-btn-toggle v-model="state.gender" variant="outlined" group>
           <v-btn value="0">
@@ -36,20 +28,16 @@
             Anders
           </v-btn>
           <v-btn value="3">
-            Niet opgegeven
+            Sla over
           </v-btn>
         </v-btn-toggle>
       </v-col>
-    </v-row>
-    <v-row>
       <v-col cols="8">
         <p>Wil je maandelijks via de app op de hoogte gehouden worden van nieuws over het speelmee.app platform?</p>
       </v-col>
       <v-col cols="4">
         <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
       </v-col>
-    </v-row>
-    <v-row>
       <v-col cols="12">
         <p>De speelmee.app neemt Privacy serieus;<br>
           daarom maken we het mogelijk alle<br>
@@ -122,7 +110,7 @@ const state = reactive({
       if (Number(value) <= Number(state.currentYear)) return true
 
       return 'U bent nog niet geboren'
-    }   
+    }
   ],
   lastLogin: Date.now(),
   newsFeed: false

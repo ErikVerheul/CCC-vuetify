@@ -29,8 +29,8 @@
     </v-col>
   </v-row>
   <div class="py-12" />
-  <v-row class="justify-end">
-    <v-col>
+  <v-row>
+    <v-col cols="auto">
       <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signin')">
         <template v-slot:prepend>
           <v-icon size="x-large" color="purple"></v-icon>

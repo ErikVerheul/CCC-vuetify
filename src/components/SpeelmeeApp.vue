@@ -18,7 +18,7 @@
             <v-col cols="auto">
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
-                  <SigninUser :aliases-in-use-incl-admin="state.aliasesInUseInclAdmin" @signin-completed="finishSignin"
+                  <SigninUser :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" @signin-completed="finishSignin"
                     @change-to-signup="switchToSignup" @exit-signin="resetApp" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
@@ -92,9 +92,6 @@ onBeforeMount(() => {
           state.allAliases.forEach(el => {
             if (aliasObject[el].inUse) state.aliasesInUse.push(el)
           })
-          // make a shallow copy
-          state.aliasesInUseInclAdmin = [...state.aliasesInUse]
-          state.aliasesInUseInclAdmin.push('admin')
         } else {
           console.log("No aliases data available")
         }
@@ -171,12 +168,18 @@ const state = reactive({
   alert: false,
   userEntryMode: undefined,
   allAliases: [],
-  aliasesInUseInclAdmin: [],
   aliasesInUse: [],
   maastrichtStoriesActive: false,
   userSettingsActive: false,
   loginErrorMsg: undefined
 })
+
+function aliasesInUseInclAdmin()  {
+  // make a shallow copy
+  const copy = [...state.aliasesInUse]
+  copy.push('admin')
+  return copy
+}
 
 // returns true if any of the games is active
 const nowPlaying = computed(() => {
@@ -215,18 +218,14 @@ function returnToLogin() {
   if (state.isAuthenticated) {
     signOut(auth).then(() => {
       state.isAuthenticated = false
-      state.userData.pinCode = ''
-      state.userData.alias = undefined
-      state.userEntryMode = 'login'
       console.log('Sign-out successful')
     }).catch((error) => {
-      console.log('signOut: An error happened, error message = ' + error.message)
+      console.error('signOut: An error happened, error message = ' + error.message)
     })
-  } else {
-    state.userData.pinCode = ''
-    state.userData.alias = undefined
-    state.userEntryMode = 'login'
   }
+  state.userData.pinCode = ''
+  state.userData.alias = undefined
+  state.userEntryMode = 'login'
   state.signupStep = 1
   state.screenName = 'Inloggen'
 }
@@ -258,7 +257,6 @@ function finishSignup(firebaseUser, lastLogin) {
   state.userData.lastLogin = lastLogin
   // add new alias to current arrays
   state.aliasesInUse.push(state.userData.alias)
-  state.aliasesInUseInclAdmin.push(state.userData.alias)
   // reset signup step
   state.signupStep = 1
   state.isAuthenticated = true
