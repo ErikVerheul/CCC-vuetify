@@ -136,7 +136,7 @@ function loadAliasData() {
       console.log("No aliases data available")
     }
   }).catch((error) => {
-    console.error('Error while reading all available aliases from database: ' + error)
+    console.error('While reading all available aliases from database: error message = ' + error.message)
   })
 }
 
@@ -236,7 +236,7 @@ function saveChange() {
     loadAliasData()
   }).catch((error) => {
     state.saveSuccess = 2
-    console.log('The write failed, error = ' + error)
+    console.error('The write failed, error message = ' + error.message)
   })
 }
 

@@ -291,7 +291,7 @@ function removeAccount() {
     emit('reset-app')
   }).catch((error) => {
     state.dialog10 = false
-    state.removeAccountErrorMsg = 'Account verwijdering mislukt. De fout is: ' + error
+    state.removeAccountErrorMsg = 'Account verwijdering mislukt. De fout is: ' + error.message
   })
 }
 

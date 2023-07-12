@@ -170,8 +170,7 @@ function doSignupUser() {
       emit('signup-completed', firebaseUser, state.lastLogin)
     })
     .catch((error) => {
-      console.log('Firebase signup: errorCode = ' + error.code)
-      console.log('Firebase signup: errorMessage = ' + error.message)
+      console.error('Firebase signup: errorMessage = ' + error.message)
     })
 }
 

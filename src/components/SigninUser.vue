@@ -136,12 +136,11 @@ function doSigninUser() {
           console.log(`doSigninUser: cannot find user ${state.userAliasInput} in the database}`)
         }
       }).catch((error) => {
-        console.error(`Error while reading child ${state.userAliasInput} from database: ` + error)
+        console.error(`While reading child ${state.userAliasInput} from database: error message = ` + error.message)
       })
     })
     .catch((error) => {
-      console.log('Firebase signin: errorCode = ' + error.code)
-      console.log('Firebase signin: errorMessage = ' + error.message)
+      console.error('Firebase signin: error message = ' + error.message)
       state.loginErrorMsg = error.message
     })
 }

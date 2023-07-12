@@ -42,7 +42,7 @@ onBeforeMount(() => {
       console.log(`No data available. User "${props.userAlias}" unknown`)
     }
   }).catch((error) => {
-    console.error(`Error while reading child "${props.userAlias}" from database: ` + error)
+    console.error(`While reading child "${props.userAlias}" from database: error message = ` + error.message)
   })
 })
 

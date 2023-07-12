@@ -4,8 +4,8 @@
       <v-row>
         <v-navigation-drawer width="100%" class="bg-deep-purple" theme="dark" permanent>
           <v-list color="transparent">
-            <v-list-item prepend-icon="mdi-view-dashboard" title="Aliassen onderhouden" @click="state.action = 'mAliases'"></v-list-item>
-            <v-list-item prepend-icon="mdi-account" title="Alias info onderhouden" @click="state.action = 'maInfo'"></v-list-item>
+            <v-list-item prepend-icon="mdi-view-dashboard" title="Schuilnamen onderhouden" @click="state.action = 'mAliases'"></v-list-item>
+            <v-list-item prepend-icon="mdi-account" title="Schuilnaam info onderhouden" @click="state.action = 'maInfo'"></v-list-item>
             <v-list-item prepend-icon="mdi-account-box" title="Berichten maken en versturen" @click="state.action = 'mMess'"></v-list-item>
             <v-list-item prepend-icon="mdi-gavel" title="Andere gebruikers rechten geven" @click="state.action = 'mRoles'"></v-list-item>
           </v-list>
