@@ -1,5 +1,5 @@
 <template>
-  <v-sheet width="100%">
+  <v-sheet>
     <v-container>
       <AppBar :is-authenticated="state.isAuthenticated" :user-alias="state.userData.alias" :PIN="state.userData.pinCode"
         :screen-name="state.screenName" :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp"
@@ -19,7 +19,7 @@
               <v-card variant="text">
                 <template v-if="state.userEntryMode === 'login'">
                   <SigninUser :aliases-in-use-incl-admin="state.aliasesInUseInclAdmin" @signin-completed="finishSignin"
-                    @change-to-signup="switchToSignup" @exit-signin="resetApp"/>
+                    @change-to-signup="switchToSignup" @exit-signin="resetApp" />
                 </template>
                 <template v-if="state.userEntryMode === 'signup'">
                   <template v-if="state.userData.alias === undefined">
@@ -124,20 +124,23 @@ onBeforeMount(() => {
                     updates['/users/' + state.firebaseUser.uid + '/lastLogin'] = Date.now()
                     update(dbRef, updates)
                   } else {
-                    // No data available; cookie does not match in the database; remove cookie and start manual login or signup
+                    // No data available; cookie does not match user data in the database; remove cookie and start manual login or signup
                     cookies.remove('speelMee', { sameSite: true })
                     state.showOpeningScreen = true
                     state.screenName = 'Welkom'
                   }
                 }).catch((error) => {
-                  console.error(`Error while reading child ${state.firebaseUser.uid} from database: ` + error)
+                  console.error(`Reading child ${state.firebaseUser.uid} from database: error message = ` + error)
                 })
               })
               .catch((error) => {
-                console.log('Firebase auto-signin: errorCode = ' + error.code)
-                console.log('Firebase auto-signin: errorMessage = ' + error.message)
-                state.loginErrorMsg = error.message
-              });
+                console.error('Firebase auto-signin: error message = ' + error.message)
+                // ToDo: log the error
+                // no account available; cookie does not match an account in the database; remove cookie and start manual login or signup
+                cookies.remove('speelMee', { sameSite: true })
+                state.showOpeningScreen = true
+                state.screenName = 'Welkom'
+              })
           } else {
             console.log('No cookie found')
             // no cookie available; manual login or signup needed
@@ -145,14 +148,14 @@ onBeforeMount(() => {
             state.screenName = 'Welkom'
           }
         }).catch((error) => {
-          console.log('Firebase signOut: errorCode = ' + error.code)
-          console.log('Firebase signOut: errorMessage = ' + error.message)
+          console.error('Firebase signOut: error message = ' + error.message)
           state.loginErrorMsg = error.message
         })
       }).catch((error) => {
-        console.error('Error while reading all available aliases from database: ' + error)
+        console.error('Reading all available aliases from database: error message = ' + error.message)
       })
     }).catch((error) => {
+      console.error('The system account could not login: error message = ' + error.message)
       state.loginErrorMsg = error.message
     })
 })
@@ -217,7 +220,7 @@ function returnToLogin() {
       state.userEntryMode = 'login'
       console.log('Sign-out successful')
     }).catch((error) => {
-      console.log('signOut: An error happened, error = ' + error)
+      console.log('signOut: An error happened, error message = ' + error.message)
     })
   } else {
     state.userData.pinCode = ''
