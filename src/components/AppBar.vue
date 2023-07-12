@@ -210,7 +210,7 @@
           </v-col>
           <v-col>
             <v-btn color="red" flat append-icon="mdi-arrow-right" @click="removeAccount">
-              Vernietig mijn gegevens
+              Vernietig
               <template v-slot:append>
                 <v-icon size="x-large" color="purple"></v-icon>
               </template>
