@@ -1,60 +1,59 @@
 <template>
-  <v-sheet>
-    <v-container>
-      <AppBar :is-authenticated="state.isAuthenticated" :user-alias="state.userData.alias" :PIN="state.userData.pinCode"
-        :screen-name="state.screenName" :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp"
-        @app-settings="doAppSettings" />
-      <template v-if="state.loginErrorMsg !== undefined">
-        <div class="py-4" />
-        <h2>Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
-      </template>
-      <div v-if="!nowPlaying && !nowOther">
-        <div v-if="state.isAuthenticated">
-          <MainMenu :last-login="state.userData.lastLogin" @menu-item-selected="doGame"></MainMenu>
-        </div>
-        <div v-else>
-          <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="loginOrSignIn" />
-          <v-row class="d-flex align-center justify-center">
-            <v-col cols="auto">
-              <v-card variant="text">
-                <template v-if="state.userEntryMode === 'login'">
-                  <SigninUser :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" @signin-completed="finishSignin"
-                    @change-to-signup="switchToSignup" @exit-signin="resetApp" />
+  <v-app :max-width="414">
+    <AppBar :is-authenticated="state.isAuthenticated" :user-alias="state.userData.alias" :PIN="state.userData.pinCode"
+      :screen-name="state.screenName" :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp"
+      @app-settings="doAppSettings" />
+    <v-main>
+      <v-row class="d-flex justify-center">
+        <v-col cols="auto">
+          <template v-if="state.loginErrorMsg !== undefined">
+            <div class="py-4" />
+            <h2>Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
+          </template>
+          <div v-if="!nowPlaying && !nowOther">
+            <div v-if="state.isAuthenticated">
+              <MainMenu :last-login="state.userData.lastLogin" @menu-item-selected="doGame"></MainMenu>
+            </div>
+            <div v-else>
+              <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="loginOrSignIn" />
+              <template v-if="state.userEntryMode === 'login'">
+                <SigninUser :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" @signin-completed="finishSignin"
+                  @change-to-signup="switchToSignup" @exit-signin="resetApp" />
+              </template>
+              <template v-if="state.userEntryMode === 'signup'">
+                <template v-if="state.userData.alias === undefined">
+                  <v-alert v-model="state.alert" border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
+                    Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
+                  </v-alert>
+                  <SelectAlias :aliases-in-use="state.aliasesInUse" :all-aliases="state.allAliases" :alias-occupied="state.alert"
+                    @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
+                  </SelectAlias>
                 </template>
-                <template v-if="state.userEntryMode === 'signup'">
-                  <template v-if="state.userData.alias === undefined">
-                    <v-alert v-model="state.alert" border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
-                      Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
-                    </v-alert>
-                    <SelectAlias :aliases-in-use="state.aliasesInUse" :all-aliases="state.allAliases" :alias-occupied="state.alert"
-                      @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
-                    </SelectAlias>
+                <template v-else>
+                  <div class="py-2" />
+                  <template v-if="state.signupStep === 1">
+                    <SignupUser :alias="state.userData.alias" @signup-continue="continueSignup" @exit-signup="returnToLogin" />
                   </template>
-                  <template v-else>
-                    <div class="py-2" />
-                    <template v-if="state.signupStep === 1">
-                      <SignupUser :alias="state.userData.alias" @signup-continue="continueSignup" @exit-signup="returnToLogin" />
-                    </template>
-                    <template v-if="state.signupStep === 2">
-                      <SignupUser2 :userData="state.userData" @signup-completed="finishSignup" @exit-signup="returnToLogin" />
-                    </template>
+                  <template v-if="state.signupStep === 2">
+                    <SignupUser2 :userData="state.userData" @signup-completed="finishSignup" @exit-signup="returnToLogin" />
                   </template>
                 </template>
-              </v-card>
-            </v-col>
-          </v-row>
-        </div>
-      </div>
-      <div else>
-        <template v-if="state.maastrichtStoriesActive">
-          <MaastrichtStories :user-id="state.userData.alias" :alias="state.userData.alias" @return-to-menu="showMenu"></MaastrichtStories>
-        </template>
-        <template v-if="state.userSettingsActive">
-          <AppSettings :firebase-user="state.firebaseUser" :userAlias="state.userData.alias" @return-to-menu="showMenu"></AppSettings>
-        </template>
-      </div>
-    </v-container>
-  </v-sheet>
+              </template>
+            </div>
+          </div>
+          <div else>
+            <template v-if="state.maastrichtStoriesActive">
+              <MaastrichtStories :user-id="state.userData.alias" :alias="state.userData.alias" @return-to-menu="showMenu">
+              </MaastrichtStories>
+            </template>
+            <template v-if="state.userSettingsActive">
+              <AppSettings :firebase-user="state.firebaseUser" :userAlias="state.userData.alias" @return-to-menu="showMenu"></AppSettings>
+            </template>
+          </div>
+        </v-col>
+      </v-row>
+    </v-main>
+  </v-app>
 </template>
 
 <script setup>
@@ -174,7 +173,7 @@ const state = reactive({
   loginErrorMsg: undefined
 })
 
-function aliasesInUseInclAdmin()  {
+function aliasesInUseInclAdmin() {
   // make a shallow copy
   const copy = [...state.aliasesInUse]
   copy.push('admin')

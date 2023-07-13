@@ -1,22 +1,29 @@
 <template>
-  <v-sheet>
-    <v-row class="d-flex align-center justify-center">
-      <v-col cols="12">
-        <h1 class="titleLine">Hallo -{{ props.userData.alias }} </h1>
+  <v-sheet max-width="414">
+    <v-row>
+      <v-col cols="12" class="text-center">
+        <h1>Hallo -{{ props.userData.alias }} </h1>
         <h3>Vervolg aanmelding</h3>
       </v-col>
       <div class="py-3" />
       <v-col cols="12" class="text-left">
         <p>De volgende vragen zijn optioneel:</p>
       </v-col>
-      <v-col cols="12" class="text-left">
+      
+      <v-col cols="5" offset="1">
         <v-text-field density="compact" label="Geboorte Jaar" v-model.trim="state.yearOfBirth" :rules="state.yearOfBirthRules" />
       </v-col>
-      <v-col cols="12">
-        <p class="infoColor">Het geboortejaar is nodig om uw prestaties in een leeftijdscategorie te plaatsen. Zonder geboortejaar komt u
-          terecht in de categorie 'Alle leeftijden'. Om de zelfde reden willen we weten of u man, vrouw of iets anders bent.</p>
+      <v-col cols="6" align-self="end">
+        <v-btn size="x-small" color="yellow-lighten-3" @click="state.showWhy = !state.showWhy">Waarom deze informatie?</v-btn>
       </v-col>
-      <v-col cols="12">
+      <v-row v-if="state.showWhy" class="d-flex align-center justify-center">
+        <v-col cols="7" offset="1">
+          <p>Het geboortejaar is nodig om uw prestaties in een leeftijds-categorie te plaatsen. Zonder geboortejaar komt u
+            terecht in de categorie 'Alle leeftijden'. Om de zelfde reden willen we weten of u man, vrouw of iets anders bent.
+          </p>
+        </v-col>
+      </v-row>
+      <v-col cols="12" class="text-left">
         <v-btn-toggle v-model="state.gender" variant="outlined" group>
           <v-btn value="0">
             Man
@@ -37,12 +44,6 @@
       </v-col>
       <v-col cols="4">
         <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
-      </v-col>
-      <v-col cols="12">
-        <p>De speelmee.app neemt Privacy serieus;<br>
-          daarom maken we het mogelijk alle<br>
-          persoonlijke data te wissen als je geen<br>
-          gebruik meer wil maken van de app.</p>
       </v-col>
     </v-row>
     <v-row class="justify-start">
@@ -77,6 +78,7 @@ const props = defineProps(['userData'])
 const emit = defineEmits(['signup-completed', 'exit-signup'])
 
 const state = reactive({
+  showWhy: false,
   currentYear: new Date().getFullYear(),
   yearOfBirth: undefined,
   gender: -1,
@@ -163,13 +165,3 @@ function doSignupUser() {
 }
 
 </script>
-
-<style scoped>
-.titleLine {
-  text-align: left;
-}
-
-.infoColor {
-  background-color: #FFF59D
-}
-</style>

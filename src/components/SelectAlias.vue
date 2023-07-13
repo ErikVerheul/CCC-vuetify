@@ -1,18 +1,19 @@
 <template>
-  <v-row>
-    <v-card flat>
-      <v-card-title align="center">Blader, en kies een schuilnaam</v-card-title>
-      <v-card-text>
-        <v-row class="scrollable text-center overflow-auto" align="center" justify="center" style="display: flex; height: 600px">
-          <SelectAliasRow v-for="(num, index) in state.numberOfRows" :aliases-in-use="aliasesInUse" :random-names="state.randomNames"
-            :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
-        </v-row>
-      </v-card-text>
-    </v-card>
-  </v-row>
-  <v-sheet>
+  <v-sheet max-width="414">
+    <div class="py-2" />
+    <v-row>
+      <v-card flat>
+        <v-card-title align="center">Blader, en kies een schuilnaam</v-card-title>
+        <v-card-text>
+          <v-row class="scrollable text-center overflow-auto" align="center" justify="center" style="display: flex; ">
+            <SelectAliasRow v-for="(num, index) in state.numberOfRows" :aliases-in-use="aliasesInUse" :random-names="state.randomNames"
+              :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
+          </v-row>
+        </v-card-text>
+      </v-card>
+    </v-row>
     <v-row class="justify-start">
-      <v-col cols="9">
+      <v-col>
         <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
           <template v-slot:prepend>
             <v-icon size="x-large" color="purple"></v-icon>
@@ -20,7 +21,7 @@
           Terug
         </v-btn>
       </v-col>
-      <v-col cols="3">
+      <v-col>
         <v-btn :disabled="state.aliasSelected === undefined || props.aliasOccupied" flat append-icon="mdi-arrow-right"
           @click="emit('alias-selected', state.aliasSelected)">
           Door
@@ -99,7 +100,7 @@ watch(state.aliasButtonSelections, (rowValue, oldRowValue) => {
 </script>
 
 <style scoped>
-  .scrollable {
-   overflow-y: scroll;
+.scrollable {
+  overflow-y: scroll;
 }
 </style>

@@ -1,4 +1,5 @@
 <template>
+  <div class="py-2" />
   <v-row class="d-flex align-center justify-center">
     <v-col cols="auto">
       <p>Laatste login: {{ createDateTimeString() }}</p>
