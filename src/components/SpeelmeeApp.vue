@@ -1,5 +1,5 @@
 <template>
-  <v-app :max-width="414">
+  <v-app max-width="414px">
     <AppBar :is-authenticated="state.isAuthenticated" :user-alias="state.userData.alias" :PIN="state.userData.pinCode"
       :screen-name="state.screenName" :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp"
       @app-settings="doAppSettings" />
