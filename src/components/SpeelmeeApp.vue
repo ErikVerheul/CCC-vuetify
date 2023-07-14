@@ -81,6 +81,23 @@ onBeforeMount(() => {
   // Signin as system first
   signInWithEmailAndPassword(auth, sysEmail, sysPw)
     .then(() => {
+      // const namen = ['Alain','Alberto','Aldo','Alessandro','Alexander','Alfred','Alice','Alla','Anastasiya','Anatoliy','Andre','Andrea','Andreas','Andrew','Andriy','Angelo','Anne','Anthony','Antonio','Armando','Arthur','Bartolomeo','Bas','Benedetto','Bernard','Bernd','Bernhard','Bjorn','Bohdan','Bram','Brian','Bruno','Carl','Carlo','Caroline','Cas','Catherine','Charles','Christian','Christine','Christopher','Claude','Claudio','Corinne','Corrado','Daan','Daniel','Daniele','David','Davide','Denis','Dennis','Dieter','Dirk','Dmytro','Domenico','Donald','Douglas','Dylan','Edward','Emanuele','Emiliano','Emilio','Emmanuel','Enrico','Eric','Erich','Ernst','Fabio','Fabrice','Federico','Filippo','Florence','Floris','Francesco','Frank','Franz','Frederic','Freek','Fritz','Gabriele','Gaetano','Gary','Georg','George','Gerard','Giacomo','Gianni','Gijs','Gilbert','Giorgio','Giovanni','Giuseppe','Gregory','Günter','Gustav','Halyna','Hanna','Hans','Hans-Peter','Harold','Heinz','Helmut','Hendrik','Henk','Henry','Hermann','Horst','Ihor','Ingo','Inna','Iryna','Isabelle','Ivan','Jacob','Jacques','James','Jan','Jarno','Jason','Jean','Jeffrey','Jelle','Jelte','Jerome','Jerry','Jesse','Joachim','Joep','Johannes','John','Joost','Joris','Jose','Josef','Joseph','Joshua','Julie','Jürgen','Karl','Kateryna','Kenneth','Kevin','Khrystyna','Klaas','Klaus','Kurt','Larry','Lars','Larysa','Laurence','Laurens','Lennard','Lothar','Luc','Luca','Lucas','Luciano','Luigi','Lyubov','Lyudmyla','Maarten','Manfred','Marc','Marcello','Marco','Marie','Mario','Mariya','Mark','Markus','Martijn','Martin','Martine','Mary','Maryna','Massimo','Matthew','Matthias','Matthijs','Max','Michael','Michel','Milan','Monique','Mykhailo','Mykola','Myroslav','Nadiya','Nataliya','Nathalie','Nicolas','Nicolo','Niels','Oksana','Oleh','Oleksandr','Oleksiy','Olha','Orest','Otto','Paolo','Patrick','Paul','Pavlo','Peter','Petro','Philippe','Pierre','Pieter','Pietro','Raffaele','Raymond','Reinhold','Riccardo','Richard','Robert','Roberto','Robin','Roger','Roland','Rolf','Roman','Ronald','Ruben','Rudolf','Ryan','Salvatore','Sam','Sandrine','Scott','Sebastien','Sem','Sergio','Serhiy','Simone','Sophie','Stefan','Stefano','Stepan','Stephane','Stephen','Steven','Stijn','Sven','Svitlana','Taras','Tetyana','Teun','Thijs','Thomas','Tim','Timothy','Tom','Tommaso','Uliana','Umberto','Uwe','Vasyl','Viktor','Viktoriya','Vincenzo','Virginie','Volker','Volodymyr','Walter','Werner','Willem','Willi','William','Wolfgang','Wouter','Xavier','Yana','Yevhen','Yosyp','Yuliana','Yuliya','Yuriy','Yves']
+      // let newAliasObject = {}
+      // for (const naam of namen) {
+      //   newAliasObject[naam] = {
+      //     "inUse": false
+      //   }
+      // }
+      // console.log('newAliasObject = ' + JSON.stringify(newAliasObject, null, 2))
+
+      // // save the data
+      // const updates = {}
+      // updates['aliases/'] = newAliasObject
+      // update(dbRef, updates).then(() => {
+      // }).catch((error) => {
+      //   console.error('The write failed, error message = ' + error.message)
+      // })
+
       // get all available aliases
       get(child(dbRef, `aliases/`)).then((snapshot) => {
         if (snapshot.exists()) {
