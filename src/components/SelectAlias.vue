@@ -20,6 +20,7 @@
           Terug
         </v-btn>
       </v-col>
+      <v-spacer></v-spacer>
       <v-col>
         <v-btn :disabled="state.aliasSelected === undefined || props.aliasOccupied" flat append-icon="mdi-arrow-right"
           @click="emit('alias-selected', state.aliasSelected)">

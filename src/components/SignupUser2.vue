@@ -55,7 +55,8 @@
           Terug
         </v-btn>
       </v-col>
-      <v-col class="text-right">
+      <v-spacer></v-spacer>
+      <v-col>
         <v-btn :disabled="!yearOfBirthOk" flat append-icon="mdi-arrow-right" @click="doSignupUser">
           Door
           <template v-slot:append>
