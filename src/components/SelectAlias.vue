@@ -4,7 +4,7 @@
     <v-row class="d-flex align-center justify-center">
       <h2>Blader, en kies een schuilnaam</h2>
     </v-row>
-    <v-row>
+    <v-row class="text-center overflow-auto" align="center" justify="center" style="display: flex ">
       <SelectAliasRow v-for="(num, index) in state.numberOfRows" :aliases-in-use="aliasesInUse" :random-names="state.randomNames"
         :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
     </v-row>
@@ -104,8 +104,6 @@ watch(state.aliasButtonSelections, (rowValue, oldRowValue) => {
   top: 0px;
   height: 90%;
   width: 100%;
-  margin-left: 10px;
-  margin-right: 10px;
   position: sticky;
 }
 
