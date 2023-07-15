@@ -1,17 +1,17 @@
 <template>
-  <v-sheet class="top scrollable" max-width="414px">
-    <div class="py-8" />
+  <v-sheet class="top" max-width="414px">
+    <div class="py-2" />
     <v-row class="d-flex align-center justify-center">
       <h2>Blader, en kies een schuilnaam</h2>
     </v-row>
-    <v-row class="text-center overflow-auto" align="center" justify="center" style="display: flex; ">
+    <v-row>
       <SelectAliasRow v-for="(num, index) in state.numberOfRows" :aliases-in-use="aliasesInUse" :random-names="state.randomNames"
         :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
     </v-row>
   </v-sheet>
 
   <v-sheet class="bottom" max-width="414px">
-    <v-row class="justify-start">
+    <v-row>
       <v-col>
         <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
           <template v-slot:prepend>
@@ -100,26 +100,16 @@ watch(state.aliasButtonSelections, (rowValue, oldRowValue) => {
 </script>
 
 <style scoped>
-
 .top {
-  top: 0;
-  left: 0;
+  top: 0px;
   height: 90%;
   width: 100%;
-  position: fixed;
+  position: sticky;
 }
 
 .bottom {
-  bottom: 0;
-  left: 0;
+  bottom: 0px;
   height: 10%;
   width: 100%;
   position: fixed;
 }
-
-.scrollable {
-  overflow-y: scroll;
-  overflow-x:hidden;
-  max-height: 90%;
-}
-</style>
