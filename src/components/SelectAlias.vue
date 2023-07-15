@@ -104,6 +104,8 @@ watch(state.aliasButtonSelections, (rowValue, oldRowValue) => {
   top: 0px;
   height: 90%;
   width: 100%;
+  margin-left: 10px;
+  margin-right: 10px;
   position: sticky;
 }
 
