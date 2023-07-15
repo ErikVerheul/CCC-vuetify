@@ -12,13 +12,14 @@
           </template>
           <div v-if="!nowPlaying && !nowOther">
             <div v-if="state.isAuthenticated">
-              <MainMenu :last-login="state.userData.lastLogin" @menu-item-selected="doGame"></MainMenu>
+              <MainMenu :last-login="state.userData.lastLogin" @menu-item-selected="doGame" />
             </div>
             <div v-else>
               <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="loginOrSignIn" />
               <template v-if="state.userEntryMode === 'login'">
                 <SigninUser :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" @signin-completed="finishSignin"
-                  @change-to-signup="switchToSignup" @exit-signin="resetApp" />
+                  @change-to-signup="switchToSignup" @exit-signin="resetApp">
+                </SigninUser>
               </template>
               <template v-if="state.userEntryMode === 'signup'">
                 <template v-if="state.userData.alias === undefined">
@@ -43,11 +44,10 @@
           </div>
           <div else>
             <template v-if="state.maastrichtStoriesActive">
-              <MaastrichtStories :user-id="state.userData.alias" :alias="state.userData.alias" @return-to-menu="showMenu">
-              </MaastrichtStories>
+              <MaastrichtStories :user-id="state.userData.alias" :alias="state.userData.alias" @return-to-menu="showMenu" />
             </template>
             <template v-if="state.userSettingsActive">
-              <AppSettings :firebase-user="state.firebaseUser" :userAlias="state.userData.alias" @return-to-menu="showMenu"></AppSettings>
+              <AppSettings :firebase-user="state.firebaseUser" :userAlias="state.userData.alias" @return-to-menu="showMenu" />
             </template>
           </div>
         </v-col>

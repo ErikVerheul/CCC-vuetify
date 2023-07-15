@@ -1,40 +1,36 @@
 <template>
-  <template v-if="PINOK">
-    <v-row>
-      <v-col cols="auto">
-        <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" max-width="350">
-          <v-card-title class="text-h5">
-            Welkom in de Speelmee.app
-          </v-card-title>
-          <v-card-text>
-            Uw schuilnaam is <b>{{ props.alias }}</b><br>
-            Uw PIN is <b>{{ state.pinCode }}</b><br>
-            Gebruik deze schuilnaam en pin code om op een ander apparaat in te loggen.
-            Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt.
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-  </template>
-  <template v-else>
-    <v-row>
-      <v-col cols="12">
-        <h1 class="titleLine">Hallo -{{ props.alias }} </h1>
-        <h3>Kies een pin code</h3>
-        <v-text-field v-model.trim="state.pinCode" label="pin code" :rules="state.pinRules" />
-      </v-col>
-    </v-row>
+  <v-row v-if="PINOK">
+    <v-col cols="12">
+      <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" max-width="350">
+        <v-card-title class="text-h5">
+          Welkom in de Speelmee.app
+        </v-card-title>
+        <v-card-text>
+          Uw schuilnaam is <b>{{ props.alias }}</b><br>
+          Uw PIN is <b>{{ state.pinCode }}</b><br>
+          Gebruik deze schuilnaam en pin code om op een ander apparaat in te loggen.
+          Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt.
+        </v-card-text>
+      </v-card>
+    </v-col>
+  </v-row>
+  <v-row v-else>
+    <v-col cols="12">
+      <h1 class="titleLine">Hallo -{{ props.alias }} </h1>
+      <h3>Kies een pin code</h3>
+      <v-text-field v-model.trim="state.pinCode" label="pin code" :rules="state.pinRules" />
+    </v-col>
+  </v-row>
 
-    <v-row>
-      <v-col cols="12">
-        <p>De speelmee.app neemt Privacy serieus;<br>
-          daarom maken we het mogelijk alle<br>
-          persoonlijke data te wissen als je geen<br>
-          gebruik meer wil maken van de app.</p>
-      </v-col>
-    </v-row>
-  </template>
-  <v-row class="justify-start">
+  <v-row>
+    <v-col cols="12">
+      <p>De speelmee.app neemt Privacy serieus;<br>
+        daarom maken we het mogelijk alle<br>
+        persoonlijke data te wissen als je geen<br>
+        gebruik meer wil maken van de app.</p>
+    </v-col>
+  </v-row>
+  <v-row>
     <v-col>
       <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
         <template v-slot:prepend>

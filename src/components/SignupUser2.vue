@@ -9,21 +9,22 @@
       <v-col cols="12" class="text-left">
         <p>De volgende vragen zijn optioneel:</p>
       </v-col>
-      
       <v-col cols="5" offset="1">
         <v-text-field density="compact" label="Geboorte Jaar" v-model.trim="state.yearOfBirth" :rules="state.yearOfBirthRules" />
       </v-col>
       <v-col cols="6" align-self="end">
         <v-btn size="x-small" color="yellow-lighten-3" @click="state.showWhy = !state.showWhy">Waarom deze informatie?</v-btn>
       </v-col>
-      <v-row v-if="state.showWhy" class="d-flex align-center justify-center">
-        <v-col cols="7" offset="1">
-          <p>Het geboortejaar is nodig om uw prestaties in een leeftijds-categorie te plaatsen. Zonder geboortejaar komt u
-            terecht in de categorie 'Alle leeftijden'. Om de zelfde reden willen we weten of u man, vrouw of iets anders bent.
-          </p>
-        </v-col>
-      </v-row>
-      <v-col cols="12" class="text-left">
+    </v-row>
+    <v-row v-if="state.showWhy">
+      <v-col>
+        <p>Het geboortejaar is nodig om uw prestaties in een leeftijds-categorie te plaatsen. Zonder geboortejaar komt u
+          terecht in de categorie 'Alle leeftijden'. Om de zelfde reden willen we weten of u man, vrouw of iets anders bent.
+        </p>
+      </v-col>
+    </v-row>
+    <v-row class="d-flex align-center justify-center">
+      <v-col cols="12" class="m_left20">
         <v-btn-toggle v-model="state.gender" variant="outlined" group>
           <v-btn value="0">
             Man
@@ -46,7 +47,7 @@
         <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
       </v-col>
     </v-row>
-    <v-row class="justify-start">
+    <v-row>
       <v-col>
         <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
           <template v-slot:prepend>
@@ -166,3 +167,14 @@ function doSignupUser() {
 }
 
 </script>
+
+<style scoped>
+p {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.m_left20 {
+  margin-left: 20px;
+}
+</style>
