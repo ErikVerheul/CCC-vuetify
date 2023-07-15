@@ -113,3 +113,4 @@ watch(state.aliasButtonSelections, (rowValue, oldRowValue) => {
   width: 100%;
   position: fixed;
 }
+</style>
