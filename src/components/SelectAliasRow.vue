@@ -1,19 +1,17 @@
 <template>
-  <v-btn-toggle v-model="aliasButtonSelections[row]" mandatory>
+  <v-btn-toggle v-model="aliasButtonSelections[row]" color="purple" mandatory>
     <template v-for="(num, index) in rowLength">
-      <template v-if="!nameIsInUse(index)">
-        <v-btn size="small">
-          {{ randomNames[indexOffset + index] }}
-        </v-btn>
-      </template>
-      <template v-else>
+      <v-btn size="small" :disabled="nameIsInUse(index)">
+        {{ randomNames[indexOffset + index] }}
+      </v-btn>
+      <!-- <template v-else> TO ADD A ICON TO THE BUTTON
         <v-btn size="small" append-icon="mdi-account-circle">
           {{ randomNames[indexOffset + index] }}
           <template v-slot:append>
             <v-icon color="warning"></v-icon>
           </template>
         </v-btn>
-      </template>
+      </template> -->
     </template>
   </v-btn-toggle>
 </template>
