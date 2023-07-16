@@ -105,14 +105,14 @@ watch(state.aliasButtonSelections, (rowValue, oldRowValue) => {
 <style scoped>
 .top {
   top: 0px;
-  height: 90%;
+  height: 88%;
   width: 100%;
   position: sticky;
 }
 
 .bottom {
   bottom: 0px;
-  height: 10%;
+  height: 12%;
   width: 100%;
   position: fixed;
 }
