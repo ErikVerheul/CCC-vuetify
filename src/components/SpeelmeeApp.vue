@@ -23,10 +23,7 @@
               </template>
               <template v-if="state.userEntryMode === 'signup'">
                 <template v-if="state.userData.alias === undefined">
-                  <v-alert v-model="state.alert" border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
-                    Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
-                  </v-alert>
-                  <SelectAlias :aliases-in-use="state.aliasesInUse" :all-aliases="state.allAliases" :alias-occupied="state.alert"
+                  <SelectAlias :alias-object="state.aliasObject" :aliases-in-use="state.aliasesInUse" :all-aliases="state.allAliases" :alias-occupied="state.alert"
                     @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
                   </SelectAlias>
                 </template>
@@ -101,12 +98,12 @@ onBeforeMount(() => {
       // get all available aliases
       get(child(dbRef, `aliases/`)).then((snapshot) => {
         if (snapshot.exists()) {
-          const aliasObject = snapshot.val()
-          state.allAliases = Object.keys(aliasObject)
+          state.aliasObject = snapshot.val()
+          state.allAliases = Object.keys(state.aliasObject)
           // extract the aliases in use
           state.aliasesInUse = []
           state.allAliases.forEach(el => {
-            if (aliasObject[el].inUse) state.aliasesInUse.push(el)
+            if (state.aliasObject[el].inUse) state.aliasesInUse.push(el)
           })
         } else {
           console.log("No aliases data available")
@@ -174,6 +171,7 @@ onBeforeMount(() => {
 })
 
 const state = reactive({
+  aliasObject: {},
   screenName: '',
   lastScreenName: '',
   signupStep: 1,

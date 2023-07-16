@@ -5,13 +5,16 @@
       <h2>Blader, en kies een schuilnaam</h2>
     </v-row>
     <v-row class="text-center overflow-auto" align="center" justify="center" style="display: flex ">
-      <SelectAliasRow v-for="(num, index) in state.numberOfRows" :aliases-in-use="aliasesInUse" :random-names="state.randomNames"
-        :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
+      <SelectAliasRow v-for="(num, index) in state.numberOfRows" :alias-object="props.aliasObject" :aliases-in-use="aliasesInUse"
+        :random-names="state.randomNames" :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
     </v-row>
   </v-sheet>
 
   <v-sheet class="bottom" max-width="414px">
-    <v-row>
+    <v-alert v-if="props.aliasOccupied" border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
+      Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
+    </v-alert>
+    <v-row v-else>
       <v-col>
         <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
           <template v-slot:prepend>
@@ -37,7 +40,7 @@
 <script setup>
 import { onBeforeMount, reactive, watch } from 'vue'
 import SelectAliasRow from './SelectAliasRow.vue'
-const props = defineProps(['aliasesInUse', 'allAliases', 'aliasOccupied'])
+const props = defineProps(['aliasObject', 'aliasesInUse', 'allAliases', 'aliasOccupied'])
 const emit = defineEmits(['alias-clicked', 'alias-selected', 'reset-signup'])
 
 onBeforeMount(() => {
