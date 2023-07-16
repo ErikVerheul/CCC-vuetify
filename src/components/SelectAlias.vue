@@ -1,39 +1,42 @@
 <template>
   <v-sheet class="top" max-width="414px">
-    <div class="py-2" />
-    <v-row class="d-flex align-center justify-center">
+    <v-row no-gutters class="d-flex align-center justify-center">
       <h2>Blader, en kies een schuilnaam</h2>
     </v-row>
-    <v-row class="text-center overflow-auto" align="center" justify="center" style="display: flex ">
+    <v-row no-gutters class="text-center overflow-auto" align="center" justify="center" style="display: flex ">
       <SelectAliasRow v-for="(num, index) in state.numberOfRows" :alias-object="props.aliasObject" :aliases-in-use="aliasesInUse"
         :random-names="state.randomNames" :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
     </v-row>
   </v-sheet>
 
   <v-sheet class="bottom" max-width="414px">
-    <v-alert v-if="props.aliasOccupied" border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
-      Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
-    </v-alert>
-    <v-row v-else>
-      <v-col>
-        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
-          <template v-slot:prepend>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-          Terug
-        </v-btn>
-      </v-col>
-      <v-spacer></v-spacer>
-      <v-col>
-        <v-btn :disabled="state.aliasSelected === undefined || props.aliasOccupied" flat append-icon="mdi-arrow-right"
-          @click="emit('alias-selected', state.aliasSelected)">
-          Door
-          <template v-slot:append>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-        </v-btn>
-      </v-col>
-    </v-row>
+    <template v-if="props.aliasOccupied">
+      <v-alert border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
+        Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
+      </v-alert>
+    </template>
+    <template v-else>
+      <v-row no-gutters class="py-10">
+        <v-col>
+          <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
+            <template v-slot:prepend>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+            Terug
+          </v-btn>
+        </v-col>
+        <v-spacer></v-spacer>
+        <v-col>
+          <v-btn :disabled="state.aliasSelected === undefined || props.aliasOccupied" flat append-icon="mdi-arrow-right"
+            @click="emit('alias-selected', state.aliasSelected)">
+            Door
+            <template v-slot:append>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </template>
   </v-sheet>
 </template>
 
