@@ -53,8 +53,8 @@
 
 <script setup>
 import { onBeforeMount, reactive, computed, watch } from 'vue'
-import { dbRef } from '../../firebase'
-import { child, get, update } from 'firebase/database'
+import { db, dbRef } from '../../firebase'
+import { ref, child, get, set, remove } from 'firebase/database'
 
 const emit = defineEmits(['m-done'])
 
@@ -63,7 +63,6 @@ onBeforeMount(() => {
 })
 
 const state = reactive({
-  aliasObject: {},
   allAliases: [],
   aliasesInUse: [],
   action: "1",
@@ -124,12 +123,12 @@ function loadAliasData() {
   // get all available aliases
   get(child(dbRef, `aliases/`)).then((snapshot) => {
     if (snapshot.exists()) {
-      state.aliasObject = snapshot.val()
-      state.allAliases = Object.keys(state.aliasObject)
+      const aliasObject = snapshot.val()
+      state.allAliases = Object.keys(aliasObject)
       // extract the aliases in use
       state.aliasesInUse = []
       state.allAliases.forEach(el => {
-        if (state.aliasObject[el].inUse) state.aliasesInUse.push(el)
+        if (aliasObject[el].inUse) state.aliasesInUse.push(el)
       })
     } else {
       console.log("No aliases data available")
@@ -196,47 +195,50 @@ const allowSave = computed(() => {
 
 function saveChange() {
   if (state.action === '1') {
-    const trimmedAlias = state.userAliasInput.trim()
-    state.aliasObject[trimmedAlias] = {
+    // note: Using set() overwrites data at the specified location, including any child nodes.
+    set(ref(db, 'aliases/' + state.userAliasInput), {
       "inUse": false
-    }
+    })
+    state.saveSuccess = 1
     // add the alias to the local array
-    state.allAliases.push(trimmedAlias)
+    state.allAliases.push(state.userAliasInput)
   }
   if (state.action === '2') {
-    for (let key in state.aliasObject) {
-      if (key.toUpperCase() === state.userAliasInput.toUpperCase()) {
-        delete state.aliasObject[key]
+    // get the data of the alias
+    get(child(dbRef, `aliases/` + state.userAliasInput)).then((snapshot) => {
+      if (snapshot.exists()) {
+        // remove the alias from the database
+        remove(child(dbRef, '/aliases/' + state.userAliasInput)).then(() => {
+          // remove the alias from the local array
+          state.allAliases = state.allAliases.filter(a => a !== state.userAliasInput)
+          // add the changed alias to the database
+          set(ref(db, 'aliases/' + state.userNewAliasInput), snapshot.val())
+          state.saveSuccess = 1
+          // add the alias to the local array
+          state.allAliases.push(state.userNewAliasInput)
+        }).catch((error) => {
+          state.saveSuccess = 2
+          console.error('The remove failed, error message = ' + error.message)
+        })
+      } else {
+        console.error('Cannot read the alias data')
+        state.saveSuccess = 2
       }
-    }
-    // remove the changed alias from the local array
-    state.allAliases = state.allAliases.filter(a => a !== state.userAliasInput)
-    state.aliasObject[state.userNewAliasInput] = {
-      "inUse": false
-    }
-    // add the changed alias to the local array
-    state.allAliases.push(state.userNewAliasInput.trim())
+    }).catch((error) => {
+      state.saveSuccess = 2
+      console.error('Cannot read the alias data, error message = ' + error.message)
+    })
   }
   if (state.action === '3') {
-    for (let key in state.aliasObject) {
-      if (key.toUpperCase() === state.userAliasInput.toUpperCase()) {
-        delete state.aliasObject[key]
-      }
-    }
-    // remove the alias from the local array
-    state.allAliases = state.allAliases.filter(a => a !== state.userAliasInput)
+    remove(child(dbRef, '/aliases/' + state.userAliasInput)).then(() => {
+      // remove the alias from the local array
+      state.allAliases = state.allAliases.filter(a => a !== state.userAliasInput)
+      state.saveSuccess = 1
+    }).catch((error) => {
+      state.saveSuccess = 2
+      console.error('The remove failed, error message = ' + error.message)
+    })
   }
-  // save the data
-  const updates = {}
-  updates['aliases/'] = state.aliasObject
-  update(dbRef, updates).then(() => {
-    state.saveSuccess = 1
-    // and read back with any changes made by other users
-    loadAliasData()
-  }).catch((error) => {
-    state.saveSuccess = 2
-    console.error('The write failed, error message = ' + error.message)
-  })
 }
 
 // reset the user input when changing action
@@ -247,7 +249,7 @@ function resetInput() {
 }
 
 // autocomplete the alias name
-watch(() => state.userAliasInput, () => { 
+watch(() => state.userAliasInput, () => {
   // undo the saveSuccess message
   state.saveSuccess = 0
   if (state.action === '2' || state.action === '3') {
