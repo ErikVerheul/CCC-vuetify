@@ -10,3 +10,11 @@
   
   import DefaultView from './View.vue'
 </script>
+
+<style>
+img {
+  width: 100%;
+  object-fit: contain;
+}
+
+</style>
