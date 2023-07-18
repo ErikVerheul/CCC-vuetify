@@ -91,13 +91,12 @@ function resetLogin() {
 // autocomplete the alias name
 watch(() => state.userAliasInput, () => {
   state.aliasOk = false
-  const trimmedInput = state.userAliasInput.trim()
-  const inputLen = trimmedInput.length
+  const inputLen = state.userAliasInput.length
   let lastMatch = undefined
   let exactMatch = false
   let matchcount = 0
   for (const el of props.aliasesInUseInclAdmin) {
-    if (el.substring(0, inputLen).toUpperCase() === trimmedInput.toUpperCase()) {
+    if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
       lastMatch = el
       matchcount++
       // test on exact match
@@ -108,7 +107,7 @@ watch(() => state.userAliasInput, () => {
   if (exactMatch || matchcount === 1) {
     // unique match found
     state.aliasOk = true
-    state.userAliasInput = lastMatch
+    state.userAliasInput = lastMatch.trim()
   }
 })
 

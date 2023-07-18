@@ -251,13 +251,12 @@ watch(() => state.userAliasInput, () => {
   // undo the saveSuccess message
   state.saveSuccess = 0
   if (state.action === '2' || state.action === '3') {
-    const trimmedInput = state.userAliasInput.trim()
-    const inputLen = trimmedInput.length
+    const inputLen = state.userAliasInput.length
     let lastMatch = undefined
     let exactMatch = false
     let matchcount = 0
     for (const el of state.allAliases) {
-      if (el.substring(0, inputLen).toUpperCase() === trimmedInput.toUpperCase()) {
+      if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
         lastMatch = el
         matchcount++
         // test on exact match
@@ -267,7 +266,7 @@ watch(() => state.userAliasInput, () => {
     }
     if (exactMatch || matchcount === 1) {
       // unique match found
-      state.userAliasInput = lastMatch
+      state.userAliasInput = lastMatch.trim()
     }
   }
 })
