@@ -52,10 +52,9 @@
 </template>
 
 <script setup>
-import { onBeforeMount, reactive, computed } from 'vue'
+import { onBeforeMount, reactive, computed, watch } from 'vue'
 import { dbRef } from '../../firebase'
 import { child, get, update } from 'firebase/database'
-import { watch } from 'vue'
 
 const emit = defineEmits(['m-done'])
 
@@ -268,7 +267,6 @@ watch(() => state.userAliasInput, () => {
     }
     if (exactMatch || matchcount === 1) {
       // unique match found
-      state.aliasOk = true
       state.userAliasInput = lastMatch
     }
   }
