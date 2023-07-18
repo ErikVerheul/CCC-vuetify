@@ -5,7 +5,7 @@
         <v-card-title>Login met schuilnaam en PIN code</v-card-title>
         <v-text-field v-model="state.userAliasInput" label="Uw schuilnaam" />
         <v-text-field v-model.trim="state.pinCode" label="PIN" :rules="state.pinRules" />
-        <v-btn class="my-6" v-if="state.aliasOk && PINOK" type="submit" color="black" @click='doSigninUser' rounded="l"
+        <v-btn class="my-6" v-if="state.aliasOk && PINOK" type="submit" color="purple" @click='doSigninUser' rounded="l"
           size="large">Login</v-btn>
         <template v-if="state.loginErrorMsg !== undefined">
           <div class="py-4" />
@@ -90,6 +90,7 @@ function resetLogin() {
 
 // autocomplete the alias name
 watch(() => state.userAliasInput, () => {
+  state.aliasOk = false
   const trimmedInput = state.userAliasInput.trim()
   const inputLen = trimmedInput.length
   let lastMatch = undefined
@@ -108,7 +109,7 @@ watch(() => state.userAliasInput, () => {
     // unique match found
     state.aliasOk = true
     state.userAliasInput = lastMatch
-  } else state.aliasOk = false
+  }
 })
 
 function doSigninUser() {
