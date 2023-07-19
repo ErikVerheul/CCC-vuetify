@@ -2,82 +2,172 @@
   <h2>Onderhoud quiz gegevens</h2>
   <v-sheet>
     <v-text-field v-model="state.headText" label="Kop tekst" />
-    <v-file-input :rules="state.imageRules" v-model="state.image" accept="image/png, image/jpeg, image/bmp" placeholder="Kies een afbeelding"
-      prepend-icon="mdi-camera" label="Afbeelding (png, jpeg of bmp)">
-    </v-file-input>
-
-    <p>Body:</p>
-    <Editor v-model="state.editorValue" api-key="perge5827m6r7l4p6saczkr4xdkk4v0fkgxwwtoltjoskmvw" :init="{
-      plugins: 'lists link image table code help wordcount'
-    }" />
-    <v-text-field :rules="state.questionRules" v-model="state.numberOfQuestions" label="Aantal vragen" />
-    <v-text-field v-model="state.link" label="Link (optioneel)" />
+    <p>Body met optionele afbeelding:</p>
+    <quill-editor v-model:value="state.content"></quill-editor>
+    <v-text-field v-model="state.quizQuestion" :label="qLabel" />
+    <v-row no-gutters>
+      <v-col>
+        <v-btn :disabled="state.questionNumber <= 0" flat prepend-icon="mdi-arrow-up" @click="qBack">
+          <template v-slot:prepend>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+          Edit vorige
+        </v-btn>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col>
+        <v-btn flat append-icon="mdi-arrow-down" @click="qSave">
+          Sla op
+          <template v-slot:append>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+        </v-btn>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col>
+        <v-btn flat append-icon="mdi-arrow-right" @click="qOpenNext">
+          Nieuwe vraag
+          <template v-slot:append>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+        </v-btn>
+      </v-col>
+      <v-spacer></v-spacer>     
+      <v-col>
+        <v-btn :disabled="state.questionNumber >= state.questionsArray.length - 1" flat append-icon="mdi-arrow-down" @click="qForward">
+          Edit volgende
+          <template v-slot:append>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-text-field v-model="state.gameRules" label="Spelregels (optioneel)" />
   </v-sheet>
 
   <p>Preview</p>
   <v-row justify="space-around">
-    <v-col cols="12" md="4">
+    <v-col cols="6" md="4">
+      <p>Preview 414 x 896 px</p>
       <v-sheet class="pa-2" color="grey-lighten-3" height="896" width="414">
         <v-row no-gutters>
           {{ state.headText }}
         </v-row>
         <v-row no-gutters>
-          {{ previewImage() }}
+          <div v-html="state.content"></div>
+        </v-row>
+        <v-row no-gutters>
+          <v-list lines="one" density="compact">
+            <v-list-item v-for="(num, index) in state.questionsArray" :title="composeQuestion(index)"></v-list-item>
+          </v-list>
+        </v-row>
+        <v-row v-if="state.gameRules !== ''" no-gutters>
+          {{ state.gameRules }}
+        </v-row>
+      </v-sheet>
+    </v-col>
+    <v-col cols="6" md="4">
+      <p>Preview 375 x 812 px</p>
+      <v-sheet class="pa-2" color="grey-lighten-3" height="812" width="375">
+        <v-row no-gutters>
+          {{ state.headText }}
+        </v-row>
+        <v-row no-gutters>
+          <div v-html="state.content"></div>
+        </v-row>
+        <v-row no-gutters>
+          <v-list lines="one" density="compact">
+            <v-list-item v-for="(num, index) in state.questionsArray" :title="composeQuestion(index)"></v-list-item>
+          </v-list>
+        </v-row>
+        <v-row v-if="state.gameRules !== ''" no-gutters>
+          {{ state.gameRules }}
         </v-row>
       </v-sheet>
     </v-col>
   </v-row>
 
-  <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('m-done')">
-    <template v-slot:prepend>
-      <v-icon size="x-large" color="purple"></v-icon>
-    </template>
-    Terug
-  </v-btn>
+  <v-row>
+    <v-col>
+      <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('m-done')">
+        <template v-slot:prepend>
+          <v-icon size="x-large" color="purple"></v-icon>
+        </template>
+        Cancel
+      </v-btn>
+    </v-col>
+    <v-spacer></v-spacer>
+    <v-col>
+      <v-btn :disabled="state.questionsArray.length < 1" flat append-icon="mdi-arrow-right" @click="saveQuiz">
+        Bewaar Quiz
+        <template v-slot:append>
+          <v-icon size="x-large" color="purple"></v-icon>
+        </template>
+      </v-btn>
+    </v-col>
+  </v-row>
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import Editor from '@tinymce/tinymce-vue'
+import { computed, reactive } from 'vue'
 const emit = defineEmits(['m-done'])
 
 const state = reactive({
   headText: '',
-  image: undefined,
-  editorValue: '',
-  imageRules: [
-    value => {
-      return !value || !value.length || value[0].size < 2000000 || 'Afbeeldingen moeten kleiner zijn dan 2 MB!'
-    }
-  ],
-  questionRules: [
-    value => {
-      if (value) return true
-
-      return 'Vul 1 of meer cijfers in.'
-    },
-    value => {
-      if (!isNaN(value)) return true
-
-      return 'Vul alleen cijfers in.'
-    },
-    value => {
-      if (value.length >= 1) return true
-
-      return 'Vul minimaal 1 cijfer in.'
-    },
-    value => {
-      if (value.length <= 2) return true
-
-      return 'Vul maximaal 2 cijfer in.'
-    },
-  ],
-  link: '',
-  numberOfQuestions: 1,
+  questionNumber: 0,
+  quizQuestion: '',
+  questionsArray: [],
+  gameRules: ''
 })
 
-function previewImage() {
-  if (state.image) return state.image
-  return 'geen plaatje geladen'
+const qLabel = computed(() => {
+  return 'Quiz vraag ' + (state.questionNumber + 1)
+})
+
+const editMode = computed(() => {
+  if (state.questionNumber < state.questionsArray.length) {
+    return "change"
+  } else return "add"
+})
+
+function composeQuestion(idx) {
+  if (idx > 12) return "Fout: Meer dan 12 vragen?"
+  const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
+  return `${letters[idx]}. ` + state.questionsArray[idx]
+}
+
+function qBack() {
+  if (state.questionNumber > 0) {
+    state.questionNumber--
+    state.quizQuestion = state.questionsArray[state.questionNumber]
+  }
+}
+
+function qOpenNext() {
+  state.questionNumber = state.questionsArray.length
+  state.quizQuestion = ''
+}
+
+function qSave() {
+  if (state.quizQuestion !== '') {
+    if (editMode.value === 'add') state.questionsArray.push(state.quizQuestion)
+    if (editMode.value === 'change') state.questionsArray[state.questionNumber] = state.quizQuestion
+  } else {
+    if (editMode.value === 'change') {
+      // remove this question
+      state.questionsArray.splice(state.questionNumber, 1)
+    }
+  }
+}
+
+function qForward() {
+  if (state.questionNumber < state.questionsArray.length - 1) {
+    state.questionNumber++
+    state.quizQuestion = state.questionsArray[state.questionNumber]
+  }
+}
+
+function saveQuiz() {
+
 }
 </script>
