@@ -32,7 +32,7 @@
           </template>
         </v-btn>
       </v-col>
-      <v-spacer></v-spacer>     
+      <v-spacer></v-spacer>
       <v-col>
         <v-btn :disabled="state.questionNumber >= state.questionsArray.length - 1" flat append-icon="mdi-arrow-down" @click="qForward">
           Edit volgende
@@ -45,7 +45,6 @@
     <v-text-field v-model="state.gameRules" label="Spelregels (optioneel)" />
   </v-sheet>
 
-  <p>Preview</p>
   <v-row justify="space-around">
     <v-col cols="6" md="4">
       <p>Preview 414 x 896 px</p>
@@ -58,7 +57,8 @@
         </v-row>
         <v-row no-gutters>
           <v-list lines="one" density="compact">
-            <v-list-item v-for="(num, index) in state.questionsArray" :title="composeQuestion(index)"></v-list-item>
+            <v-list-item v-for="(num, index) in state.questionsArray" :subtitle="composeQuestion(index)" @click="qAnswer(index)"
+              :style="{'background-color': bgColor}"></v-list-item>
           </v-list>
         </v-row>
         <v-row v-if="state.gameRules !== ''" no-gutters>
@@ -77,7 +77,8 @@
         </v-row>
         <v-row no-gutters>
           <v-list lines="one" density="compact">
-            <v-list-item v-for="(num, index) in state.questionsArray" :title="composeQuestion(index)"></v-list-item>
+            <v-list-item v-for="(num, index) in state.questionsArray" :subtitle="composeQuestion(index)" @click="qAnswer(index)"
+              :style="{'background-color': bgColor}"></v-list-item>
           </v-list>
         </v-row>
         <v-row v-if="state.gameRules !== ''" no-gutters>
@@ -85,6 +86,9 @@
         </v-row>
       </v-sheet>
     </v-col>
+  </v-row>
+  <v-row v-if="countGoodAnswers() < 1">
+    <p>Klik op de vragen in de preview om de goede antwoorden te selecteren.</p>
   </v-row>
 
   <v-row>
@@ -98,7 +102,7 @@
     </v-col>
     <v-spacer></v-spacer>
     <v-col>
-      <v-btn :disabled="state.questionsArray.length < 1" flat append-icon="mdi-arrow-right" @click="saveQuiz">
+      <v-btn :disabled="state.questionsArray.length < 1 || countGoodAnswers() < 1" flat append-icon="mdi-arrow-right" @click="saveQuiz">
         Bewaar Quiz
         <template v-slot:append>
           <v-icon size="x-large" color="purple"></v-icon>
@@ -117,8 +121,12 @@ const state = reactive({
   questionNumber: 0,
   quizQuestion: '',
   questionsArray: [],
-  gameRules: ''
+  gameRules: '',
+  quizAnswers: {},
 })
+
+// must be non-reactive
+let bgColor = undefined
 
 const qLabel = computed(() => {
   return 'Quiz vraag ' + (state.questionNumber + 1)
@@ -133,6 +141,10 @@ const editMode = computed(() => {
 function composeQuestion(idx) {
   if (idx > 12) return "Fout: Meer dan 12 vragen?"
   const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
+  bgColor = 'white' 
+  if (state.quizAnswers[idx]) {
+    bgColor = 'aqua'
+  }
   return `${letters[idx]}. ` + state.questionsArray[idx]
 }
 
@@ -167,7 +179,26 @@ function qForward() {
   }
 }
 
-function saveQuiz() {
-
+function qAnswer(idx) {
+  if (state.quizAnswers[idx]) {
+    state.quizAnswers[idx] = false   
+  } else {
+    state.quizAnswers[idx] = true
+  }
 }
-</script>
+
+function countGoodAnswers() {
+  const anwwers = Object.keys(state.quizAnswers)
+  let count = 0
+  for (const el of anwwers) {
+    if (el) count++
+  }
+  return count
+}
+
+function saveQuiz() {
+  console.log('countGoodAnswers = ' + countGoodAnswers)
+}
+
+</script> 
+
