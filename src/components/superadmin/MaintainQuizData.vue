@@ -1,10 +1,29 @@
 <template>
-  <h2>Onderhoud quiz gegevens</h2>
   <v-sheet>
-    <v-text-field v-model="state.headText" label="Kop tekst" />
-    <p>Body met optionele afbeelding:</p>
-    <quill-editor v-model:value="state.content"></quill-editor>
-    <v-text-field v-model="state.quizQuestion" :label="qLabel" />
+    <v-row class="d-flex align-center justify-center">
+      <h2>Onderhoud quiz gegevens</h2>
+    </v-row>
+    <v-row v-if="state.selectMode">
+      <v-col>
+        <v-btn @click="selectLoadQuiz">Laad een bestaande quiz</v-btn>
+      </v-col>
+      <v-col>
+        <v-btn @click="createNew">Maak een nieuwe quiz</v-btn>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-text-field v-model="state.headText" label="Kop tekst" />
+      </v-col>
+      <v-col cols="12">
+        <p>Body met optionele afbeelding:</p>
+        <quill-editor v-model:value="state.content"></quill-editor>
+      </v-col>
+      <v-col cols="12">
+        <v-text-field v-model="state.quizQuestion" :label="qLabel" />
+      </v-col>
+    </v-row>
+
     <v-row no-gutters>
       <v-col>
         <v-btn :disabled="state.questionNumber <= 0" flat prepend-icon="mdi-arrow-up" @click="qBack">
@@ -110,7 +129,8 @@
     </v-col>
     <v-spacer></v-spacer>
     <v-col>
-      <v-btn :disabled="state.questionsArray.length < 1 || countGoodAnswers() === 0" flat append-icon="mdi-arrow-right" @click="saveQuiz">
+      <v-btn :disabled="state.questionsArray.length < 1 || countGoodAnswers() === 0" flat append-icon="mdi-arrow-right"
+        @click="state.showSaveQuiz = true">
         Bewaar Quiz
         <template v-slot:append>
           <v-icon size="x-large" color="purple"></v-icon>
@@ -118,14 +138,83 @@
       </v-btn>
     </v-col>
   </v-row>
+
+  <v-dialog v-model="state.showQuizSelect" width="50%">
+    <v-card>
+      <v-card-title>Kies een bestaande quiz</v-card-title>
+      <v-text-field v-model="state.quizName" :rules="state.quizNameRules" label="Bestaande quiz naam"></v-text-field>
+      <v-card-actions>
+        <v-row>
+          <v-col>
+            <v-btn prepend-icon="mdi-arrow-left" @click="quitQuizSelect">
+              <template v-slot:prepend>
+                <v-icon size="x-large" color="purple"></v-icon>
+              </template>
+              Terug
+            </v-btn>
+          </v-col>
+          <v-spacer></v-spacer>
+          <v-col>
+            <v-btn :disabled="!state.allQuizNames.includes(state.quizName)" append-icon="mdi-arrow-right" @click="doLoadQuiz">
+              Door
+              <template v-slot:append>
+                <v-icon size="x-large" color="purple"></v-icon>
+              </template>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="state.showSaveQuiz" width="50%">
+    <v-card>
+      <v-card-title>Bewaar de quiz</v-card-title>
+      <v-text-field v-model="state.quizName" :rules="state.saveQuizNameRules" label="Unieke quiz naam"></v-text-field>
+      <v-card-actions>
+        <v-row>
+          <v-col>
+            <v-btn prepend-icon="mdi-arrow-left" @click="state.showSaveQuiz = false">
+              <template v-slot:prepend>
+                <v-icon size="x-large" color="purple"></v-icon>
+              </template>
+              Terug
+            </v-btn>
+          </v-col>
+          <v-spacer></v-spacer>
+          <v-col>
+            <v-btn append-icon="mdi-arrow-right" @click="saveQuiz">
+              Bewaar Quiz
+              <template v-slot:append>
+                <v-icon size="x-large" color="purple"></v-icon>
+              </template>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
-import { computed, reactive } from 'vue'
+import { onBeforeMount, computed, reactive } from 'vue'
+import { db, dbRef } from '../../firebase'
+import { ref, child, get, set, remove } from 'firebase/database'
 const emit = defineEmits(['m-done'])
 
+onBeforeMount(() => {
+  loadQuizNames()
+})
+
 const state = reactive({
+  indexObject: {},
+  selectMode: true,
+  allQuizNames: [],
+  showQuizSelect: false,
+  quizName: '',
+  showSaveQuiz: false,
   headText: '',
+  content: undefined,
   questionNumber: 0,
   quizQuestion: '',
   questionsArray: [],
@@ -133,9 +222,37 @@ const state = reactive({
   quizAnswers: {},
   explanationUrl: undefined,
   urlRules: [
-    (value) => isURL(value) || "URL is niet valide"
+    value => {
+      const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}/gm
+      return regex.test(value) || 'Onjuist url formaat'
+    }
+  ],
+  quizNameRules: [
+    value => {
+      return state.allQuizNames.includes(value) || 'Quiz naam niet genonden'
+    }
+  ],
+  saveQuizNameRules: [
+    value => {
+      return state.allQuizNames.includes(value) || 'Quiz naam niet genonden. Nieuwe quiz?'
+    }
   ]
 })
+
+function loadQuizNames() {
+  // get all available quiz names
+  get(child(dbRef, `quizes/index/`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      state.indexObject = snapshot.val()
+      state.allQuizNames = Object.keys(state.indexObject)
+      console.log('loadQuizNames: state.allQuizNames = ' + state.allQuizNames)
+    } else {
+      console.log("No quiz names available")
+    }
+  }).catch((error) => {
+    console.error('While reading all available quiz names from database: error message = ' + error.message)
+  })
+}
 
 // must be non-reactive
 let bgColor = undefined
@@ -150,14 +267,48 @@ const editMode = computed(() => {
   } else return "add"
 })
 
-function isURL(str) {
-  let url;
-  try {
-    url = new URL(str);
-  } catch (_) {
-    return false;
-  }
-  return url.protocol === "http:" || url.protocol === "https:"
+function selectLoadQuiz() {
+  state.selectMode = false
+  state.showQuizSelect = true
+}
+
+function doLoadQuiz() {
+  state.showQuizSelect = false
+  // get all the quiz data
+  get(child(dbRef, `quizes/` + state.quizName)).then((snapshot) => {
+    if (snapshot.exists()) {
+      const quizObject = snapshot.val()
+      state.headText = quizObject.headText
+      state.content = quizObject.body
+      state.questionsArray = quizObject.questionsArray
+      state.quizAnswers = quizObject.answers
+      state.gameRules = quizObject.gameRules
+      state.explanationUrl = quizObject.explanationUrl
+    } else {
+      console.log("No quiz data available")
+    }
+  }).catch((error) => {
+    console.error('While reading the quiz data from database: error message = ' + error.message)
+  })
+}
+
+function quitQuizSelect() {
+  state.showQuizSelect = false
+  state.selectMode = true
+}
+
+function clearAll() {
+  state.headText = ''
+  state.content = undefined
+  state.questionsArray = []
+  state.quizAnswers = []
+  state.gameRules = ''
+  state.explanationUrl = ''
+}
+
+function createNew() {
+  clearAll()
+  state.selectMode = false
 }
 
 function composeQuestion(idx) {
@@ -210,7 +361,6 @@ function qAnswer(idx) {
 }
 
 function countGoodAnswers() {
-  console.log('state.quizAnswers = ' + JSON.stringify(state.quizAnswers, null, 2))
   const answers = Object.keys(state.quizAnswers)
   let count = 0
   for (const el of answers) {
@@ -220,7 +370,34 @@ function countGoodAnswers() {
 }
 
 function saveQuiz() {
-  console.log('countGoodAnswers = ' + countGoodAnswers())
+  // note: Using set() overwrites data at the specified location, including any child nodes.
+  set(ref(db, 'quizes/' + state.quizName), {
+    "headText": state.headText,
+    "body": state.content,
+    "questionsArray": state.questionsArray,
+    "answers": state.quizAnswers,
+    "gameRules": state.gameRules,
+    "explanationUrl": state.explanationUrl
+  })
+
+  // update the index
+  if (!state.allQuizNames.includes(state.quizName)) {
+    state.allQuizNames.push(state.quizName)
+  }
+  const newIndexObject = {}
+  for (const el of state.allQuizNames) {
+    if (state.indexObject[el]) {
+      //copy existing entry
+      newIndexObject[el] = state.indexObject[el]
+    } else {
+      // create new entry
+      newIndexObject[el] = { 'state': 'created' }
+    }
+  }
+  set(ref(db, 'quizes/index/'), newIndexObject)
+  state.showSaveQuiz = false
+  state.selectMode = true
+  clearAll()
 }
 
 </script> 

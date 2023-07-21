@@ -9,6 +9,10 @@
       "aliases": {
         ".read": "auth.uid != null",
         ".write": "auth.uid != null"
+      },
+      "quizes": {
+        ".read": "auth.uid != null",
+        ".write": "auth.uid != null"
       }
   }
 }
