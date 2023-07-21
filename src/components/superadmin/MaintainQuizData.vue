@@ -63,11 +63,14 @@
     </v-row>
     <v-row>
       <v-col cols="12">
+        <v-textarea v-model="state.resultInfo" label="Toelichting op goed/fout antwoord" />
+      </v-col>
+      <v-col cols="12">
         <v-text-field v-model="state.gameRules" label="Spelregels (optioneel)" />
       </v-col>
       <v-col cols="6">
         <v-text-field v-model="state.explanationUrl" :rules="state.urlRules" placeholder="https://speelmee.app/toelichting1"
-          label="URL naar toelichting (optioneel)" />
+          label="URL naar meer info (optioneel)" />
       </v-col>
     </v-row>
   </v-sheet>
@@ -91,6 +94,13 @@
         <v-row v-if="state.gameRules !== ''" no-gutters>
           {{ state.gameRules }}
         </v-row>
+        <v-row>
+          <v-col cols="12">
+            <hr>
+            <h4>Toelichting op goed/fout antwoord:</h4>
+            <p>{{ state.resultInfo }}</p>
+          </v-col>
+        </v-row>
       </v-sheet>
     </v-col>
     <v-col cols="6" md="4">
@@ -110,6 +120,13 @@
         </v-row>
         <v-row v-if="state.gameRules !== ''" no-gutters>
           {{ state.gameRules }}
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+            <hr>
+            <h4>Toelichting op goed/fout antwoord:</h4>
+            <p>{{ state.resultInfo }}</p>
+          </v-col>
         </v-row>
       </v-sheet>
     </v-col>
@@ -220,6 +237,7 @@ const state = reactive({
   questionsArray: [],
   gameRules: '',
   quizAnswers: {},
+  resultInfo: '',
   explanationUrl: undefined,
   urlRules: [
     value => {
@@ -282,6 +300,7 @@ function doLoadQuiz() {
       state.content = quizObject.body
       state.questionsArray = quizObject.questionsArray
       state.quizAnswers = quizObject.answers
+      state.resultInfo = quizObject.resultInfo
       state.gameRules = quizObject.gameRules
       state.explanationUrl = quizObject.explanationUrl
     } else {
@@ -302,6 +321,7 @@ function clearAll() {
   state.content = undefined
   state.questionsArray = []
   state.quizAnswers = []
+  state.resultInfo = ''
   state.gameRules = ''
   state.explanationUrl = ''
 }
@@ -376,6 +396,7 @@ function saveQuiz() {
     "body": state.content,
     "questionsArray": state.questionsArray,
     "answers": state.quizAnswers,
+    "resultInfo": state.resultInfo,
     "gameRules": state.gameRules,
     "explanationUrl": state.explanationUrl
   })
