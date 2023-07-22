@@ -79,70 +79,14 @@
       </v-col>
     </v-row>
   </v-sheet>
-
-  <v-row justify="space-around">
-    <v-col cols="6" md="4">
-      <p>Preview 414 x 896 px</p>
-      <v-sheet class="pa-2" color="grey-lighten-3" height="896" width="414">
-        <v-row no-gutters>
-          {{ state.headText }}
-        </v-row>
-        <v-row no-gutters>
-          <div v-html="state.content"></div>
-        </v-row>
-        <v-row no-gutters>
-          <v-list lines="two" density="compact">
-            <v-list-item v-for="(num, index) in state.questionsArray" :subtitle="composeQuestion(index)" @click="qAnswer(index)"
-              :style="{ 'background-color': bgColor }"></v-list-item>
-          </v-list>
-        </v-row>
-        <v-row v-if="state.gameRules !== ''" no-gutters>
-          {{ state.gameRules }}
-        </v-row>
-        <v-row>
-          <v-col cols="12">
-            <hr>
-            <h4>Toelichting op goed/fout antwoord:</h4>
-            <p>{{ state.resultInfo }}</p>
-          </v-col>
-        </v-row>
-      </v-sheet>
-    </v-col>
-    <v-col cols="6" md="4">
-      <p>Preview 375 x 812 px</p>
-      <v-sheet class="pa-2" color="grey-lighten-3" height="812" width="375">
-        <v-row no-gutters>
-          {{ state.headText }}
-        </v-row>
-        <v-row no-gutters>
-          <div v-html="state.content"></div>
-        </v-row>
-        <v-row no-gutters>
-          <v-list lines="two" density="compact">
-            <v-list-item v-for="(num, index) in state.questionsArray" :subtitle="composeQuestion(index)" @click="qAnswer(index)"
-              :style="{ 'background-color': bgColor }"></v-list-item>
-          </v-list>
-        </v-row>
-        <v-row v-if="state.gameRules !== ''" no-gutters>
-          {{ state.gameRules }}
-        </v-row>
-        <v-row>
-          <v-col cols="12">
-            <hr>
-            <h4>Toelichting op goed/fout antwoord:</h4>
-            <p>{{ state.resultInfo }}</p>
-          </v-col>
-        </v-row>
-      </v-sheet>
-    </v-col>
-  </v-row>
   <v-row v-if="countGoodAnswers() === 0">
-    <p>Klik op de vragen in de preview om de goede antwoorden te selecteren.</p>
+    <v-col cols="12">
+      <p>Klik op de vragen in de preview om de goede antwoorden te selecteren.</p>
+    </v-col>
   </v-row>
-
   <v-row>
     <v-col>
-      <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('m-done')">
+      <v-btn prepend-icon="mdi-arrow-left" @click="emit('m-done')">
         <template v-slot:prepend>
           <v-icon size="x-large" color="purple"></v-icon>
         </template>
@@ -151,13 +95,68 @@
     </v-col>
     <v-spacer></v-spacer>
     <v-col>
-      <v-btn :disabled="state.questionsArray.length < 1 || countGoodAnswers() === 0" flat append-icon="mdi-arrow-right"
+      <v-btn :disabled="state.questionsArray.length < 1 || countGoodAnswers() === 0" append-icon="mdi-arrow-right"
         @click="state.showSaveQuiz = true">
         Bewaar Quiz
         <template v-slot:append>
           <v-icon size="x-large" color="purple"></v-icon>
         </template>
       </v-btn>
+    </v-col>
+  </v-row>
+
+  <v-row justify="space-around">
+    <v-col cols="6" md="4">
+      <p>Preview 414 x 1792 px (2 x schermhoogte)</p>
+      <v-sheet class="pa-2" color="grey-lighten-3" height="1792" width="414">
+        <v-row no-gutters>
+          <h3>{{ state.headText }}</h3>
+        </v-row>
+        <v-row no-gutters>
+          <div v-html="state.content"></div>
+        </v-row>
+        <v-row no-gutters>
+          <v-list lines="two" density="compact">
+            <v-list-item v-for="(num, index) in state.questionsArray" :subtitle="composeQuestion(index)" @click="qAnswer(index)"
+              :style="{ 'background-color': bgColor }"></v-list-item>
+          </v-list>
+        </v-row>
+        <v-row v-if="state.gameRules !== ''" no-gutters>
+          <p class="py-2">{{ state.gameRules }}</p>
+        </v-row>
+        <h4 class="py-3">Toelichting op goed/fout antwoord:</h4>
+        <v-row>
+          <v-col cols="12">
+            <p>{{ state.resultInfo }}</p>
+          </v-col>
+        </v-row>
+      </v-sheet>
+    </v-col>
+    <v-col cols="6" md="4">
+      <p>Preview 375 x 1624 px (2 x schermhoogte)</p>
+      <v-sheet class="pa-2" color="grey-lighten-3" height="1624" width="375">
+        <v-row no-gutters>
+          <h3>{{ state.headText }}</h3>
+        </v-row>
+        <v-row no-gutters>
+          <div v-html="state.content"></div>
+        </v-row>
+        <v-row no-gutters>
+          <v-list lines="two" density="compact">
+            <v-list-item v-for="(num, index) in state.questionsArray" :subtitle="composeQuestion(index)" @click="qAnswer(index)"
+              :style="{ 'background-color': bgColor }"></v-list-item>
+          </v-list>
+        </v-row>
+        <v-row v-if="state.gameRules !== ''" no-gutters>
+          <p class="py-2">{{ state.gameRules }}</p>
+        </v-row>
+        <h4 class="py-3">Toelichting op goed/fout antwoord:</h4>
+        <v-row>
+          <v-col cols="12">
+            <p>{{ state.resultInfo }}</p>
+          </v-col>
+        </v-row>
+      </v-sheet>
     </v-col>
   </v-row>
 
@@ -335,7 +334,7 @@ function doLoadQuiz() {
       state.resultInfo = quizObject.resultInfo
       state.gameRules = quizObject.gameRules
       state.explanationUrl = quizObject.explanationUrl
-      console.log('loaded = ' + JSON.stringify(quizObject, null, 2))
+      state.questionNumber = state.questionsArray.length - 1
     } else {
       console.log("No quiz data available")
     }
