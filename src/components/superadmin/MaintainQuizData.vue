@@ -17,16 +17,16 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12">
-        <v-text-field v-model="state.headText" label="Kop tekst" />
-      </v-col>
+      <v-text-field v-model="state.headText" label="Kop tekst" />
+    </v-row>
+    <v-row>
       <v-col cols="12">
         <p>Body met optionele afbeelding:</p>
         <quill-editor v-model:value="state.content"></quill-editor>
       </v-col>
-      <v-col cols="12">
-        <v-text-field v-model="state.quizQuestion" :label="qLabel" />
-      </v-col>
+    </v-row>
+    <v-row class="py-15">
+      <v-text-field v-model="state.quizQuestion" :label="qLabel" />
     </v-row>
 
     <v-row no-gutters>
@@ -392,6 +392,7 @@ function quitRemoveQuizSelect() {
 
 function clearAll() {
   state.quizName = ''
+  state.questionNumber = 0
   state.quizQuestion = ''
   state.headText = ''
   state.content = undefined
