@@ -94,7 +94,7 @@
       </v-btn>
     </v-col>
     <v-spacer></v-spacer>
-    <v-col>
+    <v-col class="text-right">
       <v-btn :disabled="state.questionsArray.length < 1 || countGoodAnswers() === 0" append-icon="mdi-arrow-right"
         @click="state.showSaveQuiz = true">
         Bewaar Quiz
