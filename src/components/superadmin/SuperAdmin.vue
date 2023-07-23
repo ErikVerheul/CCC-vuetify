@@ -5,7 +5,6 @@
         <v-navigation-drawer width="100%" class="bg-deep-purple" theme="dark" permanent>
           <v-list color="transparent">
             <v-list-item prepend-icon="mdi-view-dashboard" title="Schuilnamen onderhouden" @click="state.action = 'mAliases'"></v-list-item>
-            <v-list-item prepend-icon="mdi-account" title="Schuilnaam info onderhouden" @click="state.action = 'maInfo'"></v-list-item>
             <v-list-item prepend-icon="mdi-account" title="Quiz data onderhouden" @click="state.action = 'mQuiz'"></v-list-item>
             <v-list-item prepend-icon="mdi-account-box" title="Berichten maken en versturen" @click="state.action = 'mMess'"></v-list-item>
             <v-list-item prepend-icon="mdi-gavel" title="Andere gebruikers rechten geven" @click="state.action = 'mRoles'"></v-list-item>
@@ -26,7 +25,6 @@
     </v-sheet>
 
     <MaintainAliases v-if="state.action === 'mAliases'" @m-done="state.action = 'menu'"></MaintainAliases>
-    <MaintainAliasInfo v-if="state.action === 'maInfo'" @m-done="state.action = 'menu'"></MaintainAliasInfo>
     <MaintainQuizData v-if="state.action === 'mQuiz'" @m-done="state.action = 'menu'"></MaintainQuizData>
     <MaintainMessages v-if="state.action === 'mMess'" @m-done="state.action = 'menu'"></MaintainMessages>
     <MaintainRoles v-if="state.action === 'mRoles'" @m-done="state.action = 'menu'"></MaintainRoles>
@@ -37,7 +35,6 @@
 import { reactive } from 'vue'
 import router from '@/router'
 import MaintainAliases from './MaintainAliases.vue'
-import MaintainAliasInfo from './MaintainAliasInfo.vue'
 import MaintainQuizData from './MaintainQuizData.vue'
 import MaintainMessages from './MaintainMessages.vue'
 import MaintainRoles from './MaintainRoles.vue'
