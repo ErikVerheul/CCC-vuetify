@@ -5,6 +5,7 @@
       <v-radio @change="resetInput" label="Toevoegen" value="1"></v-radio>
       <v-radio @change="resetInput" label="Veranderen" value="2"></v-radio>
       <v-radio @change="resetInput" label="Verwijderen" value="3"></v-radio>
+      <v-radio @change="resetInput" label="Info toevoegen/onderhouden" value="4"></v-radio>
     </v-radio-group>
 
     <v-row>
@@ -21,40 +22,61 @@
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
-
-    <v-card-actions>
-      <v-row>
-        <v-col>
-          <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('m-done')">
-            <template v-slot:prepend>
-              <v-icon size="x-large" color="purple"></v-icon>
-            </template>
-            Terug
-          </v-btn>
+    <v-row>
+      <v-col>
+        <v-btn prepend-icon="mdi-arrow-left" @click="emit('m-done')">
+          <template v-slot:prepend>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+          Terug
+        </v-btn>
+      </v-col>
+      <v-col v-if="state.saveSuccess === 1">
+        "{{ saveButtonText }}" is gelukt
+      </v-col>
+      <v-col v-if="!state.saveSuccess === 2">
+        "{{ saveButtonText }}" is mislukt
+      </v-col>
+      <v-col class="text-right">
+        <v-btn :disabled="!allowSave" :color="saveButtonColor" append-icon="mdi-arrow-right" @click="doSave">
+          {{ saveButtonText }}
+          <template v-slot:append>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row v-if="showEditInfo()" class="d-flex align-center justify-center">
+      <h2>Onderhoud schuilnaam info</h2>
+      <v-sheet>
+        <quill-editor v-model:value="state.aliasInfoContent"></quill-editor>
+      </v-sheet>
+      <v-row justify="space-around">
+        <v-col cols="6" md="4">
+          <p>Preview 414 x 896 px</p>
+          <v-sheet class="pa-2" color="grey-lighten-3" height="896" width="414">
+            <v-row no-gutters>
+              <div v-html="state.aliasInfoContent"></div>
+            </v-row>
+          </v-sheet>
         </v-col>
-        <v-col v-if="state.saveSuccess === 1">
-          {{ saveButtonText }} is gelukt
-        </v-col>
-        <v-col v-if="!state.saveSuccess === 2">
-          {{ saveButtonText }} is mislukt
-        </v-col>
-        <v-col>
-          <v-btn :disabled="!allowSave" :color="saveButtonColor" flat append-icon="mdi-arrow-right" @click="saveChange">
-            {{ saveButtonText }}
-            <template v-slot:append>
-              <v-icon size="x-large" color="purple"></v-icon>
-            </template>
-          </v-btn>
+        <v-col cols="6" md="4">
+          <p>Preview 375 x 812 px</p>
+          <v-sheet class="pa-2" color="grey-lighten-3" height="812" width="375">
+            <v-row no-gutters>
+              <div v-html="state.aliasInfoContent"></div>
+            </v-row>
+          </v-sheet>
         </v-col>
       </v-row>
-    </v-card-actions>
+    </v-row>
   </v-card>
 </template>
 
 <script setup>
 import { onBeforeMount, reactive, computed, watch } from 'vue'
 import { db, dbRef } from '../../firebase'
-import { ref, child, get, set, remove } from 'firebase/database'
+import { ref, child, get, set, update, remove } from 'firebase/database'
 
 const emit = defineEmits(['m-done'])
 
@@ -90,6 +112,12 @@ const state = reactive({
         return 'Deze schuilnaam bestaat al'
       }
       return true
+    },
+    value => {
+      if ((state.action === '4') && !aliasExists(value)) {
+        return 'Deze schuilnaam bestaat niet'
+      }
+      return true
     }
   ],
   newNameRules: [
@@ -116,12 +144,13 @@ const state = reactive({
       return true
     }
   ],
-  saveSuccess: 0
+  saveSuccess: 0,
+  aliasInfoContent: ''
 })
 
 function loadAliasData() {
   // get all available aliases
-  get(child(dbRef, `aliases/`)).then((snapshot) => {
+  get(child(dbRef, `/aliases/`)).then((snapshot) => {
     if (snapshot.exists()) {
       const aliasObject = snapshot.val()
       state.allAliases = Object.keys(aliasObject)
@@ -148,7 +177,6 @@ function isAliasInUse(alias) {
 }
 
 function aliasExists(alias) {
-  if (alias.toUpperCase() === 'SYSTEM' || alias.toUpperCase() === 'ADMIN') return true
   for (const el of state.allAliases) {
     if (el.toUpperCase() === alias.toUpperCase()) {
       return true
@@ -157,10 +185,15 @@ function aliasExists(alias) {
   return false
 }
 
+function showEditInfo() {
+  return state.action === '4' && userAliasInputOk.value && aliasExists(state.userAliasInput)
+}
+
 const textFieldLabel = computed(() => {
   if (state.action === '1') return 'Nieuwe schuilnaam'
-  if (state.action === '2') return 'Te veranderen'
-  if (state.action === '3') return 'Te verwijderen'
+  if (state.action === '2') return 'Te veranderen schuilnaam'
+  if (state.action === '3') return 'Te verwijderen schuilnaam'
+  if (state.action === '4') return 'Schuilnaam waaraan info toe te voegen/te veranderen'
   return ''
 })
 
@@ -168,6 +201,7 @@ const saveButtonText = computed(() => {
   if (state.action === '1') return 'Voeg toe'
   if (state.action === '2') return 'Sla op'
   if (state.action === '3') return 'Verwijder'
+  if (state.action === '4') return 'Sla info op'
   return ''
 })
 
@@ -190,13 +224,14 @@ const allowSave = computed(() => {
   if (state.action === '1') return userAliasInputOk.value && !aliasExists(state.userAliasInput) && !isAliasInUse(state.userAliasInput)
   if (state.action === '2') return userAliasInputOk.value && userNewAliasInputOk.value && !aliasExists(state.userNewAliasInput) && !isAliasInUse(state.userNewAliasInput)
   if (state.action === '3') return userAliasInputOk.value && aliasExists(state.userAliasInput) && !isAliasInUse(state.userAliasInput)
+  if (state.action === '4') return userAliasInputOk.value && aliasExists(state.userAliasInput)
   return false
 })
 
-function saveChange() {
+function saveAliasEntry() {
   if (state.action === '1') {
     // note: Using set() overwrites data at the specified location, including any child nodes.
-    set(ref(db, 'aliases/' + state.userAliasInput), {
+    set(ref(db, '/aliases/' + state.userAliasInput), {
       "inUse": false
     })
     state.saveSuccess = 1
@@ -205,14 +240,14 @@ function saveChange() {
   }
   if (state.action === '2') {
     // get the data of the alias
-    get(child(dbRef, `aliases/` + state.userAliasInput)).then((snapshot) => {
+    get(child(dbRef, `/aliases/` + state.userAliasInput)).then((snapshot) => {
       if (snapshot.exists()) {
         // remove the alias from the database
         remove(child(dbRef, '/aliases/' + state.userAliasInput)).then(() => {
           // remove the alias from the local array
           state.allAliases = state.allAliases.filter(a => a !== state.userAliasInput)
           // add the changed alias to the database
-          set(ref(db, 'aliases/' + state.userNewAliasInput), snapshot.val())
+          set(ref(db, '/aliases/' + state.userNewAliasInput), snapshot.val())
           state.saveSuccess = 1
           // add the alias to the local array
           state.allAliases.push(state.userNewAliasInput)
@@ -241,18 +276,38 @@ function saveChange() {
   }
 }
 
+function saveAliasInfo() {
+  // update the info data the selected alias
+  const updates = {}
+  updates[`/aliases/${state.userAliasInput}/info`] = state.aliasInfoContent
+  update(dbRef, updates).then(() => {
+    state.saveSuccess = 1
+  }).catch((error) => {
+    state.saveSuccess = 2
+    console.error('The write failed, error message = ' + error.message)
+  })
+}
+
+function doSave() {
+  if (state.action === '1') saveAliasEntry()
+  if (state.action === '2') saveAliasEntry()
+  if (state.action === '3') saveAliasEntry()
+  if (state.action === '4') saveAliasInfo()
+}
+
 // reset the user input when changing action
 function resetInput() {
   state.userAliasInput = ''
   state.userNewAliasInput = ''
   state.saveSuccess = 0
+  state.aliasInfoContent = ''
 }
 
 // autocomplete the alias name
 watch(() => state.userAliasInput, () => {
   // undo the saveSuccess message
   state.saveSuccess = 0
-  if (state.action === '2' || state.action === '3') {
+  if (state.action === '2' || state.action === '3' || state.action === '4') {
     const inputLen = state.userAliasInput.length
     let lastMatch = undefined
     let exactMatch = false
@@ -268,7 +323,19 @@ watch(() => state.userAliasInput, () => {
     }
     if (exactMatch || matchcount === 1) {
       // unique match found
-      state.userAliasInput = lastMatch.trim()
+      if (state.action === '4' && state.userAliasInput !== lastMatch.trim()) {
+        // prevent loading again after that state.userAliasInput was set (triggers another watch)
+        state.userAliasInput = lastMatch.trim()
+        // initialize the content
+        get(child(dbRef, `/aliases/${state.userAliasInput}/info`)).then((snapshot) => {
+          if (snapshot.exists()) {
+            state.aliasInfoContent = snapshot.val()
+          }
+        }).catch((error) => {
+          console.error('While reading all available aliases from database: error message = ' + error.message)
+        })
+      } else
+        state.userAliasInput = lastMatch.trim()
     }
   }
 })
