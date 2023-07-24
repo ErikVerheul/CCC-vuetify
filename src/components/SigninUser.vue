@@ -1,5 +1,18 @@
 <template>
-  <v-row>
+  <v-row class="d-flex align-center justify-center">
+    <v-col cols="auto">
+      <v-card variant="text">
+        <v-card-title>Gebruikt u deze app voor het eerst?</v-card-title>
+        <v-btn size="x-large" variant="outlined" @click="emit('change-to-signup')">Ga naar nieuwe aanmelding</v-btn>
+      </v-card>
+    </v-col>
+  </v-row>
+  <v-row class="d-flex align-center justify-center">
+    <v-col cols="12">
+      <p>of hebt u al een account</p>
+    </v-col>
+  </v-row>
+  <v-row class="d-flex align-center justify-center">
     <v-col cols="auto">
       <v-card variant="text">
         <v-card-title>Login met schuilnaam en PIN code</v-card-title>
@@ -9,23 +22,12 @@
           size="large">Login</v-btn>
         <template v-if="state.loginErrorMsg !== undefined">
           <div class="py-4" />
-          <h2>Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
+          <h2>Fout: {{ state.loginErrorMsg }}</h2>
           <div class="py-4" />
-          <h3>Controleer of uw schuilnaam en pincode kloppen en probeer opnieuw. Of kies een andere schuilnaam en pincode met de knop
-            hieronder.
+          <h3>Controleer of uw schuilnaam en pincode kloppen en probeer opnieuw
           </h3>
         </template>
       </v-card>
-    </v-col>
-  </v-row>
-  <v-row v-if="state.loginErrorMsg === undefined" class="d-flex align-center justify-center">
-    <v-col cols="auto">
-      <p>of</p>
-    </v-col>
-  </v-row>
-  <v-row class="d-flex align-center justify-center">
-    <v-col cols="auto">
-      <v-btn type="button" @click="emit('change-to-signup')">Ga naar nieuwe aanmelding</v-btn>
     </v-col>
   </v-row>
   <div class="py-12" />
