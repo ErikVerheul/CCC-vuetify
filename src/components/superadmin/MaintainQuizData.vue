@@ -233,7 +233,7 @@
           </v-col>
           <v-spacer></v-spacer>
           <v-col>
-            <v-btn append-icon="mdi-arrow-right" @click="saveQuizQ">
+            <v-btn :disabled="state.quizQName === ''" append-icon="mdi-arrow-right" @click="saveQuizQ">
               Bewaar Quiz-vraag
               <template v-slot:append>
                 <v-icon size="x-large" color="purple"></v-icon>
@@ -453,26 +453,27 @@ function saveQuizQ() {
     "resultInfo": state.resultInfo,
     "gameRules": state.gameRules,
     "explanationUrl": state.explanationUrl
-  })
-
-  // update the index
-  if (!state.allQuizQNames.includes(state.quizQName)) {
-    state.allQuizQNames.push(state.quizQName)
-  }
-  const newIndexObject = {}
-  for (const el of state.allQuizQNames) {
-    if (state.indexObject[el]) {
-      //copy existing entry
-      newIndexObject[el] = state.indexObject[el]
-    } else {
-      // create new entry
-      newIndexObject[el] = { 'state': 'created' }
+  }).then(() => {
+    // update the index
+    if (!state.allQuizQNames.includes(state.quizQName)) {
+      state.allQuizQNames.push(state.quizQName)
     }
-  }
-  set(ref(db, '/quizes/index/'), newIndexObject)
-  state.showSaveQuizQ = false
-  clearAll()
+    const newIndexObject = {}
+    for (const el of state.allQuizQNames) {
+      if (state.indexObject[el]) {
+        //copy existing entry
+        newIndexObject[el] = state.indexObject[el]
+      } else {
+        // create new entry
+        newIndexObject[el] = { 'state': 'created' }
+      }
+    }
+    set(ref(db, '/quizes/index/'), newIndexObject)
+    state.showSaveQuizQ = false
+    clearAll()
+  }).catch((error) => {
+    console.error('The write failed, error message = ' + error.message)
+  })
 }
-
 </script> 
 
