@@ -162,8 +162,8 @@ function removeQuizRefs(quizNr) {
       for (const qName of allQuizQNames) {
         // allow type casting in this comparison
         if (indexObject[qName].quizNumber == quizNr) {
-          // reset to 0 meaning not assigned to a quiz
-          indexObject[qName].quizNumber = 0
+          // reset to '0' meaning not assigned to a quiz
+          indexObject[qName].quizNumber = '0'
           state.resetCount++
         }
       }
