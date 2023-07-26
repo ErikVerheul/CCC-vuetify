@@ -12,6 +12,7 @@
       <v-col cols="3"></v-col>
       <v-col cols="6">
         <v-text-field v-model="state.userAliasInput" :label="textFieldLabel" :rules="state.nameRules" />
+        <v-switch v-if="state.action === '4'" label="Historisch figuur" v-model="state.isCelebrity"></v-switch>
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
@@ -89,6 +90,7 @@ const state = reactive({
   aliasesInUse: [],
   action: "1",
   userAliasInput: '',
+  isCelebrity: false,
   userNewAliasInput: '',
   nameRules: [
     value => {
@@ -232,7 +234,7 @@ function saveAliasEntry() {
   if (state.action === '1') {
     // note: Using set() overwrites data at the specified location, including any child nodes.
     set(ref(db, '/aliases/' + state.userAliasInput), {
-      "inUse": false
+      "celebrity": state.isCelebrity
     })
     state.saveSuccess = 1
     // add the alias to the local array
@@ -247,7 +249,10 @@ function saveAliasEntry() {
           // remove the alias from the local array
           state.allAliases = state.allAliases.filter(a => a !== state.userAliasInput)
           // add the changed alias to the database
-          set(ref(db, '/aliases/' + state.userNewAliasInput), snapshot.val())
+          let aliasObj = snapshot.val()
+          // update the celebrity prop
+          aliasObj[state.userNewAliasInput].celebrity = state.isCelebrity
+          set(ref(db, '/aliases/' + state.userNewAliasInput), aliasObj)
           state.saveSuccess = 1
           // add the alias to the local array
           state.allAliases.push(state.userNewAliasInput)
@@ -280,6 +285,7 @@ function saveAliasInfo() {
   // update the info data the selected alias
   const updates = {}
   updates[`/aliases/${state.userAliasInput}/info`] = state.aliasInfoContent
+  updates[`/aliases/${state.userAliasInput}/celebrity`] = state.isCelebrity
   update(dbRef, updates).then(() => {
     state.saveSuccess = 1
   }).catch((error) => {
@@ -322,14 +328,14 @@ watch(() => state.userAliasInput, () => {
       }
     }
     if (exactMatch || matchcount === 1) {
-      // unique match found
-      if (state.action === '4' && state.userAliasInput !== lastMatch.trim()) {
-        // prevent loading again after that state.userAliasInput was set (triggers another watch)
+      // unique match found; prevent loading again after that state.userAliasInput was set (triggers another watch)
+      if (state.action === '4' && state.userAliasInput !== lastMatch.trim()) {   
         state.userAliasInput = lastMatch.trim()
         // initialize the content
-        get(child(dbRef, `/aliases/${state.userAliasInput}/info`)).then((snapshot) => {
+        get(child(dbRef, `/aliases/${state.userAliasInput}`)).then((snapshot) => {
           if (snapshot.exists()) {
-            state.aliasInfoContent = snapshot.val()
+            state.isCelebrity = snapshot.val().celebrity
+            state.aliasInfoContent = snapshot.val().info
           }
         }).catch((error) => {
           console.error('While reading all available aliases from database: error message = ' + error.message)
