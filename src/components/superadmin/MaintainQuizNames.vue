@@ -33,6 +33,11 @@
         </v-col>
         <v-col cols="3"></v-col>
       </v-row>
+      <v-row v-if="state.resetCount > 0">
+        <v-col cols="12">
+          <h4>{{ state.resetCount }} referenties naar deze quiz in de quiz vragen zijn verwijderd.</h4>
+        </v-col>
+      </v-row>
     </template>
     <v-row>
       <v-col>
@@ -89,7 +94,6 @@ const state = reactive({
   action: '1',
   allQuizNumbers: [],
   allQuizItems: [],
-  quizNumbersInUse: [],
   quizNumberInput: undefined,
   quizName: '',
   numberRules: [
@@ -127,7 +131,8 @@ const state = reactive({
       return 'Vul minimaal 2 letters in.'
     }
   ],
-  saveSuccess: 0
+  saveSuccess: 0,
+  resetCount: 0
 })
 
 function loadQuizes() {
@@ -148,6 +153,30 @@ function loadQuizes() {
   })
 }
 
+function removeQuizRefs(quizNr) {
+  get(child(dbRef, `/quizes/index/`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      let indexObject = snapshot.val()
+      const allQuizQNames = Object.keys(indexObject)
+      state.resetCount = 0
+      for (const qName of allQuizQNames) {
+        // allow type casting in this comparison
+        if (indexObject[qName].quizNumber == quizNr) {
+          // reset to 0 meaning not assigned to a quiz
+          indexObject[qName].quizNumber = 0
+          state.resetCount++
+        }
+      }
+      // save updated index
+      set(ref(db, '/quizes/index/'), indexObject)
+    } else {
+      console.log("No quiz-question names available")
+    }
+  }).catch((error) => {
+    console.error('While reading all available quiz-question names from database: error message = ' + error.message)
+  })
+}
+
 function numberOk() {
   return !isNaN(state.quizNumberInput) && state.quizNumberInput > 0
 }
@@ -160,19 +189,16 @@ function QNumberExists() {
   return numberOk() && state.allQuizNumbers.includes(state.quizNumberInput)
 }
 
-function isQNumberInUse(number) {
-  return state.quizNumbersInUse.includes(number)
-}
-
 function changeMode() {
   state.quizName = state.quizesObject[state.quizNumberInput].name
   state.saveSuccess = 0
+  state.resetCount = 0
 }
 
 const allowSave = computed(() => {
   if (state.action === '1') return numberOk() && QNameOk() && !QNumberExists()
   if (state.action === '2') return QNameOk() && QNumberExists()
-  if (state.action === '3') return numberOk() && QNumberExists() && !isQNumberInUse(state.quizNumberInput)
+  if (state.action === '3') return numberOk() && QNumberExists()
   return false
 })
 
@@ -222,6 +248,8 @@ function doSave() {
   }
   if (state.action === '3') {
     remove(child(dbRef, '/quizes/names/' + state.quizNumberInput)).then(() => {
+      // remove references to the removed quiz
+      removeQuizRefs(state.quizNumberInput)
       // refresh overall quiz data
       loadQuizes()
       state.saveSuccess = 1
@@ -236,6 +264,7 @@ watch(() => state.quizNumberInput, () => {
   state.quizName = ''
   state.action = '1'
   state.saveSuccess = 0
+  state.resetCount = 0
 })
 
 
