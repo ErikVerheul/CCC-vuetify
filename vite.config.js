@@ -8,6 +8,10 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // vue3-quill
+  optimizeDeps: {
+    include: ["quill"]
+  },
   plugins: [
     vue({ 
       template: { transformAssetUrls }
