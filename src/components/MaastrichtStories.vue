@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="!state.doQuiz" max-width="400" class="mx-auto">
+  <v-card v-if="!state.doQuiz" max-width="600" class="mx-auto">
     <!-- <v-system-bar
       color="pink darken-2"
       dark

@@ -72,7 +72,7 @@
     </template>
   </v-app-bar>
 
-  <v-dialog v-model="state.dialog1" width="auto">
+  <v-dialog v-model="state.dialog1" max-width="600">
     <v-card>
       <v-card-text>
         <h3>Om in te loggen op een ander apparaat hebt u nodig:</h3>
@@ -88,7 +88,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog2" width="auto">
+  <v-dialog v-model="state.dialog2" max-width="600">
     <v-card>
       <v-card-text>
         <h3>Als u automatisch inloggen heeft uitgezet kunt u inloggen met:</h3>
@@ -105,7 +105,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog4" width="auto">
+  <v-dialog v-model="state.dialog4" max-width="600">
     <v-card>
       <v-card-text>
         <h2>Stuur ons een bericht als je:</h2>
@@ -124,7 +124,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog5" width="auto">
+  <v-dialog v-model="state.dialog5" max-width="600">
     <v-card>
       <v-card-text>
         <p>Je kunt ons bereiken op ons e-mail adres contact@speelmee.app</p>
@@ -135,7 +135,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog6" width="auto">
+  <v-dialog v-model="state.dialog6" max-width="600">
     <v-card>
       <v-card-text>
         <p>Vraag: Is de app wel veilig?</p>
@@ -150,7 +150,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog7" width="auto">
+  <v-dialog v-model="state.dialog7" max-width="600">
     <v-card>
       <v-card-text>
         <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.5.14</p>
@@ -162,7 +162,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog9" width="auto">
+  <v-dialog v-model="state.dialog9" max-width="600">
     <v-card>
       <v-card-text>
         <p>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten.
@@ -178,7 +178,8 @@
               Terug
             </v-btn>
           </v-col>
-          <v-col>
+          <v-spacer></v-spacer>
+          <v-col class="text-right">
             <v-btn flat append-icon="mdi-arrow-right" @click="logout">
               Log uit
               <template v-slot:append>
@@ -191,7 +192,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog10" width="auto">
+  <v-dialog v-model="state.dialog10" max-width="600">
     <v-card>
       <v-card-text>
         <h3>Als u uw gegevens verwijderd kunt u niet meer inloggen. Wel kunt u een nieuwe schuilnaam en pin code kiezen en fris opnieuw

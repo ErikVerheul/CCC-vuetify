@@ -1,7 +1,7 @@
 <template>
   <v-row v-if="PINOK">
     <v-col cols="12">
-      <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" max-width="350">
+      <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" max-width="600px">
         <v-card-title class="text-h5">
           Welkom in de Speelmee.app
         </v-card-title>
