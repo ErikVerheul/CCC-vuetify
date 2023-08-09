@@ -1,6 +1,6 @@
 <template>
   <v-card variant="tonal">
-    <v-card-title>Quiz namen onderhouden</v-card-title>
+    <v-card-title>Quiz meta data onderhouden</v-card-title>
     <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="6">
@@ -12,7 +12,7 @@
       <v-row v-if="!QNumberExists()">
         <v-col cols="3"></v-col>
         <v-col cols="6">
-          <v-text-field v-model.trim="state.quizName" label="Nieuwe quiz naam" :rules="state.newNameRules" />
+          <v-text-field v-model.trim="state.quizTitle" label="Nieuwe quiz naam" :rules="state.newNameRules" />
         </v-col>
         <v-col cols="3"></v-col>
       </v-row>
@@ -28,8 +28,8 @@
 
         <v-col cols="3"></v-col>
         <v-col cols="6">
-          <v-text-field v-if="state.action === '2'" v-model.trim="state.quizName" label="Verander quiz naam" :rules="state.newNameRules" />
-          <p v-if="state.action === '3'">Te verwijderen quiz naam: {{ state.quizName }}</p>
+          <v-text-field v-if="state.action === '2'" v-model.trim="state.quizTitle" label="Verander quiz naam" :rules="state.newNameRules" />
+          <p v-if="state.action === '3'">Te verwijderen quiz naam: {{ state.quizTitle }}</p>
         </v-col>
         <v-col cols="3"></v-col>
       </v-row>
@@ -95,7 +95,7 @@ const state = reactive({
   allQuizNumbers: [],
   allQuizItems: [],
   quizNumberInput: undefined,
-  quizName: '',
+  quizTitle: '',
   numberRules: [
     value => {
       if (value) return true
@@ -136,8 +136,8 @@ const state = reactive({
 })
 
 function loadQuizes() {
-  // get all available quizes
-  get(child(dbRef, `/quizes/names/`)).then((snapshot) => {
+  // get all available quizzes
+  get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.quizesObject = snapshot.val()
       state.allQuizNumbers = Object.keys(state.quizesObject)
@@ -146,35 +146,35 @@ function loadQuizes() {
         state.allQuizItems.push({ [nr]: state.quizesObject[nr] })
       }
     } else {
-      console.log("No quizes available")
+      console.log("No quizzes available")
     }
   }).catch((error) => {
-    console.error('While reading all available quizes from database: error message = ' + error.message)
+    console.error('While reading all available quizzes from database: error message = ' + error.message)
   })
 }
 
 function removeQuizRefs(quizNr) {
-  get(child(dbRef, `/quizes/index/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      let indexObject = snapshot.val()
-      const allQuizQNames = Object.keys(indexObject)
-      state.resetCount = 0
-      for (const qName of allQuizQNames) {
-        // allow type casting in this comparison
-        if (indexObject[qName].quizNumber == quizNr) {
-          // reset to '0' meaning not assigned to a quiz
-          indexObject[qName].quizNumber = '0'
-          state.resetCount++
-        }
-      }
-      // save updated index
-      set(ref(db, '/quizes/index/'), indexObject)
-    } else {
-      console.log("No quiz-question names available")
-    }
-  }).catch((error) => {
-    console.error('While reading all available quiz-question names from database: error message = ' + error.message)
-  })
+  // get(child(dbRef, `/quizzes/index/`)).then((snapshot) => {
+  //   if (snapshot.exists()) {
+  //     let indexObject = snapshot.val()
+  //     const allQuizQNames = Object.keys(indexObject)
+  //     state.resetCount = 0
+  //     for (const qName of allQuizQNames) {
+  //       // allow type casting in this comparison
+  //       if (indexObject[qName].quizNumber == quizNr) {
+  //         // reset to '0' meaning not assigned to a quiz
+  //         indexObject[qName].quizNumber = '0'
+  //         state.resetCount++
+  //       }
+  //     }
+  //     // save updated index
+  //     set(ref(db, '/quizzes/index/'), indexObject)
+  //   } else {
+  //     console.log("No quiz-question names available")
+  //   }
+  // }).catch((error) => {
+  //   console.error('While reading all available quiz-question names from database: error message = ' + error.message)
+  // })
 }
 
 function numberOk() {
@@ -182,7 +182,7 @@ function numberOk() {
 }
 
 function QNameOk() {
-  return state.quizName && state.quizName.length >= 2
+  return state.quizTitle && state.quizTitle.length >= 2
 }
 
 function QNumberExists() {
@@ -190,7 +190,7 @@ function QNumberExists() {
 }
 
 function changeMode() {
-  state.quizName = state.quizesObject[state.quizNumberInput].name
+  state.quizTitle = state.quizesObject[state.quizNumberInput].title
   state.saveSuccess = 0
   state.resetCount = 0
 }
@@ -216,14 +216,14 @@ const saveButtonText = computed(() => {
 
 function composeLine(item) {
   const nr = Object.keys(item)[0]
-  return `${nr}) ${item[nr].name}`
+  return `${nr}) ${item[nr].title}`
 }
 
 function doSave() {
   if (state.action === '1') {
     // note: Using set() overwrites data at the specified location, including any child nodes.
-    set(ref(db, '/quizes/names/' + state.quizNumberInput), {
-      "name": state.quizName,
+    set(ref(db, '/quizzes/metaData/' + state.quizNumberInput), {
+      "title": state.quizTitle,
       "creationDate": Number(new Date())
     }).then(() => {
       // refresh overall quiz data
@@ -236,18 +236,18 @@ function doSave() {
   }
   if (state.action === '2') {
     const updates = {}
-    updates[`quizes/names/${state.quizNumberInput}/name`] = state.quizName
+    updates[`quizzes/metaData/${state.quizNumberInput}/title`] = state.quizTitle
     update(dbRef, updates).then(() => {
       // refresh overall quiz data
       loadQuizes()
       state.saveSuccess = 1
     }).catch((error) => {
       state.saveSuccess = 2
-      console.error('The name update failed, error message = ' + error.message)
+      console.error('The title update failed, error message = ' + error.message)
     })
   }
   if (state.action === '3') {
-    remove(child(dbRef, '/quizes/names/' + state.quizNumberInput)).then(() => {
+    remove(child(dbRef, '/quizzes/metaData/' + state.quizNumberInput)).then(() => {
       // remove references to the removed quiz
       removeQuizRefs(state.quizNumberInput)
       // refresh overall quiz data
@@ -261,7 +261,7 @@ function doSave() {
 }
 
 watch(() => state.quizNumberInput, () => {
-  state.quizName = ''
+  state.quizTitle = ''
   state.action = '1'
   state.saveSuccess = 0
   state.resetCount = 0
