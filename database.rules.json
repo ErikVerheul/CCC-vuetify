@@ -10,7 +10,7 @@
         ".read": "auth.uid != null",
         ".write": "auth.uid != null"
       },
-      "quizes": {
+      "quizzes": {
         ".read": "auth.uid != null",
         ".write": "auth.uid != null"
       }
