@@ -1,35 +1,38 @@
 <template>
+  <p>state.quizNumber = {{ state.quizNumber }}</p>
+  <p>state.questionNumber = {{ state.questionNumber }}</p>
   <v-sheet>
     <v-row class="d-flex align-center justify-center">
-      <h2 v-if="state.questionNumber !== ''">Onderhoud quiz-vraag "{{ state.questionNumber }}" gegevens</h2>
+      <h2 v-if="state.quizNumber && state.questionNumber !== ''">Onderhoud quiz-vraag {{ state.questionNumber }} voor quiz {{ state.quizNumber
+      }}</h2>
       <h2 v-else>Onderhoud quiz-vraag gegevens</h2>
     </v-row>
     <v-row>
       <v-col>
-        <v-btn @click="state.showQuizQSelect = true">Laad een bestaande quiz-vraag</v-btn>
+        <v-btn @click="changeQuestion()">Laad een bestaande quiz-vraag</v-btn>
       </v-col>
       <v-spacer></v-spacer>
       <v-col>
-        <v-btn @click="createNew()">Maak een nieuwe quiz-vraag</v-btn>
+        <v-btn @click="createNewQuestion()">Maak een nieuwe quiz-vraag</v-btn>
       </v-col>
       <v-spacer></v-spacer>
       <v-col>
-        <v-btn color="red" @click="state.showQuizQRemove = true">Verwijder een quiz-vraag</v-btn>
+        <v-btn color="red" @click="removeQuestion()">Verwijder een quiz-vraag</v-btn>
       </v-col>
     </v-row>
-    <template v-if="state.createQuestion">
-      <v-row>
-        <v-col cols="3">
-          <v-select :items="state.allQuizNumbers" v-model="state.quizNumber" label="Bestaand quiz nummer; 0 als niet toegekend" />
-        </v-col>
-        <v-col cols="3">
-          <v-text-field v-model="state.questionNumber" :rules="state.questionNumberRules" label="Nieuw quiz-vraag nummer" />
-        </v-col>
-        <v-col cols="6">
-          <v-text-field v-model="state.questionTitle" label="Quiz-vraag titel" />
-        </v-col>
-      </v-row>
-    </template>
+    <v-row v-if="state.showCreateQuestion">
+      <v-col cols="12">
+        <v-text-field v-model="state.questionNumber" :rules="state.questionNumberRules" label="Nieuw quiz-vraag nummer" />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="6">
+        <v-select v-model="state.selectedQuizItem" :items="state.quizItems" item-value="key" return-object single-line />
+      </v-col>
+      <v-col cols="6">
+        <v-text-field v-model="state.questionTitle" label="Quiz-vraag titel" />
+      </v-col>
+    </v-row>
     <v-row>
       <v-col cols="12">
         <v-text-field v-model="state.headText" label="Kop tekst" />
@@ -114,7 +117,7 @@
     <v-spacer></v-spacer>
     <v-col class="text-right">
       <v-btn :disabled="state.statementsArray.length < 1 || countGoodAnswers() === 0" append-icon="mdi-arrow-right"
-        @click="state.showSaveQuizQ = true">
+        @click="state.showSaveQuestion = true">
         Bewaar Quiz-vraag
         <template v-slot:append>
           <v-icon size="x-large" color="purple"></v-icon>
@@ -178,14 +181,14 @@
     </v-col>
   </v-row>
 
-  <v-dialog v-model="state.showQuizQSelect" width="50%">
+  <v-dialog v-model="state.showQuestionSelect" width="50%">
     <v-card>
       <v-card-title>Kies een bestaande quiz-vraag</v-card-title>
-      <v-select :items="state.allQuestionTitles" v-model="state.questionNumber" label="Bestaand quiz-vraag nummer"></v-select>
+      <v-select :items="state.questionItems" item-value="key" v-model="state.selectedQuestionItem" return-object single-line />
       <v-card-actions>
         <v-row>
           <v-col>
-            <v-btn prepend-icon="mdi-arrow-left" @click="state.showQuizQSelect = false">
+            <v-btn prepend-icon="mdi-arrow-left" @click="state.showQuestionSelect = false">
               <template v-slot:prepend>
                 <v-icon size="x-large" color="purple"></v-icon>
               </template>
@@ -194,7 +197,7 @@
           </v-col>
           <v-spacer></v-spacer>
           <v-col>
-            <v-btn append-icon="mdi-arrow-right" @click="doLoadQuizQ">
+            <v-btn :disabled="!canLoad()" append-icon="mdi-arrow-right" @click="doLoadQuestion">
               Door
               <template v-slot:append>
                 <v-icon size="x-large" color="purple"></v-icon>
@@ -206,14 +209,14 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.showQuizQRemove" width="50%">
+  <v-dialog v-model="state.showQuestionRemove" width="50%">
     <v-card>
       <v-card-title>Kies een te verwijderen quiz-vraag</v-card-title>
-      <v-select :items="state.allQuestionTitles" v-model="state.questionNumberToRemove" label="Te verwijderen quiz-vraag nummer"></v-select>
+      <v-select :items="state.questionItems" item-value="key" v-model="state.selectedQuestionItem" return-object single-line />
       <v-card-actions>
         <v-row>
           <v-col>
-            <v-btn prepend-icon="mdi-arrow-left" @click="state.showQuizQRemove = false">
+            <v-btn prepend-icon="mdi-arrow-left" @click="state.showQuestionRemove = false">
               <template v-slot:prepend>
                 <v-icon size="x-large" color="purple"></v-icon>
               </template>
@@ -222,7 +225,7 @@
           </v-col>
           <v-spacer></v-spacer>
           <v-col>
-            <v-btn append-icon="mdi-arrow-right" @click="doRemoveQuizQ">
+            <v-btn :disabled="!canRemove()" append-icon="mdi-arrow-right" @click="doRemoveQuestion">
               Door
               <template v-slot:append>
                 <v-icon size="x-large" color="red"></v-icon>
@@ -234,13 +237,13 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.showSaveQuizQ" width="50%">
+  <v-dialog v-model="state.showSaveQuestion" width="50%">
     <v-card>
       <v-card-title>Bewaar de quiz-vraag</v-card-title>
       <v-card-actions>
         <v-row>
           <v-col>
-            <v-btn prepend-icon="mdi-arrow-left" @click="state.showSaveQuizQ = false">
+            <v-btn prepend-icon="mdi-arrow-left" @click="state.showSaveQuestion = false">
               <template v-slot:prepend>
                 <v-icon size="x-large" color="purple"></v-icon>
               </template>
@@ -249,7 +252,7 @@
           </v-col>
           <v-spacer></v-spacer>
           <v-col>
-            <v-btn :disabled="!canSave()" append-icon="mdi-arrow-right" @click="saveQuestion">
+            <v-btn :disabled="!canSave()" append-icon="mdi-arrow-right" @click="doSaveQuestion">
               Bewaar Quiz-vraag
               <template v-slot:append>
                 <v-icon size="x-large" color="purple"></v-icon>
@@ -262,29 +265,38 @@
   </v-dialog>
 </template>
 
+
 <script setup>
-import { onBeforeMount, computed, reactive } from 'vue'
+import { onBeforeMount, computed, reactive, watch } from 'vue'
 import { db, dbRef } from '../../firebase'
 import { ref, child, get, set, remove } from 'firebase/database'
 const emit = defineEmits(['m-done'])
 
 onBeforeMount(() => {
-  loadquestionNumbers()
+  doLoadMetaData()
 })
 
 const state = reactive({
-  createQuestion: false,
+  quizzesObject: {},
   indexObject: {},
+  allQuizNumbers: [],
   allQuestionNumbers: [],
-  allQuestionTitles: [],
-  allQuizNumbers: [0],
+
   quizNumber: 0,
-  showQuizQSelect: false,
-  showQuizQRemove: false,
-  questionNumber: '',
+  quizTitle: '',
+  quizItems: [],
+  selectedQuizItem: { "key": 0, "title": "Kies of verander de quiz voor deze vraag" },
+
+  questionNumber: undefined,
   questionTitle: '',
-  questionNumberToRemove: '',
-  showSaveQuizQ: false,
+  questionItems: [],
+  selectedQuestionItem: { "key": undefined, "title": "Kies een quiz-vraag" },
+
+  showCreateQuestion: false,
+  showQuestionSelect: false,
+  showQuestionRemove: false,
+  showSaveQuestion: false,
+
   headText: '',
   content: undefined,
   statementNumber: 0,
@@ -327,75 +339,8 @@ const state = reactive({
       const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}/gm
       return regex.test(value) || 'Onjuist url formaat'
     }
-  ],
-  saveQuizNameRules: [
-    value => {
-      return state.allQuestionTitles.includes(value) || 'Quiz-vraag naam niet genonden. Nieuwe quiz-vraag?'
-    }
-  ],
-  saveQuizNumberRules: [
-    value => {
-      if (value) return true
-
-      return 'Vul 1 of meer cijfers in.'
-    },
-    value => {
-      if (value.length >= 1) return true
-
-      return 'Vul minimaal 1 cijfer in.'
-    },
-
-    value => {
-      if (!isNaN(value)) return true
-
-      return 'Vul alleen cijfers in.'
-    },
-    value => {
-      if (value >= 0) return true
-
-      return 'Mag geen negatief getal zijn.'
-    },
-    value => {
-      if (value === '0' || state.allQuizNumbers.includes(value)) return true
-
-      return 'Dit quiz nummer bestaat niet'
-    }
   ]
 })
-
-function isKnownQuizNumber(nr) {
-  for (const strNr of state.allQuizNumbers) {
-    if (strNr === nr) return true
-  }
-  return false
-}
-
-function loadquestionNumbers() {
-  // get all available question numbers and titles
-  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      state.indexObject = snapshot.val()
-      state.allQuestionNumbers = Object.keys(state.indexObject)
-      state.allQuestionTitles = state.allQuestionNumbers.map(el => indexObject[el].title)
-      // get all available quiz numbers
-      get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
-        if (snapshot.exists()) {
-          state.quizzesObject = snapshot.val()
-          // allQuizNumbers contains string values
-          state.allQuizNumbers = Object.keys(state.quizzesObject)
-        } else {
-          console.log("No quizzes available")
-        }
-      }).catch((error) => {
-        console.error('While reading all available quizzes from database: error message = ' + error.message)
-      })
-    } else {
-      console.log("No quiz-questions available")
-    }
-  }).catch((error) => {
-    console.error('While reading all available quiz-questions from database: error message = ' + error.message)
-  })
-}
 
 // must be non-reactive
 let bgColor = undefined
@@ -410,9 +355,93 @@ const editMode = computed(() => {
   } else return "add"
 })
 
-function doLoadQuizQ() {
-  state.showQuizQSelect = false
-  // get all the quiz-question data
+function clearAll() {
+  state.showCreateQuestion = false
+  state.showQuestionSelect = false
+  state.showQuestionRemove = false
+  state.showSaveQuestion = false
+
+  state.selectedQuizItem = { "key": 0, "title": "Kies of verander de quiz voor deze vraag" }
+  state.selectedQuestionItem = { "key": undefined, "title": "Kies een quiz-vraag" }
+  state.questionNumber = ''
+  state.questionTitle = ''
+  state.statementNumber = 0
+  state.quizStatement = ''
+  state.headText = ''
+  state.content = undefined
+  state.statementsArray = []
+  state.quizQAnswers = []
+  state.resultInfo = ''
+  state.gameRules = ''
+  state.explanationUrl = ''
+  state.quizNumber = ''
+}
+
+function createNewQuestion() {
+  clearAll()
+  state.showCreateQuestion = true
+}
+
+function changeQuestion() {
+  clearAll()
+  state.showQuestionSelect = true
+}
+
+function removeQuestion() {
+  clearAll()
+  state.showQuestionRemove = true
+}
+
+function createQuizItems(quizzesObject, allQuizNumbers) {
+  state.quizItems = []
+  allQuizNumbers.forEach(el => {
+    state.quizItems.push({ 'key': el, 'title': `(${el}) ${quizzesObject[el].title}` })
+  })
+}
+
+function createQuestionItems(questionObject, allQuestionNumbers) {
+  state.questionItems = []
+  allQuestionNumbers.forEach(el => {
+    state.questionItems.push({ 'key': el, 'title': `(${el}) ${questionObject[el].title}` })
+  })
+}
+
+/* Get quiz and questions meta data */
+function doLoadMetaData() {
+  clearAll()
+  get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      state.quizzesObject = snapshot.val()
+      state.allQuizNumbers = Object.keys(state.quizzesObject)
+      createQuizItems(state.quizzesObject, state.allQuizNumbers)
+      // get all available question numbers and titles
+      get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
+        if (snapshot.exists()) {
+          state.indexObject = snapshot.val()
+          state.allQuestionNumbers = Object.keys(state.indexObject)
+          createQuestionItems(state.indexObject, state.allQuestionNumbers)
+        } else {
+          console.log("No quiz-questions available")
+        }
+      }).catch((error) => {
+        console.error('Error while reading all available quiz-questions from database: ' + error.message)
+      })
+    } else {
+      console.log("No quizzes available")
+    }
+  }).catch((error) => {
+    console.error('Error while reading all available quizzes from database: ' + error.message)
+  })
+}
+
+/* Return true if questionNumber is defined, is a number and valid */
+function canLoad() {
+  return !isNaN(state.questionNumber) && state.allQuestionNumbers.includes(state.questionNumber)
+}
+
+/* Get the quiz-question data */
+function doLoadQuestion() {
+  state.showQuestionSelect = false
   get(child(dbRef, `/quizzes/questions/` + state.questionNumber)).then((snapshot) => {
     if (snapshot.exists()) {
       const quizObject = snapshot.val()
@@ -424,70 +453,16 @@ function doLoadQuizQ() {
       state.gameRules = quizObject.gameRules
       state.explanationUrl = quizObject.explanationUrl
       state.statementNumber = state.statementsArray.length - 1
-      // assing the quiz number
+      // assign the quiz number
       state.quizNumber = state.indexObject[state.questionNumber].quizNumber
+      // preset the quiz select
+      state.selectedQuizItem = state.quizItems.filter((q => q.key === state.quizNumber))[0]
     } else {
       console.log("No quiz-question data available")
     }
   }).catch((error) => {
     console.error('While reading the quiz-question data from database: error message = ' + error.message)
   })
-}
-
-function doRemoveQuizQ() {
-  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      // refresh data from database
-      state.indexObject = snapshot.val()
-      state.allQuestionTitles = Object.keys(state.indexObject)
-
-      state.showQuizQRemove = false
-      remove(child(dbRef, '/quizzes/questions/' + state.questionNumberToRemove)).then(() => {
-        // remove the quiz-question from the array
-        state.allQuestionTitles = state.allQuestionTitles.filter(q => q !== state.questionNumberToRemove)
-        // update the index
-        const newIndexObject = {}
-        for (const el of state.allQuestionTitles) {
-          if (state.indexObject[el]) {
-            //copy existing entries
-            newIndexObject[el] = state.indexObject[el]
-          }
-        }
-        set(ref(db, '/quizzes/questions/index/'), newIndexObject)
-        if (state.questionNumber === state.questionNumberToRemove) {
-          // the current quiz-question was removed
-          clearAll()
-        }
-        state.questionNumberToRemove = ''
-      }).catch((error) => {
-        console.error('The quiz-question remove failed, error message = ' + error.message)
-      })
-    } else {
-      console.log("No quiz-question names available")
-    }
-  }).catch((error) => {
-    console.error('While reading all available quiz-question names from database: error message = ' + error.message)
-  })
-}
-
-function createNew() {
-  clearAll()
-  state.createQuestion = true
-}
-
-function clearAll() {
-  state.questionNumber = ''
-  state.statementNumber = 0
-  state.quizStatement = ''
-  state.headText = ''
-  state.content = undefined
-  state.statementsArray = []
-  state.quizQAnswers = []
-  state.resultInfo = ''
-  state.gameRules = ''
-  state.explanationUrl = ''
-  state.quizNumber = ''
-  state.createQuestion = false
 }
 
 function composeStatement(idx) {
@@ -549,11 +524,15 @@ function countGoodAnswers() {
   return count
 }
 
+/* Return true if quizNumber and questionNumber are defined and a number, 
+the quizNumber represents an existing quiz and the question title is not empty */
 function canSave() {
-  return !isNaN(state.quizNumber) && state.questionNumber !== '' && (state.quizNumber === '0' || isKnownQuizNumber(state.quizNumber))
+  return !isNaN(state.quizNumber) && !isNaN(state.questionNumber) &&
+    state.allQuizNumbers.includes(state.quizNumber) &&
+    state.questionTitle && state.questionTitle.length > 0
 }
 
-function saveQuestion() {
+function doSaveQuestion() {
   // note: Using set() overwrites data at the specified location, including any child nodes.
   set(ref(db, '/quizzes/questions/' + state.questionNumber), {
     "headText": state.headText,
@@ -564,28 +543,58 @@ function saveQuestion() {
     "gameRules": state.gameRules,
     "explanationUrl": state.explanationUrl
   }).then(() => {
-    // update the index
-    if (!state.allQuestionNumbers.includes(state.questionNumber)) {
-      state.allQuestionNumbers.push(state.questionNumber)
-    }
-    const newIndexObject = {}
-    for (const el of state.allQuestionNumbers) {
-      if (state.indexObject[el]) {
-        //copy existing entry
-        newIndexObject[el] = state.indexObject[el]
-      } else {
-        // create new entry
-        newIndexObject[el] = { 'title': state.questionTitle, 'creationDate': Number(new Date()) }
-      }
-    }
-    // assign the quiz number to this question
-    newIndexObject[state.questionNumber].quizNumber = state.quizNumber
-    set(ref(db, '/quizzes/questions/index/'), newIndexObject)
-    state.showSaveQuizQ = false
-    clearAll()
+    const newIndexObject = { 'quizNumber': state.quizNumber, 'title': state.questionTitle, 'creationDate': Number(new Date()) }
+    set(ref(db, '/quizzes/questions/index/' + state.questionNumber.toString()), newIndexObject).then(() => {
+      // reset current activity and refresh the meta data
+      doLoadMetaData()
+    }).catch((error) => {
+      console.error('The write of the index data failed: ' + error.message)
+    })
   }).catch((error) => {
-    console.error('The write failed, error message = ' + error.message)
+    console.error('The write of the question data failed: ' + error.message)
   })
 }
+
+/* Return true if quiestionNumber is defined and a number */
+function canRemove() {
+  return !isNaN(state.questionNumber) && state.questionNumber > 0
+}
+
+function doRemoveQuestion() {
+  remove(child(dbRef, `/quizzes/questions/index/` + state.questionNumber)).then(() => {
+    remove(child(dbRef, '/quizzes/questions/' + state.questionNumber)).then(() => {
+      state.showQuestionRemove = false
+      doLoadMetaData()
+    }).catch((error) => {
+      console.error('The removal of the quiz-question failed: ' + error.message)
+    })
+  }).catch((error) => {
+    console.error('The removal of the index entry of the quiz-question failed: ' + error.message)
+  })
+}
+
+watch(
+  () => state.selectedQuizItem,
+  () => {
+    // fires only when state.someObject is replaced
+    if (state.selectedQuizItem.key) {
+      // suppress events not coming from v-select
+      state.quizNumber = state.selectedQuizItem.key
+      state.quizTitle = state.quizzesObject[state.quizNumber].title
+    }
+  }
+)
+
+watch(
+  () => state.selectedQuestionItem,
+  () => {
+    // fires only when state.someObject is replaced
+    if (state.selectedQuestionItem.key) {
+      // suppress events not coming from v-select
+      state.questionNumber = state.selectedQuestionItem.key
+      state.questionTitle = state.indexObject[state.questionNumber].title
+    }
+  }
+)
 </script> 
 
