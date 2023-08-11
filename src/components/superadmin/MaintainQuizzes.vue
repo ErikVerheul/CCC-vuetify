@@ -197,16 +197,6 @@ const state = reactive({
   resetCount: 0
 })
 
-function clearAll() {
-  state.quizNumberInput = undefined
-  state.action = '1'
-  state.quizTitle = ''
-  state.actionYear = ''
-  state.actionWeek = ''
-  state.saveSuccess = 0
-  state.resetCount = 0
-}
-
 function actionSettingsOk() {
   return state.actionYear === '' && state.actionWeek === '' ||
     (!isNaN(state.actionYear) && !isNaN(state.actionWeek) &&
@@ -234,11 +224,11 @@ function loadQuizes() {
 function removeQuizRefs(quizNr) {
   get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
     if (snapshot.exists()) {
-      let indexObject = snapshot.val()
+      const indexObject = snapshot.val()
       const allQuestionKeys = Object.keys(indexObject)
       state.resetCount = 0
       for (const key of allQuestionKeys) {
-        if (indexObject[key].quizNumber === quizNr) {
+        if (indexObject[key].quizNumber == quizNr) {
           // reset to '0' meaning not assigned to a quiz
           indexObject[key].quizNumber = '0'
           state.resetCount++
@@ -246,7 +236,6 @@ function removeQuizRefs(quizNr) {
       }
       // save updated index
       set(ref(db, '/quizzes/questions/index/'), indexObject).then(() => {
-        clearAll()
       }).catch((error) => {
         console.error('Failed to save the questions index to the database: ' + error.message)
       })
@@ -350,14 +339,13 @@ function doSaveRemove() {
       console.error('The remove failed, error message = ' + error.message)
     })
   }
-  clearAll()
 }
 
 watch(() => state.quizNumberInput, () => {
   state.quizTitle = ''
   state.action = '1'
-  state.saveSuccess = 0
-  state.resetCount = 0
+  state.actionYear = ''
+  state.actionWeek = ''
 })
 
 
