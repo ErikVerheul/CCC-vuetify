@@ -88,7 +88,8 @@
       </v-row>
       <v-row>
         <v-col cols="12">
-          <v-textarea v-model="state.resultInfo" label="Toelichting op goed/fout antwoord" />
+          <p>Toelichting op goed/fout antwoord:</p>
+          <quill-editor v-model:value="state.resultInfo"></quill-editor>
         </v-col>
         <v-col cols="12">
           <v-text-field v-model="state.gameRules" label="Spelregels (optioneel)" />
@@ -127,8 +128,8 @@
   </v-row>
   <v-row justify="space-around">
     <v-col cols="6" md="4">
-      <p>Preview 414 x 1792 px (2 x schermhoogte)</p>
-      <v-sheet class="pa-2" color="grey-lighten-3" height="1792" width="414">
+      <p>Preview 414 x 2688 px (3 x schermhoogte)</p>
+      <v-sheet class="pa-2" color="grey-lighten-3" height="2688" width="414">
         <v-row no-gutters>
           <h3>{{ state.headText }}</h3>
         </v-row>
@@ -145,16 +146,14 @@
           <p class="py-2">{{ state.gameRules }}</p>
         </v-row>
         <h4 class="py-3">Toelichting op goed/fout antwoord:</h4>
-        <v-row>
-          <v-col cols="12">
-            <p>{{ state.resultInfo }}</p>
-          </v-col>
+        <v-row no-gutters>
+          <div v-html="state.resultInfo"></div>
         </v-row>
       </v-sheet>
     </v-col>
     <v-col cols="6" md="4">
-      <p>Preview 375 x 1624 px (2 x schermhoogte)</p>
-      <v-sheet class="pa-2" color="grey-lighten-3" height="1624" width="375">
+      <p>Preview 375 x 2436 px (3 x schermhoogte)</p>
+      <v-sheet class="pa-2" color="grey-lighten-3" height="2436" width="375">
         <v-row no-gutters>
           <h3>{{ state.headText }}</h3>
         </v-row>
@@ -171,10 +170,8 @@
           <p class="py-2">{{ state.gameRules }}</p>
         </v-row>
         <h4 class="py-3">Toelichting op goed/fout antwoord:</h4>
-        <v-row>
-          <v-col cols="12">
-            <p>{{ state.resultInfo }}</p>
-          </v-col>
+        <v-row no-gutters>
+          <div v-html="state.resultInfo"></div>
         </v-row>
       </v-sheet>
     </v-col>
@@ -270,13 +267,12 @@ const state = reactive({
 
   headText: '',
   content: undefined,
-  explanation: undefined,
   statementNumber: 0,
   quizStatement: '',
   statementsArray: [],
   gameRules: '',
   quizQAnswers: {},
-  resultInfo: '',
+  resultInfo: undefined,
   explanationUrl: '',
   questionNumberRules: [
     value => {
@@ -346,7 +342,7 @@ function clearAll() {
   state.content = undefined
   state.statementsArray = []
   state.quizQAnswers = []
-  state.resultInfo = ''
+  state.resultInfo = undefined
   state.gameRules = ''
   state.explanationUrl = ''
   state.quizNumber = ''
