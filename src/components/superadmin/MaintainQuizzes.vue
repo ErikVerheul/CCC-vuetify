@@ -1,5 +1,5 @@
 <template>
-  <v-card variant="tonal">
+  <v-card>
     <v-card-title>Quiz meta data onderhouden</v-card-title>
     <v-row>
       <v-col cols="3"></v-col>
@@ -8,7 +8,7 @@
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
-    <template v-if="state.quizNumberInput && numberOk()">
+    <template v-if="state.quizNumberInput && QNumberOk()">
       <v-row v-if="!QNumberExists()">
         <v-col cols="3"></v-col>
         <v-col cols="6">
@@ -16,22 +16,45 @@
         </v-col>
         <v-col cols="3"></v-col>
       </v-row>
-      <v-row v-else>
-        <v-col cols="3"></v-col>
-        <v-col cols="6">
-          <v-radio-group inline v-model="state.action">
-            <v-radio @change="changeMode" label="Veranderen" value="2"></v-radio>
-            <v-radio @change="changeMode" label="Verwijderen" value="3"></v-radio>
-          </v-radio-group>
-        </v-col>
-        <v-col cols="3"></v-col>
+      <template v-else>
+        <v-row>
+          <v-col cols="3"></v-col>
+          <v-col cols="6">
+            <v-radio-group inline v-model="state.action">
+              <v-radio @change="changeMode" label="Veranderen" value="2"></v-radio>
+              <v-radio @change="changeMode" label="Verwijderen" value="3"></v-radio>
+            </v-radio-group>
+          </v-col>
+          <v-col cols="3"></v-col>
 
-        <v-col cols="3"></v-col>
+          <v-col cols="3"></v-col>
+          <v-col cols="6">
+            <v-text-field v-if="state.action === '2'" v-model.trim="state.quizTitle" label="Verander quiz naam" :rules="state.newNameRules" />
+            <p v-if="state.action === '3'">Te verwijderen quiz naam: {{ state.quizTitle }}</p>
+          </v-col>
+          <v-col cols="3"></v-col>
+          <template v-if="state.action === '2'">
+            <v-col cols="3"></v-col>
+            <v-col cols="6">
+              <v-text-field v-model="state.actionYear" label="Actie jaar" :rules="state.yearRules" />
+            </v-col>
+            <v-col cols="3"></v-col>
+
+            <v-col cols="3"></v-col>
+            <v-col cols="6">
+              <v-text-field v-model="state.actionWeek" label="Actie week" :rules="state.weekRules" />
+            </v-col>
+            <v-col cols="3"></v-col>
+          </template>
+        </v-row>
+      </template>
+      <v-row v-if="!QNumberExists()">
         <v-col cols="6">
-          <v-text-field v-if="state.action === '2'" v-model.trim="state.quizTitle" label="Verander quiz naam" :rules="state.newNameRules" />
-          <p v-if="state.action === '3'">Te verwijderen quiz naam: {{ state.quizTitle }}</p>
+          <v-text-field v-model="state.actionYear" label="Actie jaar" :rules="state.yearRules" />
         </v-col>
-        <v-col cols="3"></v-col>
+        <v-col cols="6">
+          <v-text-field v-model="state.actionWeek" label="Actie week" :rules="state.weekRules" />
+        </v-col>
       </v-row>
       <v-row v-if="state.resetCount > 0">
         <v-col cols="12">
@@ -55,7 +78,7 @@
         "{{ saveButtonText }}" is mislukt
       </v-col>
       <v-col class="text-right">
-        <v-btn :disabled="!allowSave" :color="saveButtonColor" append-icon="mdi-arrow-right" @click="doSave">
+        <v-btn :disabled="!allowSave" :color="saveButtonColor" append-icon="mdi-arrow-right" @click="doSaveRemove">
           {{ saveButtonText }}
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
@@ -91,11 +114,15 @@ onBeforeMount(() => {
 
 const state = reactive({
   quizesObject: {},
-  action: '1',
   allQuizNumbers: [],
   allQuizItems: [],
+
   quizNumberInput: undefined,
+  action: '1',
   quizTitle: '',
+  actionYear: '',
+  actionWeek: '',
+  creationDate: undefined,
   numberRules: [
     value => {
       if (value) return true
@@ -103,7 +130,7 @@ const state = reactive({
       return 'Vul 1 of meer cijfers in.'
     },
     value => {
-      if (value.length >= 1) return true
+      if (value && value.length >= 1) return true
 
       return 'Vul minimaal 1 cijfer in.'
     },
@@ -126,14 +153,65 @@ const state = reactive({
       return 'Vul 2 of meer letters in.'
     },
     value => {
-      if (value.length >= 2) return true
+      if (value && value.length >= 2) return true
 
       return 'Vul minimaal 2 letters in.'
+    }
+  ],
+  yearRules: [
+    value => {
+      if (value && value.length === 4) return true
+
+      return 'Vul 4 cijfers in.'
+    },
+
+    value => {
+      if (!isNaN(value)) return true
+
+      return 'Vul alleen cijfers in.'
+    },
+    value => {
+      if (value >= 2023 && value < 2100) return true
+
+      return 'Jaartal moet tussen 2023 en 2100 liggen.'
+    }
+  ],
+  weekRules: [
+    value => {
+      if (value) return true
+
+      return 'Vul 1 of meer cijfers in.'
+    },
+    value => {
+      if (!isNaN(value)) return true
+
+      return 'Vul alleen cijfers in.'
+    },
+    value => {
+      if (value > 0 && value <= 53) return true
+
+      return 'Weeknummer moet tussen 1 en 53 liggen.'
     }
   ],
   saveSuccess: 0,
   resetCount: 0
 })
+
+function clearAll() {
+  state.quizNumberInput = undefined
+  state.action = '1'
+  state.quizTitle = ''
+  state.actionYear = ''
+  state.actionWeek = ''
+  state.saveSuccess = 0
+  state.resetCount = 0
+}
+
+function actionSettingsOk() {
+  return state.actionYear === '' && state.actionWeek === '' ||
+    (!isNaN(state.actionYear) && !isNaN(state.actionWeek) &&
+      state.actionYear >= 2023 && state.actionYear < 2100 && state.actionWeek > 0 && state.actionWeek <= 53)
+}
 
 function loadQuizes() {
   // get all available quizzes
@@ -154,51 +232,57 @@ function loadQuizes() {
 }
 
 function removeQuizRefs(quizNr) {
-  // get(child(dbRef, `/quizzes/index/`)).then((snapshot) => {
-  //   if (snapshot.exists()) {
-  //     let indexObject = snapshot.val()
-  //     const allQuizQNames = Object.keys(indexObject)
-  //     state.resetCount = 0
-  //     for (const qName of allQuizQNames) {
-  //       // allow type casting in this comparison
-  //       if (indexObject[qName].quizNumber == quizNr) {
-  //         // reset to '0' meaning not assigned to a quiz
-  //         indexObject[qName].quizNumber = '0'
-  //         state.resetCount++
-  //       }
-  //     }
-  //     // save updated index
-  //     set(ref(db, '/quizzes/index/'), indexObject)
-  //   } else {
-  //     console.log("No quiz-question names available")
-  //   }
-  // }).catch((error) => {
-  //   console.error('While reading all available quiz-question names from database: error message = ' + error.message)
-  // })
+  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      let indexObject = snapshot.val()
+      const allQuestionKeys = Object.keys(indexObject)
+      state.resetCount = 0
+      for (const key of allQuestionKeys) {
+        if (indexObject[key].quizNumber === quizNr) {
+          // reset to '0' meaning not assigned to a quiz
+          indexObject[key].quizNumber = '0'
+          state.resetCount++
+        }
+      }
+      // save updated index
+      set(ref(db, '/quizzes/questions/index/'), indexObject).then(() => {
+        clearAll()
+      }).catch((error) => {
+        console.error('Failed to save the questions index to the database: ' + error.message)
+      })
+    } else {
+      console.log("No quiz-questions available")
+    }
+  }).catch((error) => {
+    console.error('Error while reading all available quiz-question names from database: ' + error.message)
+  })
 }
 
-function numberOk() {
+function QNumberOk() {
   return !isNaN(state.quizNumberInput) && state.quizNumberInput > 0
 }
 
 function QNameOk() {
-  return state.quizTitle && state.quizTitle.length >= 2
+  return state.quizTitle && state.quizTitle && state.quizTitle.length >= 2
 }
 
 function QNumberExists() {
-  return numberOk() && state.allQuizNumbers.includes(state.quizNumberInput)
+  return QNumberOk() && state.allQuizNumbers.includes(state.quizNumberInput)
 }
 
 function changeMode() {
   state.quizTitle = state.quizesObject[state.quizNumberInput].title
+  state.actionYear = state.quizesObject[state.quizNumberInput].actionYear
+  state.actionWeek = state.quizesObject[state.quizNumberInput].actionWeek
+  state.creationDate = state.quizesObject[state.quizNumberInput].creationDate
   state.saveSuccess = 0
   state.resetCount = 0
 }
 
 const allowSave = computed(() => {
-  if (state.action === '1') return numberOk() && QNameOk() && !QNumberExists()
-  if (state.action === '2') return QNameOk() && QNumberExists()
-  if (state.action === '3') return numberOk() && QNumberExists()
+  if (state.action === '1') return actionSettingsOk() && QNumberOk() && QNameOk() && !QNumberExists()
+  if (state.action === '2') return actionSettingsOk() && QNameOk() && QNumberExists()
+  if (state.action === '3') return QNumberOk() && QNumberExists()
   return false
 })
 
@@ -219,11 +303,13 @@ function composeLine(item) {
   return `${nr}) ${item[nr].title}`
 }
 
-function doSave() {
+function doSaveRemove() {
   if (state.action === '1') {
     // note: Using set() overwrites data at the specified location, including any child nodes.
     set(ref(db, '/quizzes/metaData/' + state.quizNumberInput), {
       "title": state.quizTitle,
+      "actionYear": state.actionYear,
+      "actionWeek": state.actionWeek,
       "creationDate": Number(new Date())
     }).then(() => {
       // refresh overall quiz data
@@ -235,8 +321,14 @@ function doSave() {
     })
   }
   if (state.action === '2') {
+    const newQuizObject = {
+      "title": state.quizTitle,
+      "actionYear": state.actionYear,
+      "actionWeek": state.actionWeek,
+      "creationDate": state.creationDate
+    }
     const updates = {}
-    updates[`quizzes/metaData/${state.quizNumberInput}/title`] = state.quizTitle
+    updates[`quizzes/metaData/${state.quizNumberInput}`] = newQuizObject
     update(dbRef, updates).then(() => {
       // refresh overall quiz data
       loadQuizes()
@@ -258,6 +350,7 @@ function doSave() {
       console.error('The remove failed, error message = ' + error.message)
     })
   }
+  clearAll()
 }
 
 watch(() => state.quizNumberInput, () => {
