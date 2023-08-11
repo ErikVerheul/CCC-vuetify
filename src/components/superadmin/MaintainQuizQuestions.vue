@@ -1,6 +1,4 @@
 <template>
-  <p>state.quizNumber = {{ state.quizNumber }}</p>
-  <p>state.questionNumber = {{ state.questionNumber }}</p>
   <v-sheet>
     <v-row class="d-flex align-center justify-center">
       <h2 v-if="state.quizNumber && state.questionNumber !== ''">Onderhoud quiz-vraag {{ state.questionNumber }} voor quiz {{ state.quizNumber
@@ -25,78 +23,100 @@
         <v-text-field v-model="state.questionNumber" :rules="state.questionNumberRules" label="Nieuw quiz-vraag nummer" />
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="6">
-        <v-select v-model="state.selectedQuizItem" :items="state.quizItems" item-value="key" return-object single-line />
-      </v-col>
-      <v-col cols="6">
-        <v-text-field v-model="state.questionTitle" label="Quiz-vraag titel" />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <v-text-field v-model="state.headText" label="Kop tekst" />
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <p>Body met optionele afbeelding:</p>
-        <quill-editor v-model:value="state.content"></quill-editor>
-      </v-col>
-    </v-row>
-    <v-row class="py-15">
-      <v-col cols="12">
-        <v-text-field v-model="state.quizStatement" :label="sLabel" />
-      </v-col>
-    </v-row>
+    <template v-if="showInputFields()">
+      <v-row>
+        <v-col cols="6">
+          <v-select v-model="state.selectedQuizItem" :items="state.quizItems" item-value="key" return-object single-line />
+        </v-col>
+        <v-col cols="6">
+          <v-text-field v-model="state.questionTitle" label="Quiz-vraag titel" />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12">
+          <v-text-field v-model="state.headText" label="Kop tekst" />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12">
+          <p>Body met optionele afbeelding:</p>
+          <quill-editor v-model:value="state.content"></quill-editor>
+        </v-col>
+      </v-row>
+      <v-row class="py-15">
+        <v-col cols="12">
+          <v-text-field v-model="state.quizStatement" :label="sLabel" />
+        </v-col>
+      </v-row>
 
-    <v-row no-gutters>
+      <v-row no-gutters>
+        <v-col>
+          <v-btn :disabled="state.statementNumber <= 0" flat prepend-icon="mdi-arrow-up" @click="sBack">
+            <template v-slot:prepend>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+            Edit vorige
+          </v-btn>
+        </v-col>
+        <v-spacer></v-spacer>
+        <v-col>
+          <v-btn flat append-icon="mdi-arrow-down" @click="sSave">
+            Sla stelling op
+            <template v-slot:append>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+          </v-btn>
+        </v-col>
+        <v-spacer></v-spacer>
+        <v-col>
+          <v-btn flat append-icon="mdi-arrow-right" @click="sOpenNext">
+            Nieuwe stelling
+            <template v-slot:append>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+          </v-btn>
+        </v-col>
+        <v-spacer></v-spacer>
+        <v-col>
+          <v-btn :disabled="state.statementNumber >= state.statementsArray.length - 1" flat append-icon="mdi-arrow-down" @click="sForward">
+            Edit volgende
+            <template v-slot:append>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12">
+          <v-textarea v-model="state.resultInfo" label="Toelichting op goed/fout antwoord" />
+        </v-col>
+        <v-col cols="12">
+          <v-text-field v-model="state.gameRules" label="Spelregels (optioneel)" />
+        </v-col>
+        <v-col cols="6">
+          <v-text-field v-model="state.explanationUrl" :rules="state.urlRules" placeholder="https://speelmee.app/toelichting1"
+            label="URL naar meer info (optioneel)" />
+        </v-col>
+      </v-row>
+    </template>
+    <v-row>
       <v-col>
-        <v-btn :disabled="state.statementNumber <= 0" flat prepend-icon="mdi-arrow-up" @click="sBack">
+        <v-btn prepend-icon="mdi-arrow-left" @click="emit('m-done')">
           <template v-slot:prepend>
             <v-icon size="x-large" color="purple"></v-icon>
           </template>
-          Edit vorige
+          Cancel en terug naar menu
         </v-btn>
       </v-col>
       <v-spacer></v-spacer>
-      <v-col>
-        <v-btn flat append-icon="mdi-arrow-down" @click="sSave">
-          Sla stelling op
+      <v-col class="text-right">
+        <v-btn :disabled="!canSave()" append-icon="mdi-arrow-right"
+          @click="doSaveQuestion()">
+          Bewaar Quiz-vraag
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
           </template>
         </v-btn>
-      </v-col>
-      <v-spacer></v-spacer>
-      <v-col>
-        <v-btn flat append-icon="mdi-arrow-right" @click="sOpenNext">
-          Nieuwe stelling
-          <template v-slot:append>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-        </v-btn>
-      </v-col>
-      <v-spacer></v-spacer>
-      <v-col>
-        <v-btn :disabled="state.statementNumber >= state.statementsArray.length - 1" flat append-icon="mdi-arrow-down" @click="sForward">
-          Edit volgende
-          <template v-slot:append>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-        </v-btn>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <v-textarea v-model="state.resultInfo" label="Toelichting op goed/fout antwoord" />
-      </v-col>
-      <v-col cols="12">
-        <v-text-field v-model="state.gameRules" label="Spelregels (optioneel)" />
-      </v-col>
-      <v-col cols="6">
-        <v-text-field v-model="state.explanationUrl" :rules="state.urlRules" placeholder="https://speelmee.app/toelichting1"
-          label="URL naar meer info (optioneel)" />
       </v-col>
     </v-row>
   </v-sheet>
@@ -105,27 +125,6 @@
       <p>Klik op de stellingen in de preview om de goede antwoorden te selecteren.</p>
     </v-col>
   </v-row>
-  <v-row>
-    <v-col>
-      <v-btn prepend-icon="mdi-arrow-left" @click="emit('m-done')">
-        <template v-slot:prepend>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-        Cancel
-      </v-btn>
-    </v-col>
-    <v-spacer></v-spacer>
-    <v-col class="text-right">
-      <v-btn :disabled="state.statementsArray.length < 1 || countGoodAnswers() === 0" append-icon="mdi-arrow-right"
-        @click="state.showSaveQuestion = true">
-        Bewaar Quiz-vraag
-        <template v-slot:append>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-      </v-btn>
-    </v-col>
-  </v-row>
-
   <v-row justify="space-around">
     <v-col cols="6" md="4">
       <p>Preview 414 x 1792 px (2 x schermhoogte)</p>
@@ -188,7 +187,7 @@
       <v-card-actions>
         <v-row>
           <v-col>
-            <v-btn prepend-icon="mdi-arrow-left" @click="state.showQuestionSelect = false">
+            <v-btn prepend-icon="mdi-arrow-left" @click="clearAll()">
               <template v-slot:prepend>
                 <v-icon size="x-large" color="purple"></v-icon>
               </template>
@@ -216,7 +215,7 @@
       <v-card-actions>
         <v-row>
           <v-col>
-            <v-btn prepend-icon="mdi-arrow-left" @click="state.showQuestionRemove = false">
+            <v-btn prepend-icon="mdi-arrow-left" @click="clearAll()">
               <template v-slot:prepend>
                 <v-icon size="x-large" color="purple"></v-icon>
               </template>
@@ -229,33 +228,6 @@
               Door
               <template v-slot:append>
                 <v-icon size="x-large" color="red"></v-icon>
-              </template>
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
-
-  <v-dialog v-model="state.showSaveQuestion" width="50%">
-    <v-card>
-      <v-card-title>Bewaar de quiz-vraag</v-card-title>
-      <v-card-actions>
-        <v-row>
-          <v-col>
-            <v-btn prepend-icon="mdi-arrow-left" @click="state.showSaveQuestion = false">
-              <template v-slot:prepend>
-                <v-icon size="x-large" color="purple"></v-icon>
-              </template>
-              Terug
-            </v-btn>
-          </v-col>
-          <v-spacer></v-spacer>
-          <v-col>
-            <v-btn :disabled="!canSave()" append-icon="mdi-arrow-right" @click="doSaveQuestion">
-              Bewaar Quiz-vraag
-              <template v-slot:append>
-                <v-icon size="x-large" color="purple"></v-icon>
               </template>
             </v-btn>
           </v-col>
@@ -282,7 +254,7 @@ const state = reactive({
   allQuizNumbers: [],
   allQuestionNumbers: [],
 
-  quizNumber: 0,
+  quizNumber: undefined,
   quizTitle: '',
   quizItems: [],
   selectedQuizItem: { "key": 0, "title": "Kies of verander de quiz voor deze vraag" },
@@ -295,10 +267,10 @@ const state = reactive({
   showCreateQuestion: false,
   showQuestionSelect: false,
   showQuestionRemove: false,
-  showSaveQuestion: false,
 
   headText: '',
   content: undefined,
+  explanation: undefined,
   statementNumber: 0,
   quizStatement: '',
   statementsArray: [],
@@ -355,11 +327,14 @@ const editMode = computed(() => {
   } else return "add"
 })
 
+function showInputFields() {
+  return !isNaN(state.questionNumber) && state.questionNumber > 0
+}
+
 function clearAll() {
   state.showCreateQuestion = false
   state.showQuestionSelect = false
   state.showQuestionRemove = false
-  state.showSaveQuestion = false
 
   state.selectedQuizItem = { "key": 0, "title": "Kies of verander de quiz voor deze vraag" }
   state.selectedQuestionItem = { "key": undefined, "title": "Kies een quiz-vraag" }
@@ -524,12 +499,16 @@ function countGoodAnswers() {
   return count
 }
 
-/* Return true if quizNumber and questionNumber are defined and a number, 
-the quizNumber represents an existing quiz and the question title is not empty */
+/*
+Return true if quizNumber and questionNumber are defined and a number, 
+the quizNumber represents an existing quiz, the question title is not empty and
+at leat 1 good answer is set
+*/
 function canSave() {
   return !isNaN(state.quizNumber) && !isNaN(state.questionNumber) &&
     state.allQuizNumbers.includes(state.quizNumber) &&
-    state.questionTitle && state.questionTitle.length > 0
+    state.questionTitle && state.questionTitle.length > 0 &&
+    countGoodAnswers() > 0
 }
 
 function doSaveQuestion() {
@@ -555,7 +534,7 @@ function doSaveQuestion() {
   })
 }
 
-/* Return true if quiestionNumber is defined and a number */
+/* Return true if quiestionNumber is defined and a number greater than zero */
 function canRemove() {
   return !isNaN(state.questionNumber) && state.questionNumber > 0
 }
