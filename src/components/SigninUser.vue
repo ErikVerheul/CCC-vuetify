@@ -22,7 +22,7 @@
           size="large">Login</v-btn>
         <template v-if="state.loginErrorMsg !== undefined">
           <h2 class="py-4">Fout: {{ state.loginErrorMsg }}</h2>
-          <h3 class="py-4">Controleer of uw schuilnaam en pincode kloppen en probeer opnieuw</h3>
+          <h3 class="py-4">Controleer of uw schuilnaam en pin code kloppen en probeer opnieuw</h3>
         </template>
       </v-card>
     </v-col>
