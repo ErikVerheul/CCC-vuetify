@@ -6,7 +6,7 @@
         <h3>Vervolg aanmelding</h3>
       </v-col>
       <v-col cols="12" class="py-3 text-left">
-        <p>De volgende vragen zijn optioneel:</p>
+        <p class="ml-5">De volgende vragen zijn optioneel:</p>
       </v-col>
       <v-col cols="5" offset="1">
         <v-text-field density="compact" label="Geboorte Jaar" v-model.trim="state.yearOfBirth" :rules="state.yearOfBirthRules" />
@@ -17,7 +17,7 @@
     </v-row>
     <v-row v-if="state.showWhy">
       <v-col>
-        <p>Het geboortejaar is nodig om uw prestaties in een leeftijds-categorie te plaatsen. Zonder geboortejaar komt u
+        <p class="ml-5">Het geboortejaar is nodig om uw prestaties in een leeftijds-categorie te plaatsen. Zonder geboortejaar komt u
           terecht in de categorie 'Alle leeftijden'. Om de zelfde reden willen we weten of u man, vrouw of iets anders bent.
         </p>
       </v-col>
@@ -40,7 +40,7 @@
         </v-btn-toggle>
       </v-col>
       <v-col cols="8">
-        <p>Wil je maandelijks via de app op de hoogte gehouden worden van nieuws over het speelmee.app platform?</p>
+        <p class="ml-5">Wil je maandelijks via de app op de hoogte gehouden worden van nieuws over het speelmee.app platform?</p>
       </v-col>
       <v-col cols="4">
         <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
@@ -135,7 +135,7 @@ function replaceSpacesForHyphen(name) {
 // an undefined year of birth is stored as 0; an undefined gender as -1
 function doSignupUser() {
   const fakeEmail = replaceSpacesForHyphen(store.userData.alias) + '@speelmee.app'
-  const fakePassword = (Number(store.userData.pinCode + store.userData.pinCode) * 7).toString()
+  const fakePassword = (Number(store.userData.PIN + store.userData.PIN) * 7).toString()
   const auth = getAuth()
   createUserWithEmailAndPassword(auth, fakeEmail, fakePassword)
     .then((userCredential) => {
@@ -164,10 +164,3 @@ function doSignupUser() {
 }
 
 </script>
-
-<style scoped>
-p {
-  margin-left: 20px;
-  margin-right: 20px;
-}
-</style>

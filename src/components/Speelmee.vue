@@ -7,24 +7,23 @@
   <v-row class="py-2 d-flex align-center justify-center">
     <v-col cols="auto">
       <h3>Test spelenderwijs<br>je kennis en conditie<br>en geniet van cultuur.<br><br></h3>
-      <h4>Even aanmelden: kies een<br>schuilnaam en pincode<br><br>
-        Dat is alles om te kunnen meedoen!
-      </h4>
-      <v-btn class="py-4" size="x-small" color="yellow-lighten-3" @click="state.showHowTo = !state.showHowTo">Heb al account
+      <h4>Even aanmelden: kies een schuilnaam en pincode<br><br>
+        Dat is alles om te kunnen meedoen!</h4>
+      <v-btn class="mt-3 pt-2 pb-4" size="small" color="yellow-lighten-3" @click="state.showHowTo = !state.showHowTo">Heb al account
         op ander apparaat?</v-btn>
     </v-col>
   </v-row>
   <v-row v-if="state.showHowTo" class="d-flex align-center justify-center">
     <v-col>
-      <p>Als u al een account hebt op een ander apparaat log dan in met uw schuilnaam en pin code. Die kunt u
+      <p class="ml-3">Als u al een account hebt op een ander apparaat log dan in met uw schuilnaam en pin code. Die kunt u
         terugvinden op het andere apparaat door op <v-icon>mdi-dots-vertical</v-icon> rechtsboven te tikken en 'Inloggen op ander apparaat'
         te kiezen.
       </p>
     </v-col>
   </v-row>
-  <v-row class="py-4 d-flex align-center justify-center">
+  <v-row class="py-2 d-flex align-center justify-center">
     <v-col cols="auto">
-      <p>Lees het <router-link to="/Privacybeleid">privacybeleid</router-link> nu of later.<br>
+      <p class="ml-3">Lees het <router-link to="/Privacybeleid">privacybeleid</router-link> nu of later.<br>
         Geen gebruikelijke juridische bla bla!</p>
     </v-col>
   </v-row>
@@ -51,10 +50,6 @@ const state = reactive({
 </script>
 
 <style scoped>
-p {
-  margin-left: 10px;
-  margin-right: 10px;
-}
 
 h1 {
   font-size: 50px;

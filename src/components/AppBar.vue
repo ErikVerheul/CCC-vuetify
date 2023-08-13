@@ -76,7 +76,7 @@
         <h3>Om in te loggen op een ander apparaat hebt u nodig:</h3>
         <ul class="mx-5">
           <li>Uw schuilnaam: {{ store.userData.alias }}</li>
-          <li>Uw pin code: {{ store.userData.pinCode }}</li>
+          <li>Uw pin code: {{ store.userData.PIN }}</li>
         </ul>
         <p class="py-2">Start de app door speelmee.app in te tikken in het adres veld van uw browser.</p>
       </v-card-text>
@@ -92,7 +92,7 @@
         <h3>Als u automatisch inloggen heeft uitgezet kunt u inloggen met:</h3>
         <ul class="mx-5">
           <li>Uw schuilnaam: {{ store.userData.alias }}</li>
-          <li>Uw pin code: {{ store.userData.pinCode }}</li>
+          <li>Uw pin code: {{ store.userData.PIN }}</li>
         </ul>
         <v-btn class="mt-8" @click="removeCookie">Stop automatisch inloggen</v-btn>
         <h3 class="mt-4" v-if="state.cookieIsRemoved">Automatisch inloggen is uitgezet</h3>

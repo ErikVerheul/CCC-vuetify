@@ -7,7 +7,7 @@
         </v-card-title>
         <v-card-text>
           Uw schuilnaam is <b>{{ store.userData.alias }}</b><br>
-          Uw PIN is <b>{{ store.userData.pinCode }}</b>
+          Uw PIN is <b>{{ store.userData.PIN }}</b>
           <p>Gebruik deze schuilnaam en pin code om op een ander apparaat in te loggen.<br>
             Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt.</p>
         </v-card-text>
@@ -19,7 +19,7 @@
       <v-col cols="12">
         <h1 class="titleLine">Hallo -{{ store.userData.alias }} </h1>
         <h3>Kies een pin code</h3>
-        <v-text-field v-model.trim="store.userData.pinCode" label="pin code" :rules="state.pinRules" />
+        <v-text-field v-model.trim="store.userData.PIN" label="pin code" :rules="state.pinRules" />
       </v-col>
     </v-sheet>
   </v-row>
@@ -81,7 +81,7 @@ const state = reactive({
 })
 
 const PINOK = computed(() => {
-  return !isNaN(store.userData.pinCode) && store.userData.pinCode.length >= 4
+  return !isNaN(store.userData.PIN) && store.userData.PIN.length >= 4
 })
 
 const newsFeedLabel = computed(() => {

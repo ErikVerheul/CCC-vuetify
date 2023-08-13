@@ -239,6 +239,7 @@ function switchToSignup() {
 }
 
 function finishSignin() {
+  console.log('finishSignin: store.userData = ' + JSON.stringify(store.userData, null, 2))
   state.isAuthenticated = true
   store.screenName = 'Menu'
 }

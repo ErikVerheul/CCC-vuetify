@@ -17,7 +17,7 @@
       <v-card variant="text">
         <v-card-title>Login met schuilnaam en PIN code</v-card-title>
         <v-text-field v-model="store.userData.alias" label="Uw schuilnaam" />
-        <v-text-field v-model.trim="store.userData.pinCode" label="PIN" :rules="state.pinRules" />
+        <v-text-field v-model.trim="store.userData.PIN" label="PIN" :rules="state.pinRules" />
         <v-btn class="my-6" v-if="state.aliasOk && PINOK" type="submit" color="purple" @click='doSigninUser' rounded="l"
           size="large">Login</v-btn>
         <template v-if="state.loginErrorMsg !== undefined">
@@ -73,7 +73,7 @@ const state = reactive({
 })
 
 const PINOK = computed(() => {
-  return !isNaN(store.userData.pinCode) && store.userData.pinCode.length >= 4
+  return !isNaN(store.userData.PIN) && store.userData.PIN.length >= 4
 })
 
 function replaceSpacesForHyphen(name) {
@@ -105,7 +105,7 @@ watch(() => store.userData.alias, () => {
 
 function doSigninUser() {
   const fakeEmail = replaceSpacesForHyphen(store.userData.alias) + '@speelmee.app'
-  const fakePassword = (Number(store.userData.pinCode + store.userData.pinCode) * 7).toString()
+  const fakePassword = (Number(store.userData.PIN + store.userData.PIN) * 7).toString()
   const auth = getAuth()
   signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
     .then((userCredential) => {
