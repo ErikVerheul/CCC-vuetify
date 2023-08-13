@@ -1,86 +1,84 @@
 <template>
   <v-app-bar density="compact" color="purple">
-
-    <template v-if="props.screenName === 'Welkom'">
-      <v-app-bar-title class="flex text-center">{{ props.screenName }}</v-app-bar-title>
-    </template>
-    <template v-else>
-      <v-app-bar-title v-if="props.isAuthenticated">Welkom {{ props.userAlias }}</v-app-bar-title>
-      <v-app-bar-title v-else>{{ props.screenName }}</v-app-bar-title>
-
+    <template v-if="props.isAuthenticated">
+      <v-app-bar-title v-if="store.screenName === 'Menu'">Welkom {{ props.userAlias }}</v-app-bar-title>
+      <v-app-bar-title>{{ store.screenName }}</v-app-bar-title>
       <v-btn v-if="props.isAuthenticated && props.userAlias === 'admin'" size="small" variant="outlined"
         @click="doSuperAdmin">superAdmin</v-btn>
-
-      <v-btn icon id="menu-activator">
-        <v-icon>mdi-dots-vertical</v-icon>
-      </v-btn>
-
-      <v-menu activator="#menu-activator">
-        <v-list>
-          <v-list-item v-if="props.isAuthenticated">
-            <v-btn flat size="small" @click="state.dialog1 = true">
-              Inloggen op ander apparaat
-            </v-btn>
-          </v-list-item>
-          <v-list-item v-if="props.isAuthenticated">
-            <v-btn flat size="small" @click="state.dialog2 = true">
-              Stop automatisch inloggen
-            </v-btn>
-          </v-list-item>
-          <v-list-item v-if="props.isAuthenticated">
-            <v-btn flat size="small" @click="emit('app-settings')">
-              Instellingen
-            </v-btn>
-          </v-list-item>
-          <v-list-item>
-            <v-btn flat size="small" @click="state.dialog4 = true">
-              Feedback
-            </v-btn>
-          </v-list-item>
-          <v-list-item>
-            <v-btn flat size="small" @click="state.dialog5 = true">
-              Contact
-            </v-btn>
-          </v-list-item>
-          <v-list-item>
-            <v-btn flat size="small" @click="state.dialog6 = true">
-              Veelgestelde vragen
-            </v-btn>
-          </v-list-item>
-          <v-list-item>
-            <v-btn flat size="small" @click="state.dialog7 = true">
-              Over de Speelmee app
-            </v-btn>
-          </v-list-item>
-          <v-list-item>
-            <v-btn flat size="small" @click="router.push({ path: '/Privacybeleid' })">
-              Privacybeleid
-            </v-btn>
-          </v-list-item>
-          <v-list-item v-if="props.isAuthenticated">
-            <v-btn flat size="small" @click="state.dialog9 = true">
-              Log uit
-            </v-btn>
-          </v-list-item>
-          <v-list-item v-if="props.isAuthenticated && props.userAlias !== 'admin'">
-            <v-btn color="red" flat size="small" @click="state.dialog10 = true">
-              Ik speel niet meer mee.<br>Verwijder mijn gegevens
-            </v-btn>
-          </v-list-item>
-        </v-list>
-      </v-menu>
     </template>
+    <template v-else>
+      <v-app-bar-title class="flex text-center">{{ store.screenName }}</v-app-bar-title>
+    </template>
+
+    <v-btn icon id="menu-activator">
+      <v-icon>mdi-dots-vertical</v-icon>
+    </v-btn>
+
+    <v-menu activator="#menu-activator">
+      <v-list>
+        <v-list-item v-if="props.isAuthenticated">
+          <v-btn flat size="small" @click="state.dialog1 = true">
+            Inloggen op ander apparaat
+          </v-btn>
+        </v-list-item>
+        <v-list-item v-if="props.isAuthenticated">
+          <v-btn flat size="small" @click="state.dialog2 = true">
+            Stop automatisch inloggen
+          </v-btn>
+        </v-list-item>
+        <v-list-item v-if="props.isAuthenticated">
+          <v-btn flat size="small" @click="emit('app-settings')">
+            Instellingen
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn flat size="small" @click="state.dialog4 = true">
+            Feedback
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn flat size="small" @click="state.dialog5 = true">
+            Contact
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn flat size="small" @click="state.dialog6 = true">
+            Veelgestelde vragen
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn flat size="small" @click="state.dialog7 = true">
+            Over de Speelmee app
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn flat size="small" @click="router.push({ path: '/Privacybeleid' })">
+            Privacybeleid
+          </v-btn>
+        </v-list-item>
+        <v-list-item v-if="props.isAuthenticated">
+          <v-btn flat size="small" @click="state.dialog9 = true">
+            Log uit
+          </v-btn>
+        </v-list-item>
+        <v-list-item v-if="props.isAuthenticated && props.userAlias !== 'admin'">
+          <v-btn color="red" flat size="small" @click="state.dialog10 = true">
+            Ik speel niet meer mee.<br>Verwijder mijn gegevens
+          </v-btn>
+        </v-list-item>
+      </v-list>
+    </v-menu>
   </v-app-bar>
 
   <v-dialog v-model="state.dialog1" max-width="600">
     <v-card>
       <v-card-text>
         <h3>Om in te loggen op een ander apparaat hebt u nodig:</h3>
-        <ul>
+        <ul class="mx-5">
           <li>Uw schuilnaam: {{ props.userAlias }}</li>
           <li>Uw pin code: {{ props.PIN }}</li>
         </ul>
-        <p>Start de app door speelmee.app in te tikken in het adres veld van uw browser.</p>
+        <p class="py-2">Start de app door speelmee.app in te tikken in het adres veld van uw browser.</p>
       </v-card-text>
       <v-card-actions>
         <v-btn color="purple" block @click="state.dialog1 = false">Sluit</v-btn>
@@ -92,7 +90,7 @@
     <v-card>
       <v-card-text>
         <h3>Als u automatisch inloggen heeft uitgezet kunt u inloggen met:</h3>
-        <ul>
+        <ul class="mx-5">
           <li>Uw schuilnaam: {{ props.userAlias }}</li>
           <li>Uw pin code: {{ props.PIN }}</li>
         </ul>
@@ -109,14 +107,14 @@
     <v-card>
       <v-card-text>
         <h2>Stuur ons een bericht als je:</h2>
-        <ul>
+        <ul class="mx-5">
           <li>Een idee hebt</li>
           <li>Wil bijdragen</li>
           <li>Een klacht hebt</li>
           <li>Gebeld wilt worden</li>
           <li>Of een andere goede reden</li>
         </ul>
-        <p>Ons e-mail adres is contact@speelmee.app</p>
+        <p class="py-2">Ons e-mail adres is contact@speelmee.app</p>
       </v-card-text>
       <v-card-actions>
         <v-btn color="purple" block @click="state.dialog4 = false">Sluit</v-btn>
@@ -224,11 +222,14 @@
 </template>
 
 <script setup>
-import { computed, reactive } from 'vue'
+import { reactive } from 'vue'
+import { useAppStore } from '../store/app.js'
 import Cookies from 'universal-cookie'
 import { dbRef } from '../firebase'
 import { child, update, remove } from "firebase/database"
-import router from '@/router'
+import router from '../router'
+
+const store = useAppStore()
 
 const props = defineProps({
   isAuthenticated: {
@@ -242,10 +243,6 @@ const props = defineProps({
   PIN: {
     type: String,
     default: undefined
-  },
-  screenName: {
-    type: String,
-    required: true
   },
   firebaseUser: {
     type: Object
