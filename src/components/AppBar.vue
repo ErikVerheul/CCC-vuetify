@@ -1,9 +1,9 @@
 <template>
   <v-app-bar density="compact" color="purple">
     <template v-if="props.isAuthenticated">
-      <v-app-bar-title v-if="store.screenName === 'Menu'">Welkom {{ props.userAlias }}</v-app-bar-title>
+      <v-app-bar-title v-if="store.screenName === 'Menu'">Welkom {{ store.userData.alias }}</v-app-bar-title>
       <v-app-bar-title>{{ store.screenName }}</v-app-bar-title>
-      <v-btn v-if="props.isAuthenticated && props.userAlias === 'admin'" size="small" variant="outlined"
+      <v-btn v-if="props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined"
         @click="doSuperAdmin">superAdmin</v-btn>
     </template>
     <template v-else>
@@ -61,7 +61,7 @@
             Log uit
           </v-btn>
         </v-list-item>
-        <v-list-item v-if="props.isAuthenticated && props.userAlias !== 'admin'">
+        <v-list-item v-if="props.isAuthenticated && store.userData.alias !== 'admin'">
           <v-btn color="red" flat size="small" @click="state.dialog10 = true">
             Ik speel niet meer mee.<br>Verwijder mijn gegevens
           </v-btn>
@@ -75,8 +75,8 @@
       <v-card-text>
         <h3>Om in te loggen op een ander apparaat hebt u nodig:</h3>
         <ul class="mx-5">
-          <li>Uw schuilnaam: {{ props.userAlias }}</li>
-          <li>Uw pin code: {{ props.PIN }}</li>
+          <li>Uw schuilnaam: {{ store.userData.alias }}</li>
+          <li>Uw pin code: {{ store.userData.pinCode }}</li>
         </ul>
         <p class="py-2">Start de app door speelmee.app in te tikken in het adres veld van uw browser.</p>
       </v-card-text>
@@ -91,8 +91,8 @@
       <v-card-text>
         <h3>Als u automatisch inloggen heeft uitgezet kunt u inloggen met:</h3>
         <ul class="mx-5">
-          <li>Uw schuilnaam: {{ props.userAlias }}</li>
-          <li>Uw pin code: {{ props.PIN }}</li>
+          <li>Uw schuilnaam: {{ store.userData.alias }}</li>
+          <li>Uw pin code: {{ store.userData.pinCode }}</li>
         </ul>
         <v-btn class="mt-8" @click="removeCookie">Stop automatisch inloggen</v-btn>
         <h3 class="mt-4" v-if="state.cookieIsRemoved">Automatisch inloggen is uitgezet</h3>
@@ -235,17 +235,6 @@ const props = defineProps({
   isAuthenticated: {
     type: Boolean,
     required: true
-  },
-  userAlias: {
-    type: String,
-    default: undefined
-  },
-  PIN: {
-    type: String,
-    default: undefined
-  },
-  firebaseUser: {
-    type: Object
   }
 })
 
@@ -278,12 +267,12 @@ function logout() {
 
 function removeAccount() {
   // must remove user data before user is no more authenticated
-  remove(child(dbRef, '/users/' + props.firebaseUser.uid))
+  remove(child(dbRef, '/users/' + store.firebaseUser.uid))
   // update alias in use now we are sttil authenticated
   const updates = {}
-  updates['aliases/' + props.userAlias + '/inUse'] = false
+  updates['aliases/' + store.userData.alias + '/inUse'] = false
   update(dbRef, updates)
-  props.firebaseUser.delete().then(() => {
+  store.firebaseUser.delete().then(() => {
     removeCookie()
     state.dialog10 = false
     emit('reset-app')

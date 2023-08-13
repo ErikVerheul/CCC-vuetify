@@ -1,39 +1,36 @@
 <template>
   <v-app max-width="600px">
-    <AppBar :is-authenticated="state.isAuthenticated" :user-alias="state.userData.alias" :PIN="state.userData.pinCode"
-      :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp"
-      @app-settings="doAppSettings" />
+    <AppBar :is-authenticated="state.isAuthenticated" @logout-app="returnToLogin" @reset-app="resetApp" @app-settings="doAppSettings" />
     <v-main>
       <v-row class="d-flex justify-center">
         <v-col cols="auto">
           <template v-if="state.loginErrorMsg !== undefined">
-            <div class="py-4" />
-            <h2>Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
+            <h2 class="py-4">Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
           </template>
           <div v-if="!nowPlaying && !nowOther">
             <div v-if="state.isAuthenticated">
-              <MainMenu :last-login="state.userData.lastLogin" @menu-item-selected="doGame" />
+              <MainMenu @menu-item-selected="doGame" />
             </div>
             <div v-else>
-              <Speelmee :show-opening-screen="state.showOpeningScreen" @exit-opening-screen="loginOrSignIn" />
+              <Speelmee v-if="state.showOpeningScreen" @exit-opening-screen="loginOrSignIn" />
               <template v-if="state.userEntryMode === 'login'">
                 <SigninUser :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" @signin-completed="finishSignin"
                   @change-to-signup="switchToSignup" @exit-signin="resetApp">
                 </SigninUser>
               </template>
               <template v-if="state.userEntryMode === 'signup'">
-                <template v-if="state.userData.alias === undefined">
-                  <SelectAlias :alias-object="state.aliasObject" :aliases-in-use="state.aliasesInUse" :all-aliases="state.allAliases" :alias-occupied="state.alert"
-                    @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
+                <template v-if="store.userData.alias === undefined">
+                  <SelectAlias :alias-object="state.aliasObject" :aliases-in-use="state.aliasesInUse" :all-aliases="state.allAliases"
+                    :alias-occupied="state.alert" @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias"
+                    @reset-signup="returnToLogin">
                   </SelectAlias>
                 </template>
                 <template v-else>
-                  <div class="py-2" />
-                  <template v-if="state.signupStep === 1">
-                    <SignupUser :alias="state.userData.alias" @signup-continue="continueSignup" @exit-signup="returnToLogin" />
+                  <template class="py-2" v-if="state.signupStep === 1">
+                    <SignupUser @signup-continue="continueSignup" @exit-signup="returnToLogin" />
                   </template>
                   <template v-if="state.signupStep === 2">
-                    <SignupUser2 :userData="state.userData" @signup-completed="finishSignup" @exit-signup="returnToLogin" />
+                    <SignupUser2 @signup-completed="finishSignup" @exit-signup="returnToLogin" />
                   </template>
                 </template>
               </template>
@@ -41,10 +38,10 @@
           </div>
           <div else>
             <template v-if="state.maastrichtStoriesActive">
-              <MaastrichtStories :user-id="state.userData.alias" :alias="state.userData.alias" @return-to-menu="showMenu" />
+              <MaastrichtStories @return-to-menu="showMenu" />
             </template>
             <template v-if="state.userSettingsActive">
-              <AppSettings :firebase-user="state.firebaseUser" :userAlias="state.userData.alias" @return-to-menu="showMenu" />
+              <AppSettings @return-to-menu="showMenu" />
             </template>
           </div>
         </v-col>
@@ -120,12 +117,12 @@ onBeforeMount(() => {
             const fakePassword = retrievedCookie.fpw
             signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
               .then((userCredential) => {
-                // Signed in as user
-                state.firebaseUser = userCredential.user
+                // signed in as user
+                store.firebaseUser = userCredential.user
                 // get other user data from the database
-                get(child(dbRef, `users/` + state.firebaseUser.uid)).then((snapshot) => {
+                get(child(dbRef, `users/` + store.firebaseUser.uid)).then((snapshot) => {
                   if (snapshot.exists()) {
-                    state.userData = snapshot.val()
+                    store.userData = snapshot.val()
                     // the user is authenticated by having this cookie
                     state.isAuthenticated = true
                     // refresh cookie to maintain a year long subscription
@@ -134,7 +131,7 @@ onBeforeMount(() => {
                     store.screenName = 'Menu'
                     // save the login date/time
                     const updates = {}
-                    updates['/users/' + state.firebaseUser.uid + '/lastLogin'] = Date.now()
+                    updates['/users/' + store.firebaseUser.uid + '/lastLogin'] = Date.now()
                     update(dbRef, updates)
                   } else {
                     // no data available; cookie does not match user data in the database; remove cookie and start manual login or signup
@@ -143,7 +140,7 @@ onBeforeMount(() => {
                     store.screenName = 'Welkom'
                   }
                 }).catch((error) => {
-                  console.error(`Reading child ${state.firebaseUser.uid} from database: error message = ` + error)
+                  console.error(`Reading child ${store.firebaseUser.uid} from database: error message = ` + error)
                 })
               })
               .catch((error) => {
@@ -177,8 +174,6 @@ const state = reactive({
   aliasObject: {},
   signupStep: 1,
   isAuthenticated: false,
-  firebaseUser: {},
-  userData: {},
   showOpeningScreen: undefined,
   alert: false,
   userEntryMode: undefined,
@@ -224,47 +219,37 @@ function loginOrSignIn() {
 }
 
 function returnToLogin() {
+  store.userData = {}
+  state.userEntryMode = 'login'
+  state.signupStep = 1
+  store.screenName = 'Inloggen'
   if (state.isAuthenticated) {
     signOut(auth).then(() => {
       state.isAuthenticated = false
     }).catch((error) => {
-      console.error('signOut: An error happened, error message = ' + error.message)
+      console.error('signOut: An error happened: ' + error.message)
     })
   }
-  state.userData.pinCode = ''
-  state.userData.alias = undefined
-  state.userEntryMode = 'login'
-  state.signupStep = 1
-  store.screenName = 'Inloggen'
 }
 
 function switchToSignup() {
-  state.userData.pinCode = ''
-  state.userData.alias = undefined
+  store.userData = {}
   state.userEntryMode = 'signup'
   store.screenName = 'Aanmelden'
 }
 
-function finishSignin(alias, pin, userData, lastLogin) {
-  state.userData.alias = alias
-  state.userData.pinCode = pin
-  state.firebaseUser = userData
-  state.userData.lastLogin = lastLogin
+function finishSignin() {
   state.isAuthenticated = true
   store.screenName = 'Menu'
 }
 
-function continueSignup(alias, pin) {
-  state.userData.alias = alias
-  state.userData.pinCode = pin
+function continueSignup() {
   state.signupStep = 2
 }
 
-function finishSignup(firebaseUser, lastLogin) {
-  state.firebaseUser = firebaseUser
-  state.userData.lastLogin = lastLogin
+function finishSignup() {
   // add new alias to current arrays
-  state.aliasesInUse.push(state.userData.alias)
+  state.aliasesInUse.push(store.userData.alias)
   // reset signup step
   state.signupStep = 1
   state.isAuthenticated = true
@@ -294,7 +279,7 @@ async function aliasClicked(aliasClicked) {
 }
 
 function setSelectedAlias(alias) {
-  state.userData.alias = alias
+  store.userData.alias = alias
 }
 
 function showMenu() {
@@ -306,9 +291,8 @@ function showMenu() {
 function resetApp() {
   state.isAuthenticated = false
   // remove from aliasesInUse
-  state.aliasesInUse = state.aliasesInUse.filter(a => a !== state.userData.alias)
-  state.userData.alias = undefined
-  state.userData.pinCode = ''
+  state.aliasesInUse = state.aliasesInUse.filter(a => a !== store.userData.alias)
+  store.userData = {}
   state.userEntryMode = undefined
   state.showOpeningScreen = true
   store.screenName = 'Welkom'

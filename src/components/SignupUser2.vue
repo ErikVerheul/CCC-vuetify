@@ -2,11 +2,10 @@
   <v-sheet max-width="600px">
     <v-row>
       <v-col cols="12" class="text-center">
-        <h1>Hallo -{{ props.userData.alias }} </h1>
+        <h1>Hallo -{{ store.userData.alias }} </h1>
         <h3>Vervolg aanmelding</h3>
       </v-col>
-      <div class="py-3" />
-      <v-col cols="12" class="text-left">
+      <v-col cols="12" class="py-3 text-left">
         <p>De volgende vragen zijn optioneel:</p>
       </v-col>
       <v-col cols="5" offset="1">
@@ -24,7 +23,7 @@
       </v-col>
     </v-row>
     <v-row class="d-flex align-center justify-center">
-      <v-col cols="12" class="m_left20">
+      <v-col cols="12" class="ml-5">
         <v-btn-toggle v-model="state.gender" variant="outlined" group>
           <v-btn value="0">
             Man
@@ -71,13 +70,14 @@
 
 <script setup>
 import { computed, reactive } from 'vue'
+import { useAppStore } from '../store/app.js'
 import { db, dbRef } from '../firebase'
 import { ref, set, update } from "firebase/database"
 import Cookies from 'universal-cookie'
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
 
-const props = defineProps(['userData'])
 const emit = defineEmits(['signup-completed', 'exit-signup'])
+const store = useAppStore()
 
 const state = reactive({
   showWhy: false,
@@ -116,7 +116,6 @@ const state = reactive({
       return 'U bent nog niet geboren'
     }
   ],
-  lastLogin: Date.now(),
   newsFeed: false
 })
 
@@ -135,31 +134,29 @@ function replaceSpacesForHyphen(name) {
 
 // an undefined year of birth is stored as 0; an undefined gender as -1
 function doSignupUser() {
-  const fakeEmail = replaceSpacesForHyphen(props.userData.alias) + '@speelmee.app'
-  const fakePassword = (Number(props.userData.pinCode + props.userData.pinCode) * 7).toString()
+  const fakeEmail = replaceSpacesForHyphen(store.userData.alias) + '@speelmee.app'
+  const fakePassword = (Number(store.userData.pinCode + store.userData.pinCode) * 7).toString()
   const auth = getAuth()
   createUserWithEmailAndPassword(auth, fakeEmail, fakePassword)
     .then((userCredential) => {
-      // Signed in 
-      const firebaseUser = userCredential.user;
-      // save user data in database
-      set(ref(db, 'users/' + firebaseUser.uid), {
-        PIN: props.userData.pinCode,
-        alias: props.userData.alias,
-        subscriptionDate: state.lastLogin,
-        lastLogin: state.lastLogin,
-        yearOfBirth: state.yearOfBirth === undefined ? -1 : Number(state.yearOfBirth),
-        gender: Number(state.gender),
-        newsFeed: state.newsFeed
-      })
+      // signed in as user
+      store.firebaseUser = userCredential.user
+      const now = Date.now()
+      // create user data and store in database
+      store.userData.gender = Number(state.gender)
+      store.userData.lastLogin = now
+      store.userData.newsFeed = state.newsFeed
+      store.userData.subscriptionDate = now
+      store.userData.yearOfBirth = state.yearOfBirth === undefined ? -1 : Number(state.yearOfBirth)
+      set(ref(db, 'users/' + store.firebaseUser.uid), store.userData)
       // set this alias as in use
       const updates = {}
-      updates['aliases/' + props.userData.alias + '/inUse'] = true
+      updates['aliases/' + store.userData.alias + '/inUse'] = true
       update(dbRef, updates)
       // set cookie for auto-signin next time
       const cookies = new Cookies()
-      cookies.set('speelMee', { alias: props.userData.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-      emit('signup-completed', firebaseUser, state.lastLogin)
+      cookies.set('speelMee', { alias: store.userData.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+      emit('signup-completed')
     })
     .catch((error) => {
       console.error('Firebase signup: errorMessage = ' + error.message)
@@ -172,9 +169,5 @@ function doSignupUser() {
 p {
   margin-left: 20px;
   margin-right: 20px;
-}
-
-.m_left20 {
-  margin-left: 20px;
 }
 </style>

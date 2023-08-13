@@ -6,30 +6,32 @@
           Welkom in de Speelmee.app
         </v-card-title>
         <v-card-text>
-          Uw schuilnaam is <b>{{ props.alias }}</b><br>
-          Uw PIN is <b>{{ state.pinCode }}</b><br>
-          Gebruik deze schuilnaam en pin code om op een ander apparaat in te loggen.
-          Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt.
+          Uw schuilnaam is <b>{{ store.userData.alias }}</b><br>
+          Uw PIN is <b>{{ store.userData.pinCode }}</b>
+          <p>Gebruik deze schuilnaam en pin code om op een ander apparaat in te loggen.<br>
+            Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt.</p>
         </v-card-text>
       </v-card>
     </v-col>
   </v-row>
   <v-row v-else>
-    <v-col cols="12">
-      <h1 class="titleLine">Hallo -{{ props.alias }} </h1>
-      <h3>Kies een pin code</h3>
-      <v-text-field v-model.trim="state.pinCode" label="pin code" :rules="state.pinRules" />
-    </v-col>
+    <v-sheet class="ma-2">
+      <v-col cols="12">
+        <h1 class="titleLine">Hallo -{{ store.userData.alias }} </h1>
+        <h3>Kies een pin code</h3>
+        <v-text-field v-model.trim="store.userData.pinCode" label="pin code" :rules="state.pinRules" />
+      </v-col>
+    </v-sheet>
   </v-row>
 
-  <v-row>
-    <v-col cols="12">
-      <p>De speelmee.app neemt Privacy serieus;<br>
-        daarom maken we het mogelijk alle<br>
-        persoonlijke data te wissen als je geen<br>
-        gebruik meer wil maken van de app.</p>
-    </v-col>
-  </v-row>
+  <v-sheet class="pa-2" max-width="600px">
+    <v-row>
+      <v-col cols="12">
+        <h4>De speelmee.app neemt uw privacy serieus.</h4>
+        <p>Daarom maken we het mogelijk alle persoonlijke data te wissen als je geen gebruik meer wil maken van de app.</p>
+      </v-col>
+    </v-row>
+  </v-sheet>
   <v-row>
     <v-col>
       <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
@@ -41,7 +43,7 @@
     </v-col>
     <v-spacer></v-spacer>
     <v-col>
-      <v-btn :disabled="!PINOK" flat append-icon="mdi-arrow-right" @click="emit('signup-continue', props.alias, state.pinCode)">
+      <v-btn :disabled="!PINOK" flat append-icon="mdi-arrow-right" @click="emit('signup-continue')">
         Door
         <template v-slot:append>
           <v-icon size="x-large" color="purple"></v-icon>
@@ -53,12 +55,12 @@
 
 <script setup>
 import { computed, reactive } from 'vue'
+import { useAppStore } from '../store/app.js'
 
-const props = defineProps(['alias'])
 const emit = defineEmits(['signup-continue', 'exit-signup'])
+const store = useAppStore()
 
 const state = reactive({
-  pinCode: '',
   pinRules: [
     value => {
       if (value) return true
@@ -79,7 +81,7 @@ const state = reactive({
 })
 
 const PINOK = computed(() => {
-  return !isNaN(state.pinCode) && state.pinCode.length >= 4
+  return !isNaN(store.userData.pinCode) && store.userData.pinCode.length >= 4
 })
 
 const newsFeedLabel = computed(() => {

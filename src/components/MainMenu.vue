@@ -1,6 +1,5 @@
 <template>
-  <div class="py-2" />
-  <v-row class="d-flex align-center justify-center">
+  <v-row class="py-2 d-flex align-center justify-center">
     <v-col cols="auto">
       <p>Laatste login: {{ createDateTimeString() }}</p>
       <h2>Hoe goed ben ik in</h2>
@@ -90,13 +89,12 @@
 
 <script setup>
 import { useAppStore } from '../store/app.js'
-const props = defineProps(['lastLogin'])
 const emit = defineEmits(['menu-item-selected'])
 const store = useAppStore()
 
 function createDateTimeString() {
   const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }
-  const evt = new Date(Number(props.lastLogin))
+  const evt = new Date(Number(store.userData.lastLogin))
   return evt.toLocaleDateString('nl-NL', options)
 }
 </script>

@@ -42,10 +42,8 @@
         </v-btn>
       </v-col>
     </v-row>
-    <div class="py-5" />
-    <h4>Meer over kloosterleven in Maastricht Museum</h4>
-    <div class="py-3" />
-    <v-row class="justify-start">
+    <h4 class="py-5">Meer over kloosterleven in Maastricht Museum</h4>
+    <v-row class="py-3 justify-start">
       <v-col cols="auto">
         <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('quit-quiz')">
           <template v-slot:prepend>

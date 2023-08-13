@@ -32,8 +32,7 @@
 
     <h3>Transparant</h3>
     <p>Het hele systeem is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
-    <div class="py-5" />
-    <v-row class="justify-start">
+    <v-row class="py-5 justify-start">
       <v-col cols="auto">
         <v-btn flat prepend-icon="mdi-arrow-left" @click="router.go(-1)">
           <template v-slot:prepend>

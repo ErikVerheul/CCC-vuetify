@@ -16,22 +16,18 @@
     <v-col cols="auto">
       <v-card variant="text">
         <v-card-title>Login met schuilnaam en PIN code</v-card-title>
-        <v-text-field v-model="state.userAliasInput" label="Uw schuilnaam" />
-        <v-text-field v-model.trim="state.pinCode" label="PIN" :rules="state.pinRules" />
+        <v-text-field v-model="store.userData.alias" label="Uw schuilnaam" />
+        <v-text-field v-model.trim="store.userData.pinCode" label="PIN" :rules="state.pinRules" />
         <v-btn class="my-6" v-if="state.aliasOk && PINOK" type="submit" color="purple" @click='doSigninUser' rounded="l"
           size="large">Login</v-btn>
         <template v-if="state.loginErrorMsg !== undefined">
-          <div class="py-4" />
-          <h2>Fout: {{ state.loginErrorMsg }}</h2>
-          <div class="py-4" />
-          <h3>Controleer of uw schuilnaam en pincode kloppen en probeer opnieuw
-          </h3>
+          <h2 class="py-4">Fout: {{ state.loginErrorMsg }}</h2>
+          <h3 class="py-4">Controleer of uw schuilnaam en pincode kloppen en probeer opnieuw</h3>
         </template>
       </v-card>
     </v-col>
   </v-row>
-  <div class="py-12" />
-  <v-row>
+  <v-row class="py-12">
     <v-col cols="auto">
       <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signin')">
         <template v-slot:prepend>
@@ -55,9 +51,7 @@ const emit = defineEmits(['signin-completed', 'change-to-signup', 'exit-signin']
 const store = useAppStore()
 
 const state = reactive({
-  userAliasInput: '',
   aliasOk: false,
-  pinCode: '',
   pinRules: [
     value => {
       if (value) return true
@@ -79,28 +73,22 @@ const state = reactive({
 })
 
 const PINOK = computed(() => {
-  return !isNaN(state.pinCode) && state.pinCode.length >= 4
+  return !isNaN(store.userData.pinCode) && store.userData.pinCode.length >= 4
 })
 
 function replaceSpacesForHyphen(name) {
   return name.replaceAll(' ', '-')
 }
 
-function resetLogin() {
-  state.userAliasInput = ''
-  state.pinCode = ''
-  state.loginErrorMsg = undefined
-}
-
 // autocomplete the alias name
-watch(() => state.userAliasInput, () => {
+watch(() => store.userData.alias, () => {
   state.aliasOk = false
-  const inputLen = state.userAliasInput.length
+  const inputLen = store.userData.alias.length
   let lastMatch = undefined
   let exactMatch = false
   let matchcount = 0
   for (const el of props.aliasesInUseInclAdmin) {
-    if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
+    if (el.substring(0, inputLen).toUpperCase() === store.userData.alias.toUpperCase()) {
       lastMatch = el
       matchcount++
       // test on exact match
@@ -111,36 +99,37 @@ watch(() => state.userAliasInput, () => {
   if (exactMatch || matchcount === 1) {
     // unique match found
     state.aliasOk = true
-    state.userAliasInput = lastMatch.trim()
+    store.userData.alias = lastMatch.trim()
   }
 })
 
 function doSigninUser() {
-  const fakeEmail = replaceSpacesForHyphen(state.userAliasInput) + '@speelmee.app'
-  const fakePassword = (Number(state.pinCode + state.pinCode) * 7).toString()
+  const fakeEmail = replaceSpacesForHyphen(store.userData.alias) + '@speelmee.app'
+  const fakePassword = (Number(store.userData.pinCode + store.userData.pinCode) * 7).toString()
   const auth = getAuth()
   signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
     .then((userCredential) => {
-      // Signed in 
-      const firebaseUser = userCredential.user
+      // signed in as user
+      store.firebaseUser = userCredential.user
       // get user data from the database
-      get(child(dbRef, `users/` + firebaseUser.uid)).then((snapshot) => {
+      get(child(dbRef, `users/` + store.firebaseUser.uid)).then((snapshot) => {
         if (snapshot.exists()) {
-          //... store user data from database
-          state.lastLogin = snapshot.val().lastLogin
+          store.userData = snapshot.val()
           // save a cookie for auto login next time
           const cookies = new Cookies()
-          cookies.set('speelMee', { alias: state.userAliasInput, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-          // save the login date/time
+          cookies.set('speelMee', { alias: store.userData.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+          // update the login date/time
+          const now = Date.now()
+          store.userData.lastLogin = now
           const updates = {}
-          updates['/users/' + firebaseUser.uid + '/lastLogin'] = Date.now()
+          updates['/users/' + store.firebaseUser.uid + '/lastLogin'] = now
           update(dbRef, updates)
-          emit('signin-completed', state.userAliasInput, state.pinCode, firebaseUser, state.lastLogin)
+          emit('signin-completed')
         } else {
-          console.log(`doSigninUser: cannot find user ${state.userAliasInput} in the database}`)
+          console.log(`doSigninUser: cannot find user ${store.userData.alias} in the database}`)
         }
       }).catch((error) => {
-        console.error(`While reading child ${state.userAliasInput} from database: error message = ` + error.message)
+        console.error(`While reading child ${store.userData.alias} from database: error message = ` + error.message)
       })
     })
     .catch((error) => {
