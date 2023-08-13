@@ -1,28 +1,30 @@
 <template>
-  <v-row>
-    <v-col cols="auto">
-      <h3 v-if="state.newsFeed">U bent geabbonneerd op een maandelijke nieuws update.</h3>
-      <h3 v-else>U bent niet geabbonneerd op een maandelijke nieuws update.</h3>
-    </v-col>
-  </v-row>
-  <v-row>
-    <v-col cols="8">
-      <p> Wil je maandelijks via de app op de hoogte gehouden worden van nieuws over het speelmee.app platform?</p>
-    </v-col>
-    <v-col cols="4">
-      <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
-    </v-col>
-  </v-row>
-  <v-row class="justify-start">
-    <v-col cols="auto">
-      <v-btn flat prepend-icon="mdi-arrow-left" @click="saveAndReturn">
-        <template v-slot:prepend>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-        Terug
-      </v-btn>
-    </v-col>
-  </v-row>
+  <v-sheet class="py-2 mx-5" max-width="600">
+    <v-row>
+      <v-col cols="auto">
+        <h3 v-if="state.newsFeed">U bent geabbonneerd op een maandelijke nieuws update.</h3>
+        <h3 v-else>U bent niet geabbonneerd op een maandelijke nieuws update.</h3>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="8">
+        <p> Wil je maandelijks via de app op de hoogte gehouden worden van nieuws over het speelmee.app platform?</p>
+      </v-col>
+      <v-col cols="4">
+        <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
+      </v-col>
+    </v-row>
+    <v-row class="justify-start">
+      <v-col cols="auto">
+        <v-btn flat prepend-icon="mdi-arrow-left" @click="saveAndReturn">
+          <template v-slot:prepend>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+          Terug
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-sheet>
 </template>
 
 <script setup>
