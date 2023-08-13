@@ -45,12 +45,14 @@
 
 <script setup>
 import { computed, reactive, watch } from 'vue'
+import { useAppStore } from '../store/app.js'
 import { dbRef } from '../firebase'
 import { get, child, update } from "firebase/database"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
 import Cookies from 'universal-cookie'
 const props = defineProps(['aliasesInUseInclAdmin'])
 const emit = defineEmits(['signin-completed', 'change-to-signup', 'exit-signin'])
+const store = useAppStore()
 
 const state = reactive({
   userAliasInput: '',

@@ -1,7 +1,7 @@
 <template>
   <v-app max-width="600px">
     <AppBar :is-authenticated="state.isAuthenticated" :user-alias="state.userData.alias" :PIN="state.userData.pinCode"
-      :screen-name="state.screenName" :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp"
+      :firebase-user="state.firebaseUser" @logout-app="returnToLogin" @reset-app="resetApp"
       @app-settings="doAppSettings" />
     <v-main>
       <v-row class="d-flex justify-center">
@@ -54,7 +54,8 @@
 </template>
 
 <script setup>
-import { onBeforeMount, reactive, computed, watch } from 'vue'
+import { onBeforeMount, reactive, computed } from 'vue'
+import { useAppStore } from '../store/app.js'
 import Speelmee from './Speelmee.vue'
 import SelectAlias from './SelectAlias.vue'
 import Cookies from 'universal-cookie'
@@ -69,6 +70,7 @@ import AppSettings from './AppSettings.vue'
 import { getAuth, signInWithEmailAndPassword, signOut, fetchSignInMethodsForEmail } from "firebase/auth"
 
 const auth = getAuth()
+const store = useAppStore()
 
 onBeforeMount(() => {
   // get the assigned aliases using system user credentials
@@ -108,8 +110,9 @@ onBeforeMount(() => {
         } else {
           console.log("No aliases data available")
         }
+        // sign-out from system id and sign-in user
         signOut(auth).then(() => {
-          // automatically signin from cookie, if set
+          // automatically sign-in from cookie, if set
           const cookies = new Cookies()
           const retrievedCookie = cookies.get('speelMee')
           if (retrievedCookie !== undefined) {
@@ -128,16 +131,16 @@ onBeforeMount(() => {
                     // refresh cookie to maintain a year long subscription
                     cookies.remove('speelMee', { sameSite: true })
                     cookies.set('speelMee', { alias: retrievedCookie.alias, fpw: retrievedCookie.fpw }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-                    state.screenName = 'Menu'
+                    store.screenName = 'Menu'
                     // save the login date/time
                     const updates = {}
                     updates['/users/' + state.firebaseUser.uid + '/lastLogin'] = Date.now()
                     update(dbRef, updates)
                   } else {
-                    // No data available; cookie does not match user data in the database; remove cookie and start manual login or signup
+                    // no data available; cookie does not match user data in the database; remove cookie and start manual login or signup
                     cookies.remove('speelMee', { sameSite: true })
                     state.showOpeningScreen = true
-                    state.screenName = 'Welkom'
+                    store.screenName = 'Welkom'
                   }
                 }).catch((error) => {
                   console.error(`Reading child ${state.firebaseUser.uid} from database: error message = ` + error)
@@ -149,13 +152,13 @@ onBeforeMount(() => {
                 // no account available; cookie does not match an account in the database; remove cookie and start manual login or signup
                 cookies.remove('speelMee', { sameSite: true })
                 state.showOpeningScreen = true
-                state.screenName = 'Welkom'
+                store.screenName = 'Welkom'
               })
           } else {
             console.log('No cookie found')
             // no cookie available; manual login or signup needed
             state.showOpeningScreen = true
-            state.screenName = 'Welkom'
+            store.screenName = 'Welkom'
           }
         }).catch((error) => {
           console.error('Firebase signOut: error message = ' + error.message)
@@ -172,8 +175,6 @@ onBeforeMount(() => {
 
 const state = reactive({
   aliasObject: {},
-  screenName: '',
-  lastScreenName: '',
   signupStep: 1,
   isAuthenticated: false,
   firebaseUser: {},
@@ -205,34 +206,27 @@ const nowOther = computed(() => {
   return state.userSettingsActive
 })
 
-// save the last screenName before changing
-// See watching a getter in https://vuejs.org/api/reactivity-core.html#watch
-watch(() => state.screenName, (oldVal) => {
-  state.lastScreenName = oldVal
-})
-
 function doAppSettings() {
   console.log('doAppSettings selected')
-  state.screenName = 'Instellingen'
+  store.screenName = 'Instellingen'
   state.userSettingsActive = true
 }
 
 function doGame(game) {
-  state.screenName = 'Verhalen van Maastricht'
+  store.screenName = 'Verborgen verhalen van Maastricht'
   state.maastrichtStoriesActive = true
 }
 
 function loginOrSignIn() {
   state.showOpeningScreen = false
   state.userEntryMode = 'login'
-  state.screenName = 'Inloggen'
+  store.screenName = 'Inloggen'
 }
 
 function returnToLogin() {
   if (state.isAuthenticated) {
     signOut(auth).then(() => {
       state.isAuthenticated = false
-      console.log('Sign-out successful')
     }).catch((error) => {
       console.error('signOut: An error happened, error message = ' + error.message)
     })
@@ -241,14 +235,14 @@ function returnToLogin() {
   state.userData.alias = undefined
   state.userEntryMode = 'login'
   state.signupStep = 1
-  state.screenName = 'Inloggen'
+  store.screenName = 'Inloggen'
 }
 
 function switchToSignup() {
   state.userData.pinCode = ''
   state.userData.alias = undefined
   state.userEntryMode = 'signup'
-  state.screenName = 'Aanmelden'
+  store.screenName = 'Aanmelden'
 }
 
 function finishSignin(alias, pin, userData, lastLogin) {
@@ -257,7 +251,7 @@ function finishSignin(alias, pin, userData, lastLogin) {
   state.firebaseUser = userData
   state.userData.lastLogin = lastLogin
   state.isAuthenticated = true
-  state.screenName = state.lastScreenName
+  store.screenName = 'Menu'
 }
 
 function continueSignup(alias, pin) {
@@ -274,7 +268,7 @@ function finishSignup(firebaseUser, lastLogin) {
   // reset signup step
   state.signupStep = 1
   state.isAuthenticated = true
-  state.screenName = state.lastScreenName
+  store.screenName = 'Menu'
 }
 
 function replaceSpacesForHyphen(name) {
@@ -306,7 +300,7 @@ function setSelectedAlias(alias) {
 function showMenu() {
   state.userSettingsActive = false
   state.maastrichtStoriesActive = false
-  state.screenName = 'Menu'
+  store.screenName = 'Menu'
 }
 
 function resetApp() {
@@ -317,6 +311,6 @@ function resetApp() {
   state.userData.pinCode = ''
   state.userEntryMode = undefined
   state.showOpeningScreen = true
-  state.screenName = 'Welkom'
+  store.screenName = 'Welkom'
 }
 </script>

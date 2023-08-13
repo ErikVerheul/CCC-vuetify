@@ -89,8 +89,10 @@
 </template>
 
 <script setup>
+import { useAppStore } from '../store/app.js'
 const props = defineProps(['lastLogin'])
 const emit = defineEmits(['menu-item-selected'])
+const store = useAppStore()
 
 function createDateTimeString() {
   const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }
