@@ -1,0 +1,258 @@
+<template>
+  <v-sheet class="pa-2" color="grey-lighten-3" :height="getHeight()" width="414">
+    <template v-if="!state.showExplanation">
+      <v-row no-gutters>
+        <h3>{{ state.currentQuestion.headText }}</h3>
+      </v-row>
+      <v-row no-gutters>
+        <div v-html="state.currentQuestion.body"></div>
+      </v-row>
+      <v-row no-gutters>
+        <v-list lines="two" density="compact">
+          <v-list-item v-for="(num, index) in state.currentQuestion.statementsArray" :subtitle="composeStatement(index)"
+            @click="qAnswer(index)" :style="{ 'background-color': bgColor }"></v-list-item>
+        </v-list>
+      </v-row>
+      <v-row v-if="state.currentQuestion.gameRules !== ''" no-gutters>
+        <p class="py-2">{{ state.currentQuestion.gameRules }}</p>
+      </v-row>
+    </template>
+    <template v-else>
+      <h4 class="py-3">Toelichting op goed/fout antwoord:</h4>
+      <v-row no-gutters>
+        <div v-html="state.currentQuestion.resultInfo"></div>
+      </v-row>
+    </template>
+  </v-sheet>
+  <v-sheet v-if="!state.showExplanation" class="pa-2" color="grey-lighten-3" height="60" width="414">
+    <v-row v-if="!state.done">
+      <v-col v-if="state.playerStarted" cols="9">
+        <v-btn flat @click="finishQuestion()">Verzend jouw antwoord</v-btn>
+      </v-col>
+      <v-col v-else cols="9">
+        <p>Kies je antwoord!<br>Binnen 30 sec</p>
+      </v-col>
+      <v-col cols="3">
+        {{ state.clockValue }}
+      </v-col>
+    </v-row>
+    <v-row v-else>
+      <v-col cols="9">
+        {{ state.wrapupMsg }}
+      </v-col>
+      <v-col cols="3">
+        {{ state.clockValue }}
+      </v-col>
+    </v-row>
+  </v-sheet>
+
+  <v-row class="mt-2">
+    <v-col>
+      <v-btn :disabled="true" flat prepend-icon="mdi-arrow-left">
+        <template v-slot:prepend>
+          <v-icon size="x-large" color="purple"></v-icon>
+        </template>
+        Terug
+      </v-btn>
+    </v-col>
+    <v-spacer></v-spacer>
+    <v-col>
+      <v-btn :disabled="!state.done" flat append-icon="mdi-arrow-right" @click="nextStep()">
+        Door
+        <template v-slot:append>
+          <v-icon size="x-large" color="purple"></v-icon>
+        </template>
+      </v-btn>
+    </v-col>
+  </v-row>
+</template>
+
+<script setup>
+import { onBeforeMount, computed, reactive, watch } from 'vue'
+import { useAppStore } from '../store/app.js'
+import { db, dbRef } from '../firebase'
+import { ref, child, get, set, remove, update } from 'firebase/database'
+
+const props = defineProps({
+  quizNumber: {
+    type: Number,
+    required: true
+  }
+})
+const store = useAppStore()
+const emit = defineEmits(['quiz-continue'])
+
+// must be non-reactive
+let bgColor = undefined
+
+onBeforeMount(() => {
+  loadQuiz(props.quizNumber)
+})
+
+const state = reactive({
+  quizObject: {},
+  indexObject: {},
+  currentQuestion: {},
+  quizQAnswers: [],
+  playerStarted: false,
+  seconds: 0,
+  timerId: undefined,
+  overDue: false,
+  done: false,
+  wrapupMsg: '',
+  showExplanation: false
+})
+
+function getHeight() {
+  if (!state.showExplanation) return 896-60-40
+  return 896-30
+}
+
+function loadQuiz(quizNumber) {
+  // get the quiz
+  get(child(dbRef, `/quizzes/metaData/${quizNumber}`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      state.quizObject = snapshot.val()
+      loadQuestionIds(quizNumber)
+    } else {
+      console.log("Quiz not found")
+    }
+  }).catch((error) => {
+    console.error(`Error while reading quiz ${quizNumber} from database: ` + error.message)
+  })
+}
+
+function loadQuestionIds(quizNumber) {
+  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      state.indexObject = snapshot.val()
+      const allQuestionKeys = Object.keys(state.indexObject)
+      const questionIds = []
+      for (const key of allQuestionKeys) {
+        // allow type casting although isNaN says both are numbers
+        if (state.indexObject[key].quizNumber == quizNumber) {
+          questionIds.push(key)
+        }
+      }
+      if (questionIds.length > 0) {
+        loadQuestion(questionIds[0])
+      } else {
+        console.log(`No questions found for quiz ${quizNumber}`)
+        // ToDo: show warning and exit
+      }
+    } else {
+      console.log("No quiz-questions available")
+    }
+  }).catch((error) => {
+    console.error('Error while reading all available quiz-question names from database: ' + error.message)
+  })
+}
+
+function loadQuestion(id) {
+  store.screenName = state.indexObject[id].title
+  get(child(dbRef, `/quizzes/questions/${Number(id)}`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      state.currentQuestion = snapshot.val()
+      // initialize answers to false
+      for (let i = 0; i < state.currentQuestion.statementsArray.length; i++) {
+        state.quizQAnswers[i] = false
+      }
+      startTimer()
+    } else {
+      console.log("No quiz-question data available")
+    }
+  }).catch((error) => {
+    console.error('While reading the quiz-question data from database: error message = ' + error.message)
+  })
+}
+
+function composeStatement(idx) {
+  if (idx > 12) return "Fout: Meer dan 12 vragen?"
+  const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
+  bgColor = 'white'
+  if (state.quizQAnswers[idx]) {
+    bgColor = 'aqua'
+  }
+  return `${letters[idx]}. ` + state.currentQuestion.statementsArray[idx]
+}
+
+function qAnswer(idx) {
+  state.playerStarted = true
+  if (state.quizQAnswers[idx]) {
+    state.quizQAnswers[idx] = false
+  } else {
+    state.quizQAnswers[idx] = true
+  }
+}
+function numberOfStatemenst() {
+  if (state.currentQuestion.statementsArray === undefined) return 0
+  return state.currentQuestion.statementsArray.length
+}
+
+function numberOfCorrectStatements() {
+  if (state.currentQuestion.answers === undefined) return 0
+  const keys = Object.keys(state.currentQuestion.answers)
+  let count = 0
+  keys.forEach(k => {
+    if (state.currentQuestion.answers[k] === true) count++
+  })
+  return count
+}
+
+function countCorrectAnswers() {
+  if (state.currentQuestion.answers === undefined) return 0
+  const keys = Object.keys(state.currentQuestion.answers)
+  let count = 0
+  keys.forEach(k => {
+    if (state.currentQuestion.answers[k] === true && state.quizQAnswers[k] === true) count++
+  })
+  return count
+}
+
+function countWrongAnswers() {
+  let count = 0
+  for (let ind = 0; ind < state.quizQAnswers.length; ind++) {
+    if (state.quizQAnswers[ind] === true && state.currentQuestion.answers[ind] !== true) count++
+  }
+  return count
+}
+
+function startTimer() {
+  state.timerId = setInterval(() => {
+    state.seconds += 1
+    const minutes = Math.floor(state.seconds / 60)
+    const seconds = state.seconds - minutes * 60
+    let secondsStr = seconds.toString()
+    if (secondsStr.length === 1) secondsStr = '0' + secondsStr
+    state.clockValue = `${minutes}:${secondsStr}`
+  }, 1000)
+
+}
+
+function finishQuestion() {
+  state.done = true
+  clearInterval(state.timerId)
+  if (countCorrectAnswers() === numberOfCorrectStatements() && countWrongAnswers() === 0) {
+    state.wrapupMsg = 'Je antwoord was goed en binnen de tijd!'
+  } else {
+    state.wrapupMsg = 'Je antwoord was fout'
+  }
+}
+
+function nextStep() {
+  if (state.showExplanation) {
+    emit('quiz-continue')
+  } else
+    state.showExplanation = true
+}
+
+watch(() => state.seconds, () => {
+  if (state.seconds >= 30) {
+    clearInterval(state.timerId)
+    state.done = true
+    state.overDue = true
+    state.wrapupMsg = 'Je antwoord was niet binnen de tijd'
+  }
+})
+
+</script>

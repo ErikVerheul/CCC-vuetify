@@ -487,11 +487,11 @@ function qAnswer(idx) {
 
 function countGoodAnswers() {
   if (state.quizQAnswers === undefined) return 0
-  const answers = Object.keys(state.quizQAnswers)
+  const keys = Object.keys(state.quizQAnswers)
   let count = 0
-  for (const el of answers) {
-    if (state.quizQAnswers[el]) count++
-  }
+  keys.forEach(k => {
+    if (state.quizQAnswers[k] === true && state.quizQAnswers[k] === true) count++
+  })
   return count
 }
 

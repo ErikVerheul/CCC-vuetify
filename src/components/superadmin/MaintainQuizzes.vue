@@ -217,7 +217,7 @@ function loadQuizes() {
       console.log("No quizzes available")
     }
   }).catch((error) => {
-    console.error('While reading all available quizzes from database: error message = ' + error.message)
+    console.error('Error while reading all available quizzes from database: ' + error.message)
   })
 }
 
