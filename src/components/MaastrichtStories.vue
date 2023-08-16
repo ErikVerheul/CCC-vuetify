@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="pa-2 text-center mx-auto" v-if="!state.doQuiz" max-width="600">
+  <v-sheet class="pa-2 text-center mx-auto" v-if="!state.doQuiz"  :max-width="store.screenWidth">
     <h3 class="py-3 text-red">Doe mee en win!</h3>
     <v-row>
       <v-col cols="9" class="text-left">       

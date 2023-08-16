@@ -1,8 +1,11 @@
 <template>
   <v-app-bar density="compact" color="purple">
     <template v-if="props.isAuthenticated">
-      <v-app-bar-title v-if="store.screenName === 'Menu'">Welkom {{ store.userData.alias }}</v-app-bar-title>
-      <v-app-bar-title>{{ store.screenName }}</v-app-bar-title>
+      <template v-if="store.screenName === 'Menu'">
+        <v-app-bar-title>Welkom {{ store.userData.alias }}</v-app-bar-title>
+        <v-app-bar-title>{{ store.screenName }}</v-app-bar-title>
+      </template>
+      <v-app-bar-title v-else class="flex text-center">{{ store.screenName }}</v-app-bar-title>
       <v-btn v-if="props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined"
         @click="doSuperAdmin">superAdmin</v-btn>
     </template>
@@ -70,7 +73,7 @@
     </v-menu>
   </v-app-bar>
 
-  <v-dialog v-model="state.dialog1" max-width="600">
+  <v-dialog v-model="state.dialog1" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
         <h3>Om in te loggen op een ander apparaat hebt u nodig:</h3>
@@ -86,7 +89,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog2" max-width="600">
+  <v-dialog v-model="state.dialog2" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
         <h3>Als u automatisch inloggen heeft uitgezet kunt u inloggen met:</h3>
@@ -103,7 +106,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog4" max-width="600">
+  <v-dialog v-model="state.dialog4" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
         <h2>Stuur ons een bericht als je:</h2>
@@ -122,7 +125,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog5" max-width="600">
+  <v-dialog v-model="state.dialog5" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
         <p>Je kunt ons bereiken op ons e-mail adres contact@speelmee.app</p>
@@ -133,7 +136,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog6" max-width="600">
+  <v-dialog v-model="state.dialog6" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
         <p>Vraag: Is de app wel veilig?</p>
@@ -148,7 +151,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog7" max-width="600">
+  <v-dialog v-model="state.dialog7" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
         <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.6.3</p>
@@ -160,7 +163,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog9" max-width="600">
+  <v-dialog v-model="state.dialog9" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
         <p>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten.
@@ -190,7 +193,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog10" max-width="600">
+  <v-dialog v-model="state.dialog10" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
         <h3>Als u uw gegevens verwijderd kunt u niet meer inloggen. Wel kunt u een nieuwe schuilnaam en pin code kiezen en fris opnieuw

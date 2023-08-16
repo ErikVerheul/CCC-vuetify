@@ -1,9 +1,6 @@
 <template>
-  <v-sheet class="pa-2" color="grey-lighten-3" :height="getHeight()" width="414">
+  <v-sheet class="pa-2" :min-height="getHeight()" :width="store.screenWidth">
     <template v-if="!state.showExplanation">
-      <v-row no-gutters>
-        <h3>{{ state.currentQuestion.headText }}</h3>
-      </v-row>
       <v-row no-gutters>
         <div v-html="state.currentQuestion.body"></div>
       </v-row>
@@ -13,9 +10,6 @@
             @click="qAnswer(index)" :style="{ 'background-color': bgColor }"></v-list-item>
         </v-list>
       </v-row>
-      <v-row v-if="state.currentQuestion.gameRules !== ''" no-gutters>
-        <p class="py-2">{{ state.currentQuestion.gameRules }}</p>
-      </v-row>
     </template>
     <template v-else>
       <h4 class="py-3">Toelichting op goed/fout antwoord:</h4>
@@ -24,13 +18,13 @@
       </v-row>
     </template>
   </v-sheet>
-  <v-sheet v-if="!state.showExplanation" class="pa-2" color="grey-lighten-3" height="60" width="414">
+  <v-sheet v-if="!state.showExplanation" class="pa-2" height="60" width="414">
     <v-row v-if="!state.done">
       <v-col v-if="state.playerStarted" cols="9">
         <v-btn flat @click="finishQuestion()">Verzend jouw antwoord</v-btn>
       </v-col>
       <v-col v-else cols="9">
-        <p>Kies je antwoord!<br>Binnen 30 sec</p>
+        <p>{{ state.currentQuestion.gameRules }}<br>Binnen 30 sec</p>
       </v-col>
       <v-col cols="3">
         {{ state.clockValue }}
@@ -102,12 +96,13 @@ const state = reactive({
   overDue: false,
   done: false,
   wrapupMsg: '',
-  showExplanation: false
+  showExplanation: false,
+  counterHeight: 60
 })
 
 function getHeight() {
-  if (!state.showExplanation) return 896 - 60 - 40
-  return 896 - 30
+  if (!state.showExplanation) return store.screenHeight - store.backContinueHeight - state.counterHeight
+  return store.screenHeight - store.backContinueHeight
 }
 
 function loadQuiz(quizNumber) {
@@ -241,9 +236,9 @@ function finishQuestion() {
   // stop the timer
   clearInterval(state.timerId)
   if (countCorrectAnswers() === numberOfCorrectStatements() && countWrongAnswers() === 0) {
-    state.wrapupMsg = 'Je antwoord was goed en binnen de tijd!'
+    state.wrapupMsg = 'Je antwoord was GOED en binnen de tijd!'
   } else {
-    state.wrapupMsg = 'Je antwoord was fout'
+    state.wrapupMsg = 'Je antwoord was FOUT'
   }
 }
 

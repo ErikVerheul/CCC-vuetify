@@ -1,5 +1,5 @@
 <template>
-  <v-app max-width="600px">
+  <v-app :max-width="store.screenWidth">
     <AppBar :is-authenticated="state.isAuthenticated" @logout-app="returnToLogin" @reset-app="resetApp" @app-settings="doAppSettings" />
     <v-main>
       <v-row class="d-flex justify-center">
@@ -208,7 +208,7 @@ function doAppSettings() {
 }
 
 function doGame(game) {
-  store.screenName = 'Verborgen verhalen van Maastricht'
+  // store.screenName = 'Verborgen verhalen van Maastricht'
   state.maastrichtStoriesActive = true
 }
 

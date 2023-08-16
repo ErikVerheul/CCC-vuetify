@@ -1,7 +1,7 @@
 <template>
   <v-row v-if="PINOK">
     <v-col cols="12">
-      <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" max-width="600px">
+      <v-card class="mx-auto" color="yellow-lighten-3" theme="dark"  :max-width="store.screenWidth">
         <v-card-title class="text-h5">
           Welkom in de Speelmee.app
         </v-card-title>
@@ -24,7 +24,7 @@
     </v-sheet>
   </v-row>
 
-  <v-sheet class="pa-2" max-width="600px">
+  <v-sheet class="pa-2"  :max-width="store.screenWidth">
     <v-row>
       <v-col cols="12">
         <h4>De speelmee.app neemt uw privacy serieus.</h4>

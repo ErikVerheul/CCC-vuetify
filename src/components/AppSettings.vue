@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="py-2 mx-5" max-width="600">
+  <v-sheet class="py-2 mx-5"  :max-width="store.screenWidth">
     <v-row>
       <v-col cols="auto">
         <h3 v-if="state.newsFeed">U bent geabbonneerd op een maandelijke nieuws update.</h3>

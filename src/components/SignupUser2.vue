@@ -1,5 +1,5 @@
 <template>
-  <v-sheet max-width="600px">
+  <v-sheet  :max-width="store.screenWidth">
     <v-row>
       <v-col cols="12" class="text-center">
         <h1>Hallo -{{ store.userData.alias }} </h1>
