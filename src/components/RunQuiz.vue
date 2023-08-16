@@ -92,6 +92,8 @@ onBeforeMount(() => {
 const state = reactive({
   quizObject: {},
   indexObject: {},
+  questionIds: [],
+  currentQuestionIdx: 0,
   currentQuestion: {},
   quizQAnswers: [],
   playerStarted: false,
@@ -104,8 +106,8 @@ const state = reactive({
 })
 
 function getHeight() {
-  if (!state.showExplanation) return 896-60-40
-  return 896-30
+  if (!state.showExplanation) return 896 - 60 - 40
+  return 896 - 30
 }
 
 function loadQuiz(quizNumber) {
@@ -127,15 +129,18 @@ function loadQuestionIds(quizNumber) {
     if (snapshot.exists()) {
       state.indexObject = snapshot.val()
       const allQuestionKeys = Object.keys(state.indexObject)
-      const questionIds = []
+      state.questionIds = []
       for (const key of allQuestionKeys) {
         // allow type casting although isNaN says both are numbers
         if (state.indexObject[key].quizNumber == quizNumber) {
-          questionIds.push(key)
+          state.questionIds.push(key)
         }
       }
-      if (questionIds.length > 0) {
-        loadQuestion(questionIds[0])
+      console.log('loadQuestionIds: state.questionIds = ' + state.questionIds)
+      if (state.questionIds.length > 0) {
+        // load the first question
+        state.currentQuestionIdx = 0
+        loadQuestion()
       } else {
         console.log(`No questions found for quiz ${quizNumber}`)
         // ToDo: show warning and exit
@@ -148,9 +153,10 @@ function loadQuestionIds(quizNumber) {
   })
 }
 
-function loadQuestion(id) {
-  store.screenName = state.indexObject[id].title
-  get(child(dbRef, `/quizzes/questions/${Number(id)}`)).then((snapshot) => {
+function loadQuestion() {
+  const questionId = state.questionIds[state.currentQuestionIdx]
+  store.screenName = state.indexObject[questionId].title
+  get(child(dbRef, `/quizzes/questions/${Number(questionId)}`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.currentQuestion = snapshot.val()
       // initialize answers to false
@@ -218,6 +224,11 @@ function countWrongAnswers() {
 }
 
 function startTimer() {
+
+  if (state.timerId !== undefined) {
+    // reset value from previous timer
+    state.seconds = 0
+  }
   state.timerId = setInterval(() => {
     state.seconds += 1
     const minutes = Math.floor(state.seconds / 60)
@@ -226,11 +237,11 @@ function startTimer() {
     if (secondsStr.length === 1) secondsStr = '0' + secondsStr
     state.clockValue = `${minutes}:${secondsStr}`
   }, 1000)
-
 }
 
 function finishQuestion() {
   state.done = true
+  // stop the timer
   clearInterval(state.timerId)
   if (countCorrectAnswers() === numberOfCorrectStatements() && countWrongAnswers() === 0) {
     state.wrapupMsg = 'Je antwoord was goed en binnen de tijd!'
@@ -239,15 +250,30 @@ function finishQuestion() {
   }
 }
 
+function startNextQuestion() {
+  state.currentQuestionIdx++
+  if (state.currentQuestionIdx < state.questionIds.length) {
+    state.done = false
+    state.showExplanation = false
+    state.clockValue = `0:00`
+    state.playerStarted = false
+    loadQuestion()
+    return true
+  }
+  return false
+}
+
 function nextStep() {
   if (state.showExplanation) {
-    emit('quiz-continue')
-  } else
+    if (!startNextQuestion()) emit('quiz-continue')
+  } else {   
     state.showExplanation = true
+  }
 }
 
 watch(() => state.seconds, () => {
   if (state.seconds >= 30) {
+    // stop the timer
     clearInterval(state.timerId)
     state.done = true
     state.overDue = true

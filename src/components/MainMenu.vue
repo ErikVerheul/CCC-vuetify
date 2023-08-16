@@ -1,7 +1,35 @@
-<template>
-  <v-row class="py-2 d-flex align-center justify-center">
+<template> 
+  <v-row class="d-flex align-center">
     <v-col cols="auto">
       <p>Laatste login: {{ createDateTimeString() }}</p>
+      <h2>Hoe goed ken ik</h2>
+      <ul>
+        <li>
+          <v-btn class="my-2" size="small" @click="emit('menu-item-selected', 'verborgenVerhalen')">
+            De verborgen verhalen van Maastricht
+          </v-btn>
+        </li>
+        <li>
+          <v-btn class="my-2" size="small" @click="">
+            Natuurhistorie en biodiversiteit
+          </v-btn>
+        </li>
+        <li>
+          <v-btn class="my-2" size="small" @click="">
+            Natuur in en rond Maastricht
+          </v-btn>
+        </li>
+        <li>
+          <v-btn class="my-2" size="small" @click="">
+            Groeten uit Maastricht
+          </v-btn>
+        </li>
+      </ul>
+    </v-col>
+  </v-row>
+
+  <v-row class="py-2 d-flex align-center">
+    <v-col cols="auto">      
       <h2>Hoe goed ben ik in</h2>
       <ul>
         <li>
@@ -53,34 +81,6 @@
               </v-btn>
             </li>
           </ul>
-        </li>
-      </ul>
-    </v-col>
-  </v-row>
-
-  <v-row class="d-flex align-center justify-center">
-    <v-col cols="auto">
-      <h2>Hoe goed ken ik</h2>
-      <ul>
-        <li>
-          <v-btn class="my-2" size="small" @click="emit('menu-item-selected', 'verborgenVerhalen')">
-            De verborgen verhalen van Maastricht
-          </v-btn>
-        </li>
-        <li>
-          <v-btn class="my-2" size="small" @click="">
-            Natuurhistorie en biodiversiteit
-          </v-btn>
-        </li>
-        <li>
-          <v-btn class="my-2" size="small" @click="">
-            Natuur in en rond Maastricht
-          </v-btn>
-        </li>
-        <li>
-          <v-btn class="my-2" size="small" @click="">
-            Groeten uit Maastricht
-          </v-btn>
         </li>
       </ul>
     </v-col>
