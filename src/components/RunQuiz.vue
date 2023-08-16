@@ -224,13 +224,10 @@ function countWrongAnswers() {
 }
 
 function startTimer() {
-
-  if (state.timerId !== undefined) {
-    // reset value from previous timer
-    state.seconds = 0
-  }
+  // reset value from previous timer
+  state.seconds = 0
   state.timerId = setInterval(() => {
-    state.seconds += 1
+    state.seconds++
     const minutes = Math.floor(state.seconds / 60)
     const seconds = state.seconds - minutes * 60
     let secondsStr = seconds.toString()
@@ -266,7 +263,7 @@ function startNextQuestion() {
 function nextStep() {
   if (state.showExplanation) {
     if (!startNextQuestion()) emit('quiz-continue')
-  } else {   
+  } else {
     state.showExplanation = true
   }
 }
