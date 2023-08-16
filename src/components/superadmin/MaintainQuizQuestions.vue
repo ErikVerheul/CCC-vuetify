@@ -33,9 +33,6 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="12">
-          <v-text-field v-model="state.headText" label="Kop tekst" />
-        </v-col>
       </v-row>
       <v-row>
         <v-col cols="12">
@@ -91,8 +88,8 @@
           <p>Toelichting op goed/fout antwoord:</p>
           <quill-editor v-model:value="state.resultInfo"></quill-editor>
         </v-col>
-        <v-col cols="12">
-          <v-text-field v-model="state.gameRules" label="Spelregels (optioneel)" />
+        <v-col class="mt-12" cols="12">
+          <v-text-field v-model="state.gameRules" label="Spelregels (verplicht)" />
         </v-col>
         <v-col cols="6">
           <v-text-field v-model="state.explanationUrl" :rules="state.urlRules" placeholder="https://speelmee.app/toelichting1"
@@ -131,9 +128,6 @@
       <p>Preview 414 x 2688 px (3 x schermhoogte)</p>
       <v-sheet class="pa-2" color="grey-lighten-3" height="2688" width="414">
         <v-row no-gutters>
-          <h3>{{ state.headText }}</h3>
-        </v-row>
-        <v-row no-gutters>
           <div v-html="state.content"></div>
         </v-row>
         <v-row no-gutters>
@@ -154,9 +148,6 @@
     <v-col cols="6" md="4">
       <p>Preview 375 x 2436 px (3 x schermhoogte)</p>
       <v-sheet class="pa-2" color="grey-lighten-3" height="2436" width="375">
-        <v-row no-gutters>
-          <h3>{{ state.headText }}</h3>
-        </v-row>
         <v-row no-gutters>
           <div v-html="state.content"></div>
         </v-row>
@@ -265,7 +256,6 @@ const state = reactive({
   showQuestionSelect: false,
   showQuestionRemove: false,
 
-  headText: '',
   content: undefined,
   statementNumber: 0,
   quizStatement: '',
@@ -338,7 +328,6 @@ function clearAll() {
   state.questionTitle = ''
   state.statementNumber = 0
   state.quizStatement = ''
-  state.headText = ''
   state.content = undefined
   state.statementsArray = []
   state.quizQAnswers = []
@@ -416,7 +405,6 @@ function doLoadQuestion() {
   get(child(dbRef, `/quizzes/questions/` + state.questionNumber)).then((snapshot) => {
     if (snapshot.exists()) {
       const quizObject = snapshot.val()
-      state.headText = quizObject.headText
       state.content = quizObject.body || ''
       state.statementsArray = quizObject.statementsArray
       state.quizQAnswers = quizObject.answers
@@ -504,13 +492,12 @@ function canSave() {
   return !isNaN(state.quizNumber) && !isNaN(state.questionNumber) &&
     state.allQuizNumbers.includes(state.quizNumber) &&
     state.questionTitle && state.questionTitle.length > 0 &&
-    countGoodAnswers() > 0
+    countGoodAnswers() > 0 && state.gameRules && state.gameRules.length > 0
 }
 
 function doSaveQuestion() {
   // note: Using set() overwrites data at the specified location, including any child nodes.
   set(ref(db, '/quizzes/questions/' + state.questionNumber), {
-    "headText": state.headText,
     "body": state.content || '',
     "statementsArray": state.statementsArray,
     "answers": state.quizQAnswers,
