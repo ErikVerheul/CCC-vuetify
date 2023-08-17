@@ -132,7 +132,6 @@ function loadQuestionIds(quizNumber) {
           state.questionIds.push(key)
         }
       }
-      console.log('loadQuestionIds: state.questionIds = ' + state.questionIds)
       if (state.questionIds.length > 0) {
         // load the first question
         state.currentQuestionIdx = 0
