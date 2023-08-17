@@ -26,7 +26,7 @@
           </v-btn>
         </template>
         <template v-else>
-          <v-btn size="small" variant="outlined" color="orange">
+          <v-btn size="small" rounded="xl" variant="outlined" color="orange">
             {{ randomNames[indexOffset + index] }}
           </v-btn>
         </template>
