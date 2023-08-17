@@ -12,6 +12,7 @@
           </v-list>
 
           <template v-slot:append>
+            <v-divider></v-divider>
             <div class="pa-2">
               <v-btn flat prepend-icon="mdi-arrow-left" @click="router.replace({ path: '/' })">
                 <template v-slot:prepend>

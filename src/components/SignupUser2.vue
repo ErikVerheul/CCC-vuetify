@@ -46,6 +46,7 @@
         <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
       </v-col>
     </v-row>
+    <v-divider></v-divider>
     <v-row>
       <v-col>
         <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">

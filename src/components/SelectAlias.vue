@@ -16,7 +16,8 @@
       </v-alert>
     </template>
     <template v-else>
-      <v-row no-gutters class="py-10">
+      <v-divider></v-divider>
+      <v-row no-gutters class="py-4">
         <v-col>
           <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
             <template v-slot:prepend>

@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="py-2 mx-5"  :max-width="store.screenWidth">
+  <v-sheet class="py-2 mx-5" :max-width="store.screenWidth">
     <v-row>
       <v-col cols="auto">
         <h3 v-if="state.newsFeed">U bent geabbonneerd op een maandelijke nieuws update.</h3>
@@ -14,6 +14,7 @@
         <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
       </v-col>
     </v-row>
+    <v-divider class="mb-5"></v-divider>
     <v-row class="justify-start">
       <v-col cols="auto">
         <v-btn flat prepend-icon="mdi-arrow-left" @click="saveAndReturn">

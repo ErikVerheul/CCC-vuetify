@@ -97,6 +97,7 @@
         </v-col>
       </v-row>
     </template>
+    <v-divider class="my-5"></v-divider>
     <v-row>
       <v-col>
         <v-btn prepend-icon="mdi-arrow-left" @click="emit('m-done')">
@@ -172,6 +173,7 @@
     <v-card>
       <v-card-title>Kies een bestaande quiz-vraag</v-card-title>
       <v-select :items="state.questionItems" item-value="key" v-model="state.selectedQuestionItem" return-object single-line />
+      <v-divider></v-divider>
       <v-card-actions>
         <v-row>
           <v-col>
@@ -200,6 +202,7 @@
     <v-card>
       <v-card-title>Kies een te verwijderen quiz-vraag</v-card-title>
       <v-select :items="state.questionItems" item-value="key" v-model="state.selectedQuestionItem" return-object single-line />
+      <v-divider></v-divider>
       <v-card-actions>
         <v-row>
           <v-col>

@@ -62,6 +62,7 @@
         </v-col>
       </v-row>
     </template>
+    <v-divider class="mb-5"></v-divider>
     <v-row>
       <v-col>
         <v-btn prepend-icon="mdi-arrow-left" @click="emit('m-done')">

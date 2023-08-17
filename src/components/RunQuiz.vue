@@ -40,6 +40,7 @@
     </v-row>
   </v-sheet>
 
+  <v-divider></v-divider>
   <v-row class="mt-2">
     <v-col>
       <v-btn :disabled="true" flat prepend-icon="mdi-arrow-left">

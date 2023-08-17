@@ -24,7 +24,7 @@
     </v-sheet>
   </v-row>
 
-  <v-sheet class="pa-2"  :max-width="store.screenWidth">
+  <v-sheet class="pa-2" :max-width="store.screenWidth">
     <v-row>
       <v-col cols="12">
         <h4>De speelmee.app neemt uw privacy serieus.</h4>
@@ -32,6 +32,7 @@
       </v-col>
     </v-row>
   </v-sheet>
+  <v-divider class="mb-5"></v-divider>
   <v-row>
     <v-col>
       <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">

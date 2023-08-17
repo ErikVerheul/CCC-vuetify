@@ -169,7 +169,8 @@
         <p>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten.
           Als u hier uitlogt stopt u ook de automatische login.</p>
       </v-card-text>
-      <v-card-actions>
+      <v-divider></v-divider>
+      <v-card-actions style="height: 60px;">
         <v-row>
           <v-col>
             <v-btn flat prepend-icon="mdi-arrow-left" @click="state.dialog9 = false">
@@ -200,7 +201,8 @@
           beginnen.</h3>
         <h3>UW GEGEVENS WORDEN VERNIETIGD NIEMAND KAN DIE NOG TERUGHALEN</h3>
       </v-card-text>
-      <v-card-actions>
+      <v-divider></v-divider>
+      <v-card-actions style="height: 60px;">
         <v-row>
           <v-col>
             <v-btn flat prepend-icon="mdi-arrow-left" @click="state.dialog10 = false">

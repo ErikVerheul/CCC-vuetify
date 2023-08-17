@@ -1,6 +1,6 @@
 <template>
-  <v-card variant="tonal">
-    <v-card-title>Schuilnamen onderhouden</v-card-title>
+  <v-sheet>
+    <h2>Schuilnamen onderhouden</h2>
     <v-radio-group inline v-model="state.action">
       <v-radio @change="resetInput" label="Toevoegen" value="1"></v-radio>
       <v-radio @change="resetInput" label="Veranderen" value="2"></v-radio>
@@ -23,6 +23,7 @@
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
+    <v-divider class="mb-5"></v-divider>
     <v-row>
       <v-col>
         <v-btn prepend-icon="mdi-arrow-left" @click="emit('m-done')">
@@ -71,7 +72,7 @@
         </v-col>
       </v-row>
     </v-row>
-  </v-card>
+  </v-sheet>
 </template>
 
 <script setup>
@@ -347,9 +348,3 @@ watch(() => state.userAliasInput, () => {
 })
 
 </script>
-
-<style scoped>
-h3 {
-  color: orange
-}
-</style>
