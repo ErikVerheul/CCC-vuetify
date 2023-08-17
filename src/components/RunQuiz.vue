@@ -24,7 +24,7 @@
         <v-btn flat @click="finishQuestion()">Verzend jouw antwoord</v-btn>
       </v-col>
       <v-col v-else cols="9">
-        <p>{{ state.currentQuestion.gameRules }}<br>Binnen 30 sec</p>
+        <p>{{ state.currentQuestion.gameRules }}<br>Binnen 3 min</p>
       </v-col>
       <v-col cols="3">
         {{ state.clockValue }}
@@ -264,7 +264,7 @@ function nextStep() {
 }
 
 watch(() => state.seconds, () => {
-  if (state.seconds >= 30) {
+  if (state.seconds >= 300) {
     // stop the timer
     clearInterval(state.timerId)
     state.done = true
