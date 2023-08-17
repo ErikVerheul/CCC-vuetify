@@ -223,6 +223,7 @@ function returnToLogin() {
   state.userEntryMode = 'login'
   state.signupStep = 1
   store.screenName = 'Inloggen'
+  state.maastrichtStoriesActive = false
   if (state.isAuthenticated) {
     signOut(auth).then(() => {
       state.isAuthenticated = false
@@ -239,7 +240,6 @@ function switchToSignup() {
 }
 
 function finishSignin() {
-  console.log('finishSignin: store.userData = ' + JSON.stringify(store.userData, null, 2))
   state.isAuthenticated = true
   store.screenName = 'Menu'
 }
