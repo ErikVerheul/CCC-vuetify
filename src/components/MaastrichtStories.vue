@@ -40,7 +40,7 @@
       </v-col>
     </v-row>
   </v-sheet>
-  <RunQuiz v-else :quizNumber="state.qNumber" @quiz-continue="state.doQuiz = false"></RunQuiz>
+  <RunQuiz v-else :quizNumber="state.qNumber" :isArchivedQuiz= "state.isArchivedQuiz" @quiz-continue="state.doQuiz = false"></RunQuiz>
 </template>
 
 <script setup>
@@ -56,7 +56,8 @@ const state = reactive({
   metaObject: {},
   quizNumbers: [],
   doQuiz: false,
-  qNumber: undefined
+  qNumber: undefined,
+  isArchivedQuiz: false
 })
 
 onBeforeMount(() => {
@@ -108,12 +109,13 @@ function startQuiz() {
   const currentWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) === getWeekNumber())
   state.qNumber = currentWeekQnumbers[0]
   state.doQuiz = true
+  state.isArchivedQuiz = false
 }
 
 function startOldQuiz() {
   const oldWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) < getWeekNumber())
-  const qNr = oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))]
-  state.qNumber = oldWeekQnumbers[qNr]
+  state.qNumber = oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))]
   state.doQuiz = true
+  state.isArchivedQuiz = true
 }
 </script>

@@ -12,7 +12,7 @@
       </v-row>
     </template>
     <template v-else>
-      <h4 class="py-3">Toelichting op goed/fout antwoord:</h4>
+      <h4 class="py-3">Toelichting</h4>
       <v-row no-gutters>
         <div v-html="state.currentQuestion.resultInfo"></div>
       </v-row>
@@ -21,7 +21,7 @@
   <v-sheet v-if="!state.showExplanation" class="pa-2" height="60" width="414">
     <v-row v-if="!state.done">
       <v-col v-if="state.playerStarted" cols="9">
-        <v-btn flat @click="finishQuestion()">Verzend jouw antwoord</v-btn>
+        <v-btn @click="finishQuestion()">{{ getReadyText() }}</v-btn>
       </v-col>
       <v-col v-else cols="9">
         <p>{{ state.currentQuestion.gameRules }}<br>Binnen 3 min</p>
@@ -72,6 +72,10 @@ const props = defineProps({
   quizNumber: {
     type: Number,
     required: true
+  },
+  isArchivedQuiz: {
+    type: Boolean,
+    required: true
   }
 })
 const store = useAppStore()
@@ -100,6 +104,11 @@ const state = reactive({
   showExplanation: false,
   counterHeight: 60
 })
+
+function getReadyText() {
+  if (props.isArchivedQuiz) return 'Onthul het resultaat'
+  return 'Verzend jouw antwoord'
+}
 
 function getHeight() {
   if (!state.showExplanation) return store.screenHeight - store.backContinueHeight - state.counterHeight
