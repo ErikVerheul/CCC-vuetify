@@ -273,7 +273,7 @@ function nextStep() {
 }
 
 watch(() => state.seconds, () => {
-  if (state.seconds >= 300) {
+  if (state.seconds >= 180) {
     // stop the timer
     clearInterval(state.timerId)
     state.done = true
