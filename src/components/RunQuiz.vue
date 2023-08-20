@@ -18,7 +18,7 @@
       </v-row>
     </template>
   </v-sheet>
-  <v-sheet v-if="!state.showExplanation" class="pa-2" height="60" width="414">
+  <v-sheet v-if="!state.showExplanation" class="pa-2" :height="state.counterHeight" :width="store.screenWidth">
     <v-row v-if="!state.done">
       <v-col v-if="state.playerStarted" cols="9">
         <v-btn @click="finishQuestion()">{{ getReadyText() }}</v-btn>
