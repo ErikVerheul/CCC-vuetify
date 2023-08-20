@@ -1,65 +1,71 @@
 <template>
-  <v-sheet class="pa-2" :min-height="getHeight()" :width="store.screenWidth">
-    <template v-if="!state.showExplanation">
-      <v-row no-gutters>
-        <div v-html="state.currentQuestion.body"></div>
+  <ReportFbError v-if="state.onError" :firebaseError="state.firebaseError" :fbErrorContext="state.fbErrorContext"
+    @return-to="emit('quiz-continue')"></ReportFbError>
+  <ReportWarning v-else-if="state.onWarning" :problemText="state.problemText" :problemCause="state.problemCause"
+    :tipToResolve="state.tipToResolve" @return-to="emit('quiz-continue')"></ReportWarning>
+  <template v-else>
+    <v-sheet class="pa-2" :min-height="getHeight()" :width="store.screenWidth">
+      <template v-if="!state.showExplanation">
+        <v-row no-gutters>
+          <div v-html="state.currentQuestion.body"></div>
+        </v-row>
+        <v-row no-gutters>
+          <v-list lines="two" density="compact">
+            <v-list-item v-for="(num, index) in state.currentQuestion.statementsArray" :subtitle="composeStatement(index)"
+              @click="qAnswer(index)" :style="{ 'background-color': bgColor }"></v-list-item>
+          </v-list>
+        </v-row>
+      </template>
+      <template v-else>
+        <h4 class="py-3">Toelichting</h4>
+        <v-row no-gutters>
+          <div v-html="state.currentQuestion.resultInfo"></div>
+        </v-row>
+      </template>
+    </v-sheet>
+    <v-sheet v-if="!state.showExplanation" class="pa-2" :height="state.counterHeight" :width="store.screenWidth">
+      <v-row v-if="!state.done">
+        <v-col v-if="state.playerStarted" cols="9">
+          <v-btn @click="finishQuestion()">{{ getReadyText() }}</v-btn>
+        </v-col>
+        <v-col v-else cols="9">
+          <p>{{ state.currentQuestion.gameRules }}<br>Binnen 3 min</p>
+        </v-col>
+        <v-col cols="3">
+          {{ state.clockValue }}
+        </v-col>
       </v-row>
-      <v-row no-gutters>
-        <v-list lines="two" density="compact">
-          <v-list-item v-for="(num, index) in state.currentQuestion.statementsArray" :subtitle="composeStatement(index)"
-            @click="qAnswer(index)" :style="{ 'background-color': bgColor }"></v-list-item>
-        </v-list>
+      <v-row v-else>
+        <v-col cols="9">
+          {{ state.wrapupMsg }}
+        </v-col>
+        <v-col cols="3">
+          {{ state.clockValue }}
+        </v-col>
       </v-row>
-    </template>
-    <template v-else>
-      <h4 class="py-3">Toelichting</h4>
-      <v-row no-gutters>
-        <div v-html="state.currentQuestion.resultInfo"></div>
-      </v-row>
-    </template>
-  </v-sheet>
-  <v-sheet v-if="!state.showExplanation" class="pa-2" :height="state.counterHeight" :width="store.screenWidth">
-    <v-row v-if="!state.done">
-      <v-col v-if="state.playerStarted" cols="9">
-        <v-btn @click="finishQuestion()">{{ getReadyText() }}</v-btn>
-      </v-col>
-      <v-col v-else cols="9">
-        <p>{{ state.currentQuestion.gameRules }}<br>Binnen 3 min</p>
-      </v-col>
-      <v-col cols="3">
-        {{ state.clockValue }}
-      </v-col>
-    </v-row>
-    <v-row v-else>
-      <v-col cols="9">
-        {{ state.wrapupMsg }}
-      </v-col>
-      <v-col cols="3">
-        {{ state.clockValue }}
-      </v-col>
-    </v-row>
-  </v-sheet>
+    </v-sheet>
 
-  <v-divider></v-divider>
-  <v-row class="mt-2">
-    <v-col>
-      <v-btn :disabled="true" flat prepend-icon="mdi-arrow-left">
-        <template v-slot:prepend>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-        Terug
-      </v-btn>
-    </v-col>
-    <v-spacer></v-spacer>
-    <v-col>
-      <v-btn :disabled="!state.done" flat append-icon="mdi-arrow-right" @click="nextStep()">
-        Door
-        <template v-slot:append>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-      </v-btn>
-    </v-col>
-  </v-row>
+    <v-divider></v-divider>
+    <v-row class="mt-2">
+      <v-col>
+        <v-btn :disabled="true" flat prepend-icon="mdi-arrow-left">
+          <template v-slot:prepend>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+          Terug
+        </v-btn>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col>
+        <v-btn :disabled="!state.done" flat append-icon="mdi-arrow-right" @click="nextStep()">
+          Door
+          <template v-slot:append>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+        </v-btn>
+      </v-col>
+    </v-row>
+  </template>
 </template>
 
 <script setup>
@@ -67,6 +73,8 @@ import { onBeforeMount, computed, reactive, watch } from 'vue'
 import { useAppStore } from '../store/app.js'
 import { db, dbRef } from '../firebase'
 import { ref, child, get, set, remove, update } from 'firebase/database'
+import ReportFbError from "./ReportFbError.vue"
+import ReportWarning from "./ReportWarning.vue"
 
 const props = defineProps({
   quizNumber: {
@@ -89,6 +97,13 @@ onBeforeMount(() => {
 })
 
 const state = reactive({
+  onError: false,
+  onWarning: false,
+  firebaseError: {},
+  problemText: '',
+  fbErrorContext: '',
+  problemCause: '',
+  tipToResolve: '',
   quizObject: {},
   indexObject: {},
   questionIds: [],
@@ -122,10 +137,15 @@ function loadQuiz(quizNumber) {
       state.quizObject = snapshot.val()
       loadQuestionIds(quizNumber)
     } else {
-      console.log("Quiz not found")
+      state.onWarning = true
+      state.problemText = `Kan quiz niet vinden`
+      state.problemCause = `De quiz met nummer ${quizNumber} bestaat niet in de database. Als het quiz nummer 'undefined' is, is er geen quiz voor deze week of geen enkele quiz om te oefenen.`
+      state.tipToResolve = `Vraag de redacteur om een quiz voor deze week aan te maken of een oefen quiz toe te voegen.`
     }
   }).catch((error) => {
-    console.error(`Error while reading quiz ${quizNumber} from database: ` + error.message)
+    state.onError = true
+    state.firebaseError = error
+    state.fbErrorContext = `De fout is opgetreden bij het lezen van quiz nummer ${quizNumber}`
   })
 }
 
@@ -146,14 +166,21 @@ function loadQuestionIds(quizNumber) {
         state.currentQuestionIdx = 0
         loadQuestion()
       } else {
-        console.log(`No questions found for quiz ${quizNumber}`)
-        // ToDo: show warning and exit
+        state.onWarning = true
+        state.problemText = `Kan geen vragen vinden voor deze quiz`
+        state.problemCause = `De quiz met nummer ${quizNumber} bestaat maar er zijn geen vragen voor gemaakt.`
+        state.tipToResolve = `Vraag de redacteur om voor deze quiz vragen aan te maken`
       }
     } else {
-      console.log("No quiz-questions available")
+      state.onWarning = true
+      state.problemText = `De app kan geen enkele vraag vinden voor geen enkele quiz`
+      state.problemCause = `De database is corrupt of werkt niet naar behoren`
+      state.tipToResolve = `Probeer het later nog een keer.`
     }
   }).catch((error) => {
-    console.error('Error while reading all available quiz-question names from database: ' + error.message)
+    state.onError = true
+    state.firebaseError = error
+    state.fbErrorContext = `De fout is opgetreden bij het lezen van de index van alle quiz vragen`
   })
 }
 
@@ -169,10 +196,15 @@ function loadQuestion() {
       }
       startTimer()
     } else {
-      console.log("No quiz-question data available")
+      state.onWarning = true
+      state.problemText = `Kan de quiz vraag niet vinden`
+      state.problemCause = `De quiz vraag met nummer ${questionId} bestaat niet.`
+      state.tipToResolve = `Vraag de redacteur om deze quiz vraag aan te maken`
     }
   }).catch((error) => {
-    console.error('While reading the quiz-question data from database: error message = ' + error.message)
+    state.onError = true
+    state.firebaseError = error
+    state.fbErrorContext = `De fout is opgetreden bij het lezen quiz vraag ${questionId}`
   })
 }
 

@@ -1,7 +1,7 @@
 <template> 
   <v-row class="d-flex align-center">
     <v-col cols="auto">
-      <p>Laatste login: {{ createDateTimeString() }}</p>
+      <p class="mb-4">Laatste login: {{ createDateTimeString() }}</p>
       <h2>Hoe goed ken ik</h2>
       <ul>
         <li>
