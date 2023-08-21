@@ -4,48 +4,41 @@
       <h2>Blader, en kies een schuilnaam</h2>
     </v-row>
     <v-row no-gutters class="text-center overflow-auto" align="center" justify="center" style="display: flex ">
-      <SelectAliasRow v-for="(num, index) in state.numberOfRows" :alias-object="props.aliasObject" :aliases-in-use="aliasesInUse"
-        :random-names="state.randomNames" :row-length="state.rowLength" :row=index :alias-button-selections="state.aliasButtonSelections" />
+      <SelectAliasRow v-for="(num, index) in state.numberOfRows" :random-names="state.randomNames" :row-length="state.rowLength" :row=index
+        :alias-button-selections="state.aliasButtonSelections" />
     </v-row>
   </v-sheet>
 
   <v-sheet class="bottom" max-width="414px">
-    <template v-if="props.aliasOccupied">
-      <v-alert border="start" variant="tonal" type="warning" title="Schuilnaam bezet">
-        Deze schuilnaam is al gekozen door een andere gebruiker. Kies een andere schuilnaam.
-      </v-alert>
-    </template>
-    <template v-else>
-      <v-divider></v-divider>
-      <v-row no-gutters class="py-10">
-        <v-col>
-          <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
-            <template v-slot:prepend>
-              <v-icon size="x-large" color="purple"></v-icon>
-            </template>
-            Terug
-          </v-btn>
-        </v-col>
-        <v-spacer></v-spacer>
-        <v-col>
-          <v-btn :disabled="state.aliasSelected === undefined || props.aliasOccupied" flat append-icon="mdi-arrow-right"
-            @click="emit('alias-selected', state.aliasSelected)">
-            Door
-            <template v-slot:append>
-              <v-icon size="x-large" color="purple"></v-icon>
-            </template>
-          </v-btn>
-        </v-col>
-      </v-row>
-    </template>
+    <v-divider></v-divider>
+    <v-row no-gutters class="py-10">
+      <v-col>
+        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
+          <template v-slot:prepend>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+          Terug
+        </v-btn>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col>
+        <v-btn :disabled="state.aliasSelected === undefined" flat append-icon="mdi-arrow-right"
+          @click="emit('alias-selected', state.aliasSelected)">
+          Door
+          <template v-slot:append>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+        </v-btn>
+      </v-col>
+    </v-row>
   </v-sheet>
 </template>
 
 <script setup>
 import { onBeforeMount, reactive, watch } from 'vue'
 import SelectAliasRow from './SelectAliasRow.vue'
-const props = defineProps(['aliasObject', 'aliasesInUse', 'allAliases', 'aliasOccupied'])
-const emit = defineEmits(['alias-clicked', 'alias-selected', 'reset-signup'])
+const props = defineProps(['aliasObject', 'aliasesInUse', 'aliasesNotInUse'])
+const emit = defineEmits(['alias-selected', 'reset-signup'])
 
 onBeforeMount(() => {
   // randomize alias names
@@ -53,14 +46,14 @@ onBeforeMount(() => {
   let numberOfButtons = state.rowLength * state.numberOfRows
   state.randomNames = []
   do {
-    // pick a random alias
-    let alias = props.allAliases[Math.round(Math.random() * (props.allAliases.length - 1))]
+    // pick a random alias that is not in use
+    let alias = props.aliasesNotInUse[Math.round(Math.random() * (props.aliasesNotInUse.length - 1))]
     if (!state.randomNames.includes(alias)) {
       // select if not already done
       state.randomNames.push(alias)
       itemsSet++
     }
-  } while (itemsSet < numberOfButtons && itemsSet < props.allAliases.length)
+  } while (itemsSet < numberOfButtons && itemsSet < props.aliasesNotInUse.length)
 
   // initialize button selection
   for (let i = 0; i < state.numberOfRows; i++) {
@@ -102,7 +95,6 @@ watch(state.aliasButtonSelections, (rowValue, oldRowValue) => {
 
   let index = newIndex * state.rowLength + state.aliasButtonSelections[newIndex]
   state.aliasSelected = state.randomNames[index]
-  if (state.aliasSelected !== undefined) emit('alias-clicked', state.aliasSelected)
 })
 </script>
 

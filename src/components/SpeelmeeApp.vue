@@ -20,9 +20,8 @@
               </template>
               <template v-if="state.userEntryMode === 'signup'">
                 <template v-if="store.userData.alias === undefined">
-                  <SelectAlias :alias-object="state.aliasObject" :aliases-in-use="state.aliasesInUse" :all-aliases="state.allAliases"
-                    :alias-occupied="state.alert" @alias-clicked="aliasClicked" @alias-selected="setSelectedAlias"
-                    @reset-signup="returnToLogin">
+                  <SelectAlias :alias-object="state.aliasObject" :aliases-in-use="state.aliasesInUse"
+                    :aliases-not-in-use="state.aliasesNotInUse" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
                   </SelectAlias>
                 </template>
                 <template v-else>
@@ -77,33 +76,15 @@ onBeforeMount(() => {
   // Signin as system first
   signInWithEmailAndPassword(auth, sysEmail, sysPw)
     .then(() => {
-      // const namen = ['Alain','Alberto','Aldo','Alessandro','Alexander','Alfred','Alice','Alla','Anastasiya','Anatoliy','Andre','Andrea','Andreas','Andrew','Andriy','Angelo','Anne','Anthony','Antonio','Armando','Arthur','Bartolomeo','Bas','Benedetto','Bernard','Bernd','Bernhard','Bjorn','Bohdan','Bram','Brian','Bruno','Carl','Carlo','Caroline','Cas','Catherine','Charles','Christian','Christine','Christopher','Claude','Claudio','Corinne','Corrado','Daan','Daniel','Daniele','David','Davide','Denis','Dennis','Dieter','Dirk','Dmytro','Domenico','Donald','Douglas','Dylan','Edward','Emanuele','Emiliano','Emilio','Emmanuel','Enrico','Eric','Erich','Ernst','Fabio','Fabrice','Federico','Filippo','Florence','Floris','Francesco','Frank','Franz','Frederic','Freek','Fritz','Gabriele','Gaetano','Gary','Georg','George','Gerard','Giacomo','Gianni','Gijs','Gilbert','Giorgio','Giovanni','Giuseppe','Gregory','Günter','Gustav','Halyna','Hanna','Hans','Hans-Peter','Harold','Heinz','Helmut','Hendrik','Henk','Henry','Hermann','Horst','Ihor','Ingo','Inna','Iryna','Isabelle','Ivan','Jacob','Jacques','James','Jan','Jarno','Jason','Jean','Jeffrey','Jelle','Jelte','Jerome','Jerry','Jesse','Joachim','Joep','Johannes','John','Joost','Joris','Jose','Josef','Joseph','Joshua','Julie','Jürgen','Karl','Kateryna','Kenneth','Kevin','Khrystyna','Klaas','Klaus','Kurt','Larry','Lars','Larysa','Laurence','Laurens','Lennard','Lothar','Luc','Luca','Lucas','Luciano','Luigi','Lyubov','Lyudmyla','Maarten','Manfred','Marc','Marcello','Marco','Marie','Mario','Mariya','Mark','Markus','Martijn','Martin','Martine','Mary','Maryna','Massimo','Matthew','Matthias','Matthijs','Max','Michael','Michel','Milan','Monique','Mykhailo','Mykola','Myroslav','Nadiya','Nataliya','Nathalie','Nicolas','Nicolo','Niels','Oksana','Oleh','Oleksandr','Oleksiy','Olha','Orest','Otto','Paolo','Patrick','Paul','Pavlo','Peter','Petro','Philippe','Pierre','Pieter','Pietro','Raffaele','Raymond','Reinhold','Riccardo','Richard','Robert','Roberto','Robin','Roger','Roland','Rolf','Roman','Ronald','Ruben','Rudolf','Ryan','Salvatore','Sam','Sandrine','Scott','Sebastien','Sem','Sergio','Serhiy','Simone','Sophie','Stefan','Stefano','Stepan','Stephane','Stephen','Steven','Stijn','Sven','Svitlana','Taras','Tetyana','Teun','Thijs','Thomas','Tim','Timothy','Tom','Tommaso','Uliana','Umberto','Uwe','Vasyl','Viktor','Viktoriya','Vincenzo','Virginie','Volker','Volodymyr','Walter','Werner','Willem','Willi','William','Wolfgang','Wouter','Xavier','Yana','Yevhen','Yosyp','Yuliana','Yuliya','Yuriy','Yves']
-      // let newAliasObject = {}
-      // for (const naam of namen) {
-      //   newAliasObject[naam] = {
-      //     "inUse": false
-      //   }
-      // }
-      // console.log('newAliasObject = ' + JSON.stringify(newAliasObject, null, 2))
-
-      // // save the data
-      // const updates = {}
-      // updates['aliases/'] = newAliasObject
-      // update(dbRef, updates).then(() => {
-      // }).catch((error) => {
-      //   console.error('The write failed, error message = ' + error.message)
-      // })
-
       // get all available aliases
       get(child(dbRef, `aliases/`)).then((snapshot) => {
         if (snapshot.exists()) {
           state.aliasObject = snapshot.val()
-          state.allAliases = Object.keys(state.aliasObject)
+          const allAliases = Object.keys(state.aliasObject)
+          // extract the aliases not in use
+          state.aliasesNotInUse = allAliases.filter(el => !state.aliasObject[el].inUse)
           // extract the aliases in use
-          state.aliasesInUse = []
-          state.allAliases.forEach(el => {
-            if (state.aliasObject[el].inUse) state.aliasesInUse.push(el)
-          })
+          state.aliasesInUse = allAliases.filter(el => state.aliasObject[el].inUse)
         } else {
           console.log("No aliases data available")
         }
@@ -177,7 +158,7 @@ const state = reactive({
   showOpeningScreen: undefined,
   alert: false,
   userEntryMode: undefined,
-  allAliases: [],
+  aliasesNotInUse: [],
   aliasesInUse: [],
   maastrichtStoriesActive: false,
   userSettingsActive: false,
@@ -268,15 +249,6 @@ function isAliasInUse(alias) {
     }
   }
   return false
-}
-
-// check for newly assigned aliases since login
-async function aliasClicked(aliasClicked) {
-  let signInMethods = await fetchSignInMethodsForEmail(auth, replaceSpacesForHyphen(aliasClicked) + '@speelmee.app')
-  if (signInMethods.length > 0) {
-    state.aliasesInUse.push(aliasClicked)
-  }
-  state.alert = isAliasInUse(aliasClicked)
 }
 
 function setSelectedAlias(alias) {
