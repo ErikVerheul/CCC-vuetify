@@ -183,7 +183,6 @@ const nowOther = computed(() => {
 })
 
 function doAppSettings() {
-  console.log('doAppSettings selected')
   store.screenName = 'Instellingen'
   state.userSettingsActive = true
 }
@@ -230,7 +229,9 @@ function continueSignup() {
 }
 
 function finishSignup() {
-  // add new alias to current arrays
+  // remove from aliases not in use
+  state.aliasesNotInUse = state.aliasesNotInUse.filter(a => a !== store.userData.alias)
+  // add new alias to aliases in use
   state.aliasesInUse.push(store.userData.alias)
   // reset signup step
   state.signupStep = 1
@@ -240,15 +241,6 @@ function finishSignup() {
 
 function replaceSpacesForHyphen(name) {
   return name.replaceAll(' ', '-')
-}
-
-function isAliasInUse(alias) {
-  for (const el of state.aliasesInUse) {
-    if (el.toUpperCase() === alias.toUpperCase()) {
-      return true
-    }
-  }
-  return false
 }
 
 function setSelectedAlias(alias) {
@@ -263,8 +255,10 @@ function showMenu() {
 
 function resetApp() {
   state.isAuthenticated = false
-  // remove from aliasesInUse
+  // remove from aliases in use
   state.aliasesInUse = state.aliasesInUse.filter(a => a !== store.userData.alias)
+  // add alias to aliases not in use
+  state.aliasesNotInUse.push(store.userData.alias)
   store.userData = {}
   state.userEntryMode = undefined
   state.showOpeningScreen = true
