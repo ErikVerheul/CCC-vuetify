@@ -12,7 +12,7 @@
     </v-row>
     <v-row>
       <v-avatar class="ma-3" size="300" rounded="0">
-        <v-img src="../assets/mok2.jpg"></v-img>
+        <v-img src="../assets/mok34.png"></v-img>
       </v-avatar>
     </v-row>
     <v-row>
