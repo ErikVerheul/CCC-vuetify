@@ -113,11 +113,12 @@ const state = reactive({
   playerStarted: false,
   seconds: 0,
   timerId: undefined,
-  overDue: false,
+  timeout: 20,
   done: false,
   wrapupMsg: '',
   showExplanation: false,
-  counterHeight: 60
+  counterHeight: 60,
+  quizResult: {}
 })
 
 function getReadyText() {
@@ -204,7 +205,7 @@ function loadQuestion() {
   }).catch((error) => {
     state.onError = true
     state.firebaseError = error
-    state.fbErrorContext = `De fout is opgetreden bij het lezen quiz vraag ${questionId}`
+    state.fbErrorContext = `De fout is opgetreden bij het lezen van quiz vraag met nummer ${questionId}`
   })
 }
 
@@ -276,10 +277,17 @@ function finishQuestion() {
   state.done = true
   // stop the timer
   clearInterval(state.timerId)
+  if (!props.isArchivedQuiz) {
+    state.quizResult[state.currentQuestionIdx] = {}
+    state.quizResult[state.currentQuestionIdx].answers = state.quizQAnswers.slice()
+    state.quizResult[state.currentQuestionIdx].time = state.seconds
+  }
   if (countCorrectAnswers() === numberOfCorrectStatements() && countWrongAnswers() === 0) {
     state.wrapupMsg = 'Je antwoord was GOED en binnen de tijd!'
+    if (!props.isArchivedQuiz) state.quizResult[state.currentQuestionIdx].correctAnswer = true
   } else {
     state.wrapupMsg = 'Je antwoord was FOUT'
+    if (!props.isArchivedQuiz) state.quizResult[state.currentQuestionIdx].correctAnswer = false
   }
 }
 
@@ -293,6 +301,9 @@ function startNextQuestion() {
     loadQuestion()
     return true
   }
+  // save quiz result
+  if (!props.isArchivedQuiz) saveResults()
+
   return false
 }
 
@@ -305,13 +316,27 @@ function nextStep() {
 }
 
 watch(() => state.seconds, () => {
-  if (state.seconds >= 180) {
+  if (state.seconds >= state.timeout) {
     // stop the timer
     clearInterval(state.timerId)
     state.done = true
-    state.overDue = true
     state.wrapupMsg = 'Je antwoord was niet binnen de tijd'
+    if (!props.isArchivedQuiz) {
+      state.quizResult[state.currentQuestionIdx] = {}
+      state.quizResult[state.currentQuestionIdx].overdue = true
+    }
   }
 })
+
+function getCurrentYear() {
+  const currentDate = new Date()
+  return currentDate.getFullYear()
+}
+
+function saveResults() {
+  state.quizResult.quizNumber = props.quizNumber
+  state.quizResult.timestamp = Date.now()
+  set(ref(db, `/quizzes/results/${getCurrentYear()}/${store.userData.alias}/${state.quizObject.actionWeek}/`), state.quizResult)
+}
 
 </script>
