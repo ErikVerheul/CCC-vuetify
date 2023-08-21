@@ -1,5 +1,7 @@
 <template>
-  <v-sheet  :max-width="store.screenWidth">
+  <ReportFbError v-if="state.onError" :firebaseError="state.firebaseError" :fbErrorContext="state.fbErrorContext"
+    @return-to="emit('exit-signup')"></ReportFbError>
+  <v-sheet v-else :max-width="store.screenWidth">
     <v-row>
       <v-col cols="12" class="text-center">
         <h1>Hallo -{{ store.userData.alias }} </h1>
@@ -76,6 +78,7 @@ import { db, dbRef } from '../firebase'
 import { ref, set, update } from "firebase/database"
 import Cookies from 'universal-cookie'
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
+import ReportFbError from "./ReportFbError.vue"
 
 const emit = defineEmits(['signup-completed', 'exit-signup'])
 const store = useAppStore()
@@ -117,7 +120,10 @@ const state = reactive({
       return 'U bent nog niet geboren'
     }
   ],
-  newsFeed: false
+  newsFeed: false,
+  onError: false,
+  firebaseError: {},
+  fbErrorContext: ''
 })
 
 const yearOfBirthOk = computed(() => {
@@ -160,7 +166,9 @@ function doSignupUser() {
       emit('signup-completed')
     })
     .catch((error) => {
-      console.error('Firebase signup: errorMessage = ' + error.message)
+      state.onError = true
+      state.firebaseError = error
+      state.fbErrorContext = `Mogelijk heeft een andere speler deze schuilnaam net gekozen. Kies een andere schuilnaam`
     })
 }
 
