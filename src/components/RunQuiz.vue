@@ -69,10 +69,10 @@
 </template>
 
 <script setup>
-import { onBeforeMount, computed, reactive, watch } from 'vue'
+import { onBeforeMount, reactive, watch } from 'vue'
 import { useAppStore } from '../store/app.js'
 import { db, dbRef } from '../firebase'
-import { ref, child, get, set, remove, update } from 'firebase/database'
+import { ref, child, get, set, update } from 'firebase/database'
 import ReportFbError from "./ReportFbError.vue"
 import ReportWarning from "./ReportWarning.vue"
 
@@ -334,9 +334,16 @@ function getCurrentYear() {
 }
 
 function saveResults() {
-  state.quizResult.quizNumber = props.quizNumber
-  state.quizResult.timestamp = Date.now()
-  set(ref(db, `/quizzes/results/${getCurrentYear()}/${store.userData.alias}/${state.quizObject.actionWeek}/`), state.quizResult)
+  if (store.userData.alias !== 'admin') {
+    state.quizResult.quizNumber = props.quizNumber
+    state.quizResult.timestamp = Date.now()
+    set(ref(db, `/quizzes/results/${getCurrentYear()}/${store.userData.alias}/${state.quizObject.actionWeek}/`), state.quizResult)
+    // save the completed quiz number to user data
+    if (store.userData.completedQuizNumbers) {
+      store.userData.completedQuizNumbers.push(props.quizNumber)
+    } else store.userData.completedQuizNumbers = [props.quizNumber]
+    set(ref(db, `users/${store.firebaseUser.uid}/completedQuizNumbers`), store.userData.completedQuizNumbers)
+  }
 }
 
 </script>

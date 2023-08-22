@@ -1,13 +1,22 @@
 <template>
+  <p>store.userData.alias = {{ store.userData.alias }}</p>
   <v-sheet class="pa-2 text-center mx-auto" v-if="!state.doQuiz" :max-width="store.screenWidth">
     <h3 class="py-3 text-red">Doe mee en win!</h3>
-    <v-row>
+    <v-row v-if="!state.quizWasCompleted">
       <v-col cols="9" class="text-left">
         <p>Vijf vragen van deze week ({{ getWeekNumber() }})<br>
           Per vraag krijg je 3 min de tijd</p>
       </v-col>
       <v-col cols="3">
         <v-btn :disabled="!quizAvailable()" color="purple" @click="startQuiz">Start</v-btn>
+      </v-col>
+    </v-row>
+    <v-row v-else>
+      <v-col cols="9" class="text-left">
+        <p>U hebt de quiz van deze week ({{ getWeekNumber() }}) al gedaan. Zie de scores </p>
+      </v-col>
+      <v-col cols="3">
+        <v-btn color="purple" @click="">Toon</v-btn>
       </v-col>
     </v-row>
     <v-row>
@@ -40,7 +49,7 @@
       </v-col>
     </v-row>
   </v-sheet>
-  <RunQuiz v-else :quizNumber="state.qNumber" :isArchivedQuiz= "state.isArchivedQuiz" @quiz-continue="state.doQuiz = false"></RunQuiz>
+  <RunQuiz v-else :quizNumber="state.qNumber" :isArchivedQuiz="state.isArchivedQuiz" @quiz-continue="state.doQuiz = false"></RunQuiz>
 </template>
 
 <script setup>
@@ -57,7 +66,8 @@ const state = reactive({
   quizNumbers: [],
   doQuiz: false,
   qNumber: undefined,
-  isArchivedQuiz: false
+  isArchivedQuiz: false,
+  quizWasCompleted: false
 })
 
 onBeforeMount(() => {
@@ -108,11 +118,19 @@ function historyAvailable() {
 function startQuiz() {
   const currentWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) === getWeekNumber())
   state.qNumber = currentWeekQnumbers[0]
-  state.doQuiz = true
-  state.isArchivedQuiz = false
+  if (store.userData.alias !== 'admin' && store.userData.completedQuizNumbers && store.userData.completedQuizNumbers.includes(state.qNumber)) {
+    // admin can run a quiz multiple times
+    state.quizWasCompleted = true
+  } else {
+    state.quizWasCompleted = false
+    state.doQuiz = true
+    state.isArchivedQuiz = false
+  }
 }
 
 function startOldQuiz() {
+  // allow to run archived quizzez multiple times
+  state.quizWasCompleted = false
   const oldWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) < getWeekNumber())
   state.qNumber = oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))]
   state.doQuiz = true
