@@ -1,5 +1,12 @@
-// Utilities
 import { defineStore } from 'pinia'
+
+/* See https://www.geeksforgeeks.org/calculate-current-week-number-in-javascript/ */
+function getWeekNumber() {
+  const currentDate = new Date()
+  const startDate = new Date(currentDate.getFullYear(), 0, 1)
+  const days = Math.floor((currentDate - startDate) / (24 * 60 * 60 * 1000))
+  return Number(Math.ceil(days / 7))
+}
 
 export const useAppStore = defineStore('app', {
   state: () => ({
@@ -9,6 +16,8 @@ export const useAppStore = defineStore('app', {
     backContinueHeight: 60,
     firebaseUser: undefined,
     userData: {},
-    screenName: ''
+    screenName: '',
+    currentYear: new Date().getFullYear(),
+    currentWeekNr: getWeekNumber()
   }),
 })
