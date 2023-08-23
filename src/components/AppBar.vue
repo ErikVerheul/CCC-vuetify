@@ -254,8 +254,7 @@ const state = reactive({
   dialog7: false,
   dialog9: false,
   dialog10: false,
-  cookieIsRemoved: false,
-  removeAccountErrorMsg: ''
+  cookieIsRemoved: false
 })
 
 function removeCookie() {
@@ -264,27 +263,36 @@ function removeCookie() {
   state.cookieIsRemoved = true
 }
 
+/* Remove users data, cookie and account */
+function removeAccount() {
+  const updates = {}
+  // remove the user data
+  updates[`users/${store.firebaseUser.uid}`] = null
+  // update alias in use value for future use
+  updates[`aliases/${store.userData.alias}/inUse`] = false
+  // remove the quiz results of the last 3 years, if existing
+  updates[`quizzes/results/${store.currentYear}/${store.userData.alias}`] = null
+  updates[`quizzes/results/${store.currentYear - 1}/${store.userData.alias}`] = null
+  updates[`quizzes/results/${store.currentYear - 2}/${store.userData.alias}`] = null
+  // remove the users account and cookie
+  update(dbRef, updates).then(() => {
+    store.firebaseUser.delete().then(() => {
+      removeCookie()
+      state.dialog10 = false
+      emit('reset-app')
+    }).catch((error) => {
+      state.dialog10 = false
+      console.log(`Account and/or cookie deletion failed: ${error.message}`)
+    })
+  }).catch((error) => {
+    console.log(`Removal of ${store.userData.alias} data failed`)
+  })
+}
+
 function logout() {
   removeCookie()
   state.dialog9 = false
   emit('logout-app')
-}
-
-function removeAccount() {
-  // must remove user data before user is no more authenticated
-  remove(child(dbRef, '/users/' + store.firebaseUser.uid))
-  // update alias in use now we are sttil authenticated
-  const updates = {}
-  updates['aliases/' + store.userData.alias + '/inUse'] = false
-  update(dbRef, updates)
-  store.firebaseUser.delete().then(() => {
-    removeCookie()
-    state.dialog10 = false
-    emit('reset-app')
-  }).catch((error) => {
-    state.dialog10 = false
-    state.removeAccountErrorMsg = 'Account verwijdering mislukt. De fout is: ' + error.message
-  })
 }
 
 function doSuperAdmin() {
