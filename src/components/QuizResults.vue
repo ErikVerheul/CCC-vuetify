@@ -124,7 +124,6 @@ function calcWeeks() {
     weekArray.push(store.currentWeekNr - 1)
   } else weekArray.push(undefined)
   weekArray.push(store.currentWeekNr)
-  console.log('calcWeeks = ' + weekArray)
   return weekArray
 }
 
@@ -146,7 +145,6 @@ function createScoresArray(yearScores) {
     obj.sum = sum
     if (scoreFound) scores.push(obj)
   })
-  console.log('createScoresArray = ' + JSON.stringify(scores, null, 2))
   return scores
 }
 </script>
