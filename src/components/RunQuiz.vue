@@ -4,7 +4,7 @@
   <ReportWarning v-else-if="state.onWarning" :problemText="state.problemText" :problemCause="state.problemCause"
     :tipToResolve="state.tipToResolve" @return-to="emit('quiz-continue')"></ReportWarning>
   <template v-else>
-    <v-sheet class="pa-2" :min-height="getHeight()" :width="store.screenWidth">
+    <v-sheet class="ma-2" :min-height="getHeight()" :width="store.screenWidth">
       <template v-if="!state.showExplanation">
         <v-row no-gutters>
           <div v-html="state.currentQuestion.body"></div>
@@ -328,16 +328,9 @@ watch(() => state.seconds, () => {
   }
 })
 
-function getCurrentYear() {
-  const currentDate = new Date()
-  return currentDate.getFullYear()
-}
-
 function saveResults() {
   if (store.userData.alias !== 'admin') {
-    state.quizResult.quizNumber = props.quizNumber
-    state.quizResult.timestamp = Date.now()
-    set(ref(db, `/quizzes/results/${getCurrentYear()}/${store.userData.alias}/${state.quizObject.actionWeek}/`), state.quizResult)
+    set(ref(db, `/quizzes/results/${store.currentYear}/${store.userData.alias}/${state.quizObject.actionWeek}/`), state.quizResult)
     // save the completed quiz number to user data
     if (store.userData.completedQuizNumbers) {
       store.userData.completedQuizNumbers.push(props.quizNumber)

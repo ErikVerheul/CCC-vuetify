@@ -1,10 +1,10 @@
 <template>
-  <p>store.userData.alias = {{ store.userData.alias }}</p>
-  <v-sheet class="pa-2 text-center mx-auto" v-if="!state.doQuiz" :max-width="store.screenWidth">
+  <QuizResults v-if="state.showResults" @return-to-menu="emit('return-to-menu')"></QuizResults>
+  <v-sheet v-else-if="!state.doQuiz" class="pa-2 text-center mx-auto" :max-width="store.screenWidth">
     <h3 class="py-3 text-red">Doe mee en win!</h3>
     <v-row v-if="!state.quizWasCompleted">
       <v-col cols="9" class="text-left">
-        <p>Vijf vragen van deze week ({{ getWeekNumber() }})<br>
+        <p>Vijf vragen van deze week ({{ store.currentWeekNr }})<br>
           Per vraag krijg je 3 min de tijd</p>
       </v-col>
       <v-col cols="3">
@@ -13,10 +13,10 @@
     </v-row>
     <v-row v-else>
       <v-col cols="9" class="text-left">
-        <p>U hebt de quiz van deze week ({{ getWeekNumber() }}) al gedaan. Zie de scores </p>
+        <p>U hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores </p>
       </v-col>
       <v-col cols="3">
-        <v-btn color="purple" @click="">Toon</v-btn>
+        <v-btn color="purple" @click="state.showResults = true">Toon</v-btn>
       </v-col>
     </v-row>
     <v-row>
@@ -49,15 +49,16 @@
       </v-col>
     </v-row>
   </v-sheet>
-  <RunQuiz v-else :quizNumber="state.qNumber" :isArchivedQuiz="state.isArchivedQuiz" @quiz-continue="state.doQuiz = false"></RunQuiz>
+  <RunQuiz v-else :quizNumber="state.qNumber" :isArchivedQuiz="state.isArchivedQuiz" @quiz-continue="showResultsData"></RunQuiz>
 </template>
 
 <script setup>
 import { onBeforeMount, reactive } from 'vue'
+import { useAppStore } from '../store/app.js'
 import { db, dbRef } from '../firebase'
 import { ref, child, get, set, remove, update } from 'firebase/database'
 import RunQuiz from './RunQuiz.vue'
-import { useAppStore } from '../store/app.js'
+import QuizResults from './QuizResults.vue'
 const emit = defineEmits(['return-to-menu'])
 const store = useAppStore()
 
@@ -67,7 +68,8 @@ const state = reactive({
   doQuiz: false,
   qNumber: undefined,
   isArchivedQuiz: false,
-  quizWasCompleted: false
+  quizWasCompleted: false,
+  showResults: false
 })
 
 onBeforeMount(() => {
@@ -88,19 +90,11 @@ function loadMetaData() {
   })
 }
 
-/* See https://www.geeksforgeeks.org/calculate-current-week-number-in-javascript/ */
-function getWeekNumber() {
-  const currentDate = new Date()
-  const startDate = new Date(currentDate.getFullYear(), 0, 1)
-  const days = Math.floor((currentDate - startDate) / (24 * 60 * 60 * 1000))
-  return Number(Math.ceil(days / 7))
-}
-
 function quizAvailable() {
   for (const qNr of state.quizNumbers)
     if (qNr !== 0) {
       // skip dummy quiz
-      if (Number(state.metaObject[qNr].actionWeek) === getWeekNumber()) return true
+      if (Number(state.metaObject[qNr].actionWeek) === store.currentWeekNr) return true
     }
   return false
 }
@@ -109,14 +103,14 @@ function historyAvailable() {
   for (const qNr of state.quizNumbers)
     if (qNr !== 0) {
       // skip dummy quiz
-      if (Number(state.metaObject[qNr].actionWeek) < getWeekNumber()) return true
+      if (Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr) return true
     }
   return false
 }
 
 
 function startQuiz() {
-  const currentWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) === getWeekNumber())
+  const currentWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) === store.currentWeekNr)
   state.qNumber = currentWeekQnumbers[0]
   if (store.userData.alias !== 'admin' && store.userData.completedQuizNumbers && store.userData.completedQuizNumbers.includes(state.qNumber)) {
     // admin can run a quiz multiple times
@@ -131,9 +125,14 @@ function startQuiz() {
 function startOldQuiz() {
   // allow to run archived quizzez multiple times
   state.quizWasCompleted = false
-  const oldWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) < getWeekNumber())
+  const oldWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr)
   state.qNumber = oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))]
   state.doQuiz = true
   state.isArchivedQuiz = true
+}
+
+function showResultsData() {
+  state.doQuiz = false
+  state.showResults = true
 }
 </script>

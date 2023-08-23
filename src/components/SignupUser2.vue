@@ -85,7 +85,6 @@ const store = useAppStore()
 
 const state = reactive({
   showWhy: false,
-  currentYear: new Date().getFullYear(),
   yearOfBirth: undefined,
   gender: -1,
   yearOfBirthRules: [
@@ -110,12 +109,12 @@ const state = reactive({
       return 'Vul 4 cijfers in.'
     },
     value => {
-      if (Number((state.currentYear) - Number(value)) <= 130) return true
+      if (store.currentYear - Number(value) <= 130) return true
 
       return 'U bent meer dan 130 jaar oud?'
     },
     value => {
-      if (Number(value) <= Number(state.currentYear)) return true
+      if (Number(value) <= tore.currentYear) return true
 
       return 'U bent nog niet geboren'
     }
@@ -127,7 +126,7 @@ const state = reactive({
 })
 
 const yearOfBirthOk = computed(() => {
-  return state.yearOfBirth === undefined || (Number((state.currentYear) - state.yearOfBirth <= 130) && state.yearOfBirth <= Number(state.currentYear))
+  return state.yearOfBirth === undefined || (Number((store.currentYear) - state.yearOfBirth <= 130) && state.yearOfBirth <= store.currentYear)
 })
 
 const newsFeedLabel = computed(() => {
