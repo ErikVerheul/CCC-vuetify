@@ -227,10 +227,6 @@ function qAnswer(idx) {
     state.quizQAnswers[idx] = true
   }
 }
-function numberOfStatemenst() {
-  if (state.currentQuestion.statementsArray === undefined) return 0
-  return state.currentQuestion.statementsArray.length
-}
 
 function numberOfCorrectStatements() {
   if (state.currentQuestion.answers === undefined) return 0

@@ -100,7 +100,7 @@ function getHeaders() {
       key: 'name',
     },
     // for now skip one column
-    // { title: store.currentWeekNr - 3, align: 'end', key: 'week_3' },
+    { title: store.currentWeekNr - 3, align: 'end', key: 'week_3' },
     { title: store.currentWeekNr - 2, align: 'end', key: 'week_2' },
     { title: store.currentWeekNr - 1, align: 'end', key: 'week_1' },
     { title: store.currentWeekNr, align: 'end', key: 'week_0' },
