@@ -126,7 +126,7 @@ function doSigninUser() {
           update(dbRef, updates)
           emit('signin-completed')
         } else {
-          console.log(`doSigninUser: cannot find user ${store.userData.alias} in the database}`)
+          console.log(`doSigninUser: cannot find user ${store.userData.alias} in the database`)
         }
       }).catch((error) => {
         console.error(`While reading child ${store.userData.alias} from database: error message = ` + error.message)
