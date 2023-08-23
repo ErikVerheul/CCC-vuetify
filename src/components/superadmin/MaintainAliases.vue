@@ -11,7 +11,8 @@
     <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="6">
-        <v-text-field v-model="state.userAliasInput" :label="textFieldLabel" :rules="state.nameRules" />
+        <v-text-field v-if="state.action === '1'" v-model="state.userAliasInput" :label="textFieldLabel" :rules="state.nameRules" />
+        <v-autocomplete v-else v-model="state.userAliasInput" :items="state.allAliases" :label="textFieldLabel" />       
         <v-switch v-if="state.action === '4'" label="Historisch figuur" v-model="state.isCelebrity"></v-switch>
       </v-col>
       <v-col cols="3"></v-col>
@@ -252,7 +253,7 @@ function saveAliasEntry() {
           // add the changed alias to the database
           let aliasObj = snapshot.val()
           // update the celebrity prop
-          aliasObj[state.userNewAliasInput].celebrity = state.isCelebrity
+          if (state.isCelebrity) aliasObj[state.userNewAliasInput].celebrity = state.isCelebrity
           set(ref(db, '/aliases/' + state.userNewAliasInput), aliasObj)
           state.saveSuccess = 1
           // add the alias to the local array
@@ -310,41 +311,9 @@ function resetInput() {
   state.aliasInfoContent = ''
 }
 
-// autocomplete the alias name
+// undo the saveSuccess message
 watch(() => state.userAliasInput, () => {
-  // undo the saveSuccess message
   state.saveSuccess = 0
-  if (state.action === '2' || state.action === '3' || state.action === '4') {
-    const inputLen = state.userAliasInput.length
-    let lastMatch = undefined
-    let exactMatch = false
-    let matchcount = 0
-    for (const el of state.allAliases) {
-      if (el.substring(0, inputLen).toUpperCase() === state.userAliasInput.toUpperCase()) {
-        lastMatch = el
-        matchcount++
-        // test on exact match
-        exactMatch = el.length === inputLen
-        if (exactMatch) break
-      }
-    }
-    if (exactMatch || matchcount === 1) {
-      // unique match found; prevent loading again after that state.userAliasInput was set (triggers another watch)
-      if (state.action === '4' && state.userAliasInput !== lastMatch.trim()) {   
-        state.userAliasInput = lastMatch.trim()
-        // initialize the content
-        get(child(dbRef, `/aliases/${state.userAliasInput}`)).then((snapshot) => {
-          if (snapshot.exists()) {
-            state.isCelebrity = snapshot.val().celebrity
-            state.aliasInfoContent = snapshot.val().info
-          }
-        }).catch((error) => {
-          console.error('While reading all available aliases from database: error message = ' + error.message)
-        })
-      } else
-        state.userAliasInput = lastMatch.trim()
-    }
-  }
 })
 
 </script>

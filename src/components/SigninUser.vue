@@ -16,9 +16,9 @@
     <v-col cols="auto">
       <v-card variant="text">
         <v-card-title>Login met schuilnaam en PIN code</v-card-title>
-        <v-text-field v-model="store.userData.alias" label="Uw schuilnaam" />
+        <v-autocomplete v-model="store.userData.alias" :items="props.aliasesInUseInclAdmin" label="Uw schuilnaam" />
         <v-text-field v-model.trim="store.userData.PIN" label="PIN" :rules="state.pinRules" />
-        <v-btn class="my-6" v-if="state.aliasOk && PINOK" type="submit" color="purple" @click='doSigninUser' rounded="l"
+        <v-btn class="my-6" v-if="PINOK" type="submit" color="purple" @click='doSigninUser' rounded="l"
           size="large">Login</v-btn>
         <template v-if="state.loginErrorMsg !== undefined">
           <h2 class="py-4">Fout: {{ state.loginErrorMsg }}</h2>
@@ -51,7 +51,6 @@ const emit = defineEmits(['signin-completed', 'change-to-signup', 'exit-signin']
 const store = useAppStore()
 
 const state = reactive({
-  aliasOk: false,
   pinRules: [
     value => {
       if (value) return true
@@ -79,29 +78,6 @@ const PINOK = computed(() => {
 function replaceSpacesForHyphen(name) {
   return name.replaceAll(' ', '-')
 }
-
-// autocomplete the alias name
-watch(() => store.userData.alias, () => {
-  state.aliasOk = false
-  const inputLen = store.userData.alias.length
-  let lastMatch = undefined
-  let exactMatch = false
-  let matchcount = 0
-  for (const el of props.aliasesInUseInclAdmin) {
-    if (el.substring(0, inputLen).toUpperCase() === store.userData.alias.toUpperCase()) {
-      lastMatch = el
-      matchcount++
-      // test on exact match
-      exactMatch = el.length === inputLen
-      if (exactMatch) break
-    }
-  }
-  if (exactMatch || matchcount === 1) {
-    // unique match found
-    state.aliasOk = true
-    store.userData.alias = lastMatch.trim()
-  }
-})
 
 function doSigninUser() {
   const fakeEmail = replaceSpacesForHyphen(store.userData.alias) + '@speelmee.app'

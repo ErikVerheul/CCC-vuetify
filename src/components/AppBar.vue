@@ -285,7 +285,7 @@ function removeAccount() {
       console.log(`Account and/or cookie deletion failed: ${error.message}`)
     })
   }).catch((error) => {
-    console.log(`Removal of ${store.userData.alias} data failed`)
+    console.log(`Removal of ${store.userData.alias} data failed: ${error.message}`)
   })
 }
 
