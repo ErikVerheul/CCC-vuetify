@@ -4,7 +4,7 @@
   <ReportWarning v-else-if="state.onWarning" :problemText="state.problemText" :problemCause="state.problemCause"
     :tipToResolve="state.tipToResolve" @return-to="emit('quiz-continue')"></ReportWarning>
   <template v-else>
-    <v-sheet class="ma-2" :min-height="getHeight()" :width="store.screenWidth">
+    <v-sheet class="ma-2" :min-height="getHeight()" :max-width="store.screenWidth">
       <template v-if="!state.showExplanation">
         <v-row no-gutters>
           <div v-html="state.currentQuestion.body"></div>
@@ -23,7 +23,7 @@
         </v-row>
       </template>
     </v-sheet>
-    <v-sheet v-if="!state.showExplanation" class="pa-2" :height="state.counterHeight" :width="store.screenWidth">
+    <v-sheet v-if="!state.showExplanation" class="pa-2" :height="state.counterHeight" :max-width="store.screenWidth">
       <v-row v-if="!state.done">
         <v-col v-if="state.playerStarted" cols="9">
           <v-btn @click="finishQuestion()">{{ getReadyText() }}</v-btn>
