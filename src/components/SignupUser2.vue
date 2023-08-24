@@ -104,7 +104,7 @@ const state = reactive({
       return 'Kan niet negatief zijn.'
     },
     value => {
-      if (value.length === 4) return true
+      if (value && value.length === 4) return true
 
       return 'Vul 4 cijfers in.'
     },

@@ -63,7 +63,7 @@ const state = reactive({
       return 'Vul alleen cijfers in.'
     },
     value => {
-      if (value.length >= 4) return true
+      if (value && value.length >= 4) return true
 
       return 'Vul minimaal 4 cijfers in.'
     },

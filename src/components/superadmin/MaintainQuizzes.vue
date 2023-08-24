@@ -253,7 +253,7 @@ function QNumberOk() {
 }
 
 function QNameOk() {
-  return state.quizTitle && state.quizTitle && state.quizTitle.length >= 2
+  return state.quizTitle && state.quizTitle.length >= 2
 }
 
 function QNumberExists() {

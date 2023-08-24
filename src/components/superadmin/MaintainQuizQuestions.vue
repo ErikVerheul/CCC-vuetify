@@ -274,7 +274,7 @@ const state = reactive({
       return 'Vul 1 of meer cijfers in.'
     },
     value => {
-      if (value.length >= 1) return true
+      if (value && value.length >= 1) return true
 
       return 'Vul minimaal 1 cijfer in.'
     },
