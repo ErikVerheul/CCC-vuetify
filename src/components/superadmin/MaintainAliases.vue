@@ -2,25 +2,26 @@
   <v-sheet>
     <h2>Schuilnamen onderhouden</h2>
     <v-radio-group inline v-model="state.action">
-      <v-radio @change="resetInput" label="Toevoegen" value="1"></v-radio>
-      <v-radio @change="resetInput" label="Veranderen" value="2"></v-radio>
-      <v-radio @change="resetInput" label="Verwijderen" value="3"></v-radio>
-      <v-radio @change="resetInput" label="Info toevoegen/onderhouden" value="4"></v-radio>
+      <v-radio @change="resetInput" label="Toevoegen" value="newAlias"></v-radio>
+      <v-radio @change="resetInput" label="Veranderen" value="replaceAlias"></v-radio>
+      <v-radio @change="resetInput" label="Verwijderen" value="removeAlias"></v-radio>
+      <v-radio @change="resetInput" label="Info toevoegen/onderhouden" value="celebrity"></v-radio>
     </v-radio-group>
 
     <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="6">
-        <v-text-field v-if="state.action === '1'" v-model="state.userAliasInput" :label="textFieldLabel" :rules="state.nameRules" />
-        <v-autocomplete v-else v-model="state.userAliasInput" :items="state.allAliases" :label="textFieldLabel" />       
-        <v-switch v-if="state.action === '4'" label="Historisch figuur" v-model="state.isCelebrity"></v-switch>
+        <v-text-field v-if="state.action === 'newAlias'" v-model="state.newAlias" :label="textFieldLabel" :rules="state.nameRules" />
+        <v-autocomplete v-else v-model="state.selectedAlias" :items="state.allAliases" :label="textFieldLabel" />
+        <v-switch v-if="state.action === 'celebrity'" label="Historisch figuur" v-model="state.isCelebrity"></v-switch>
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
-    <v-row v-if="state.action === '2' && aliasExists(state.userAliasInput) && !isAliasInUse(state.userAliasInput)">
+    <v-row
+      v-if="state.action === 'replaceAlias' && isValidAlias(state.selectedAlias) && aliasExists(state.selectedAlias) && !isAliasInUse(state.selectedAlias)">
       <v-col cols="3"></v-col>
       <v-col cols="6">
-        <v-text-field v-model.trim="state.userNewAliasInput" label="Nieuwe schuilnaam" :rules="state.newNameRules" />
+        <v-text-field v-model.trim="state.replaceAlias" label="Nieuwe schuilnaam" :rules="state.newNameRules" />
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
@@ -84,16 +85,17 @@ import { ref, child, get, set, update, remove } from 'firebase/database'
 const emit = defineEmits(['m-done'])
 
 onBeforeMount(() => {
-  loadAliasData()
+  loadAliasNames()
 })
 
 const state = reactive({
   allAliases: [],
   aliasesInUse: [],
-  action: "1",
-  userAliasInput: '',
+  action: "newAlias",
+  newAlias: '',
+  selectedAlias: '',
   isCelebrity: false,
-  userNewAliasInput: '',
+  replaceAlias: '',
   nameRules: [
     value => {
       if (value) return true
@@ -106,20 +108,14 @@ const state = reactive({
       return 'Vul minimaal 2 letters in.'
     },
     value => {
-      if ((state.action === '2' || state.action === '3') && isAliasInUse(value)) {
+      if (isAliasInUse(value)) {
         return 'Deze schuilnaam is in gebruik'
       }
       return true
     },
     value => {
-      if ((state.action === '1') && aliasExists(value)) {
+      if (aliasExists(value)) {
         return 'Deze schuilnaam bestaat al'
-      }
-      return true
-    },
-    value => {
-      if ((state.action === '4') && !aliasExists(value)) {
-        return 'Deze schuilnaam bestaat niet'
       }
       return true
     }
@@ -152,23 +148,24 @@ const state = reactive({
   aliasInfoContent: ''
 })
 
-function loadAliasData() {
-  // get all available aliases
+function loadAliasNames() {
+  // get all available alias names
   get(child(dbRef, `/aliases/`)).then((snapshot) => {
     if (snapshot.exists()) {
       const aliasObject = snapshot.val()
       state.allAliases = Object.keys(aliasObject)
       // extract the aliases in use
-      state.aliasesInUse = []
-      state.allAliases.forEach(el => {
-        if (aliasObject[el].inUse) state.aliasesInUse.push(el)
-      })
+      state.aliasesInUse = state.allAliases.filter(a => aliasObject[a].inUse)
     } else {
       console.log("No aliases data available")
     }
   }).catch((error) => {
     console.error('While reading all available aliases from database: error message = ' + error.message)
   })
+}
+
+function isValidAlias(alias) {
+  return alias && alias.length > 1
 }
 
 function isAliasInUse(alias) {
@@ -190,74 +187,74 @@ function aliasExists(alias) {
 }
 
 function showEditInfo() {
-  return state.action === '4' && userAliasInputOk.value && aliasExists(state.userAliasInput)
+  return state.action === 'celebrity' && isValidAlias(state.selectedAlias) && aliasExists(state.selectedAlias) && state.isCelebrity
 }
 
 const textFieldLabel = computed(() => {
-  if (state.action === '1') return 'Nieuwe schuilnaam'
-  if (state.action === '2') return 'Te veranderen schuilnaam'
-  if (state.action === '3') return 'Te verwijderen schuilnaam'
-  if (state.action === '4') return 'Schuilnaam waaraan info toe te voegen/te veranderen'
+  if (state.action === 'newAlias') return 'Nieuwe schuilnaam'
+  if (state.action === 'replaceAlias') return 'Te veranderen schuilnaam'
+  if (state.action === 'removeAlias') return 'Te verwijderen schuilnaam'
+  if (state.action === 'celebrity') return 'Schuilnaam waaraan info toe te voegen/te veranderen'
   return ''
 })
 
 const saveButtonText = computed(() => {
-  if (state.action === '1') return 'Voeg toe'
-  if (state.action === '2') return 'Sla op'
-  if (state.action === '3') return 'Verwijder'
-  if (state.action === '4') return 'Sla info op'
+  if (state.action === 'newAlias') return 'Voeg toe'
+  if (state.action === 'replaceAlias') return 'Sla op'
+  if (state.action === 'removeAlias') return 'Verwijder'
+  if (state.action === 'celebrity') return 'Sla info op'
   return ''
 })
 
 const saveButtonColor = computed(() => {
-  if (state.action === '3') return 'red'
+  if (state.action === 'removeAlias') return 'red'
   return ''
 })
 
-const userAliasInputOk = computed(() => {
-  if (state.userAliasInput && state.userAliasInput.length < 2 || state.userAliasInput.toUpperCase() === 'ADMIN' || state.userAliasInput.toUpperCase() === 'SYSTEM') return false
+const newAliasOk = computed(() => {
+  if (state.newAlias && state.newAlias.length < 2 || state.newAlias.toUpperCase() === 'ADMIN' || state.newAlias.toUpperCase() === 'SYSTEM') return false
   return true
 })
 
-const userNewAliasInputOk = computed(() => {
-  if (state.userNewAliasInput && state.userNewAliasInput.length < 2 || state.userNewAliasInput.toUpperCase() === 'ADMIN' || state.userNewAliasInput.toUpperCase() === 'SYSTEM') return false
+const replaceAliasOk = computed(() => {
+  if (state.replaceAlias && state.replaceAlias.length < 2 || state.replaceAlias.toUpperCase() === 'ADMIN' || state.replaceAlias.toUpperCase() === 'SYSTEM') return false
   return true
 })
 
 const allowSave = computed(() => {
-  if (state.action === '1') return userAliasInputOk.value && !aliasExists(state.userAliasInput) && !isAliasInUse(state.userAliasInput)
-  if (state.action === '2') return userAliasInputOk.value && userNewAliasInputOk.value && !aliasExists(state.userNewAliasInput) && !isAliasInUse(state.userNewAliasInput)
-  if (state.action === '3') return userAliasInputOk.value && aliasExists(state.userAliasInput) && !isAliasInUse(state.userAliasInput)
-  if (state.action === '4') return userAliasInputOk.value && aliasExists(state.userAliasInput)
+  if (state.action === 'newAlias') return newAliasOk.value && !aliasExists(state.newAlias) && !isAliasInUse(state.newAlias)
+  if (state.action === 'replaceAlias') return replaceAliasOk.value && !aliasExists(state.replaceAlias) && !isAliasInUse(state.replaceAlias)
+  if (state.action === 'removeAlias') return isValidAlias(state.selectedAlias) && aliasExists(state.selectedAlias) && !isAliasInUse(state.selectedAlias)
+  if (state.action === 'celebrity') return isValidAlias(state.selectedAlias) && aliasExists(state.selectedAlias)
   return false
 })
 
 function saveAliasEntry() {
-  if (state.action === '1') {
+  if (state.action === 'newAlias') {
     // note: Using set() overwrites data at the specified location, including any child nodes.
-    set(ref(db, '/aliases/' + state.userAliasInput), {
+    set(ref(db, '/aliases/' + state.newAlias), {
       "celebrity": state.isCelebrity
     })
     state.saveSuccess = 1
     // add the alias to the local array
-    state.allAliases.push(state.userAliasInput)
+    state.allAliases.push(state.newAlias)
   }
-  if (state.action === '2') {
+  if (state.action === 'replaceAlias') {
     // get the data of the alias
-    get(child(dbRef, `/aliases/` + state.userAliasInput)).then((snapshot) => {
+    get(child(dbRef, `/aliases/` + state.selectedAlias)).then((snapshot) => {
       if (snapshot.exists()) {
         // remove the alias from the database
-        remove(child(dbRef, '/aliases/' + state.userAliasInput)).then(() => {
+        remove(child(dbRef, '/aliases/' + state.selectedAlias)).then(() => {
           // remove the alias from the local array
-          state.allAliases = state.allAliases.filter(a => a !== state.userAliasInput)
+          state.allAliases = state.allAliases.filter(a => a !== state.selectedAlias)
           // add the changed alias to the database
           let aliasObj = snapshot.val()
           // update the celebrity prop
-          if (state.isCelebrity) aliasObj[state.userNewAliasInput].celebrity = state.isCelebrity
-          set(ref(db, '/aliases/' + state.userNewAliasInput), aliasObj)
+          if (state.isCelebrity) aliasObj[state.replaceAlias].celebrity = state.isCelebrity
+          set(ref(db, '/aliases/' + state.replaceAlias), aliasObj)
           state.saveSuccess = 1
           // add the alias to the local array
-          state.allAliases.push(state.userNewAliasInput)
+          state.allAliases.push(state.replaceAlias)
         }).catch((error) => {
           state.saveSuccess = 2
           console.error('The remove failed, error message = ' + error.message)
@@ -271,10 +268,10 @@ function saveAliasEntry() {
       console.error('Cannot read the alias data, error message = ' + error.message)
     })
   }
-  if (state.action === '3') {
-    remove(child(dbRef, '/aliases/' + state.userAliasInput)).then(() => {
+  if (state.action === 'removeAlias') {
+    remove(child(dbRef, '/aliases/' + state.selectedAlias)).then(() => {
       // remove the alias from the local array
-      state.allAliases = state.allAliases.filter(a => a !== state.userAliasInput)
+      state.allAliases = state.allAliases.filter(a => a !== state.selectedAlias)
       state.saveSuccess = 1
     }).catch((error) => {
       state.saveSuccess = 2
@@ -286,8 +283,8 @@ function saveAliasEntry() {
 function saveAliasInfo() {
   // update the info data the selected alias
   const updates = {}
-  updates[`/aliases/${state.userAliasInput}/info`] = state.aliasInfoContent
-  updates[`/aliases/${state.userAliasInput}/celebrity`] = state.isCelebrity
+  updates[`/aliases/${state.selectedAlias}/info`] = state.aliasInfoContent
+  updates[`/aliases/${state.selectedAlias}/celebrity`] = state.isCelebrity
   update(dbRef, updates).then(() => {
     state.saveSuccess = 1
   }).catch((error) => {
@@ -297,23 +294,39 @@ function saveAliasInfo() {
 }
 
 function doSave() {
-  if (state.action === '1') saveAliasEntry()
-  if (state.action === '2') saveAliasEntry()
-  if (state.action === '3') saveAliasEntry()
-  if (state.action === '4') saveAliasInfo()
+  if (state.action === 'newAlias') saveAliasEntry()
+  if (state.action === 'replaceAlias') saveAliasEntry()
+  if (state.action === 'removeAlias') saveAliasEntry()
+  if (state.action === 'celebrity') saveAliasInfo()
 }
 
 // reset the user input when changing action
 function resetInput() {
-  state.userAliasInput = ''
-  state.userNewAliasInput = ''
+  state.newAlias = ''
+  state.selectedAlias = ''
+  state.replaceAlias = ''
+  state.isCelebrity = false
   state.saveSuccess = 0
   state.aliasInfoContent = ''
 }
 
-// undo the saveSuccess message
-watch(() => state.userAliasInput, () => {
+watch(() => state.selectedAlias, () => {
+  // prevent null when backspacing
+  if (state.selectedAlias === null) state.selectedAlias = ''
+  // undo the saveSuccess message
   state.saveSuccess = 0
+  // check for celebrity info
+  if (isValidAlias(state.selectedAlias)) {
+    // initialize the content
+    get(child(dbRef, `/aliases/${state.selectedAlias}`)).then((snapshot) => {
+      if (snapshot.exists()) {
+        state.isCelebrity = snapshot.val().celebrity
+        state.aliasInfoContent = snapshot.val().info
+      } else state.isCelebrity = false
+    }).catch((error) => {
+      console.error('While reading all available aliases from database: error message = ' + error.message)
+    })
+  }
 })
 
 </script>
