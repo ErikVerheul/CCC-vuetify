@@ -1,43 +1,44 @@
 <template>
-  <v-row class="d-flex align-center justify-center">
-    <v-col cols="auto">
-      <v-card variant="text">
-        <v-card-title>Gebruikt u deze app voor het eerst?</v-card-title>
-        <v-btn size="x-large" variant="outlined" @click="emit('change-to-signup')">Ga naar nieuwe aanmelding</v-btn>
-      </v-card>
-    </v-col>
-  </v-row>
-  <v-row class="d-flex align-center justify-center">
-    <v-col cols="12">
-      <p>of hebt u al een account</p>
-    </v-col>
-  </v-row>
-  <v-row class="d-flex align-center justify-center">
-    <v-col cols="auto">
-      <v-card variant="text">
-        <v-card-title>Login met schuilnaam en PIN code</v-card-title>
-        <v-autocomplete v-model="store.userData.alias" :items="props.aliasesInUseInclAdmin" label="Uw schuilnaam" />        
-        <v-text-field v-model.trim="store.userData.PIN" label="PIN" :rules="state.pinRules" />
-        <!-- check for store.userData.alias not null -->
-        <v-btn class="my-6" v-if="store.userData.alias && PINOK" type="submit" color="purple" @click='doSigninUser' rounded="l"
-          size="large">Login</v-btn>
-        <template v-if="state.loginErrorMsg !== undefined">
-          <h2 class="py-4">Fout: {{ state.loginErrorMsg }}</h2>
-          <h3 class="py-4">Controleer of uw schuilnaam en pin code kloppen en probeer opnieuw</h3>
-        </template>
-      </v-card>
-    </v-col>
-  </v-row>
-  <v-row class="py-12">
-    <v-col cols="auto">
-      <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signin')">
-        <template v-slot:prepend>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-        Terug
-      </v-btn>
-    </v-col>
-  </v-row>
+  <v-sheet class="ma-2" :max-width="store.screenWidth">
+    <v-row class="d-flex align-center justify-center">
+      <v-col cols="12">
+        <v-card variant="text">
+          <v-card-title>Gebruikt u deze app voor het eerst?</v-card-title>
+          <v-btn size="x-large" variant="outlined" @click="emit('change-to-signup')">Ga naar nieuwe aanmelding</v-btn>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <p>of hebt u al een account</p>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-card variant="text">
+          <v-card-title>Login met schuilnaam en PIN code</v-card-title>
+          <v-autocomplete v-model="store.userData.alias" :items="props.aliasesInUseInclAdmin" label="Uw schuilnaam" />
+          <v-text-field v-model.trim="store.userData.PIN" label="PIN" :rules="state.pinRules" />
+          <!-- check for store.userData.alias not null -->
+          <v-btn class="my-6" v-if="store.userData.alias && PINOK" type="submit" color="purple" @click='doSigninUser' rounded="l"
+            size="large">Login</v-btn>
+          <v-card-text v-if="state.loginErrorMsg !== undefined">
+            <h3>Controleer of uw schuilnaam en pin code kloppen en probeer opnieuw</h3>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row class="py-12">
+      <v-col cols="12">
+        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signin')">
+          <template v-slot:prepend>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+          Terug
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-sheet>
 </template>
 
 <script setup>
