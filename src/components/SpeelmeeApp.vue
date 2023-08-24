@@ -188,7 +188,7 @@ function doAppSettings() {
 }
 
 function doGame(game) {
-  // store.screenName = 'Verborgen verhalen van Maastricht'
+  store.screenName = 'Verborgen verhalen van Maastricht'
   state.maastrichtStoriesActive = true
 }
 
