@@ -1,18 +1,39 @@
 <template>
   <QuizResults v-if="state.showResults" @return-to-menu="emit('return-to-menu')"></QuizResults>
   <v-sheet v-else-if="!state.doQuiz" class="pa-2 text-center mx-auto" :max-width="store.screenWidth">
-    <h3 class="py-3 text-red">Doe mee en win!</h3>
-    <v-row v-if="!state.quizWasCompleted">
-      <v-col cols="9" class="text-left">
-        <p>Vijf vragen van deze week ({{ store.currentWeekNr }})<br>
-          Per vraag krijg je 3 min de tijd</p>
-      </v-col>
-      <v-col cols="3">
-        <v-btn :disabled="!quizAvailable()" color="purple" @click="startQuiz">Start</v-btn>
+    <v-row>
+      <v-col class="mt-8 pl-12 text-left">
+        <h4>De vijf vragen van deze week ({{ store.currentWeekNr }})<br>
+          Per vraag krijg je 1 min de tijd</h4>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col class="text-center">
+        <h3 class="py-3 text-red">Doe mee en win!</h3>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-avatar class="ml-12" size="300" rounded="0">
+        <v-img src="../assets/mok34.png"></v-img>
+      </v-avatar>
+    </v-row>
+    <v-row>
+      <v-col>
+        <h3 class="text-red">Unieke erfgoed beker</h3>
+      </v-col>
+    </v-row>
+    <template v-if="!state.quizWasCompleted">
+      <v-row>
+        <v-col cols="9" class="pl-12 text-left">
+          <h4>Elke vier weken met nieuwe opdruk. Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</h4>
+        </v-col>
+        <v-col cols="3">
+          <v-btn :disabled="!quizAvailable()" color="purple" @click="startQuiz">Start</v-btn>
+        </v-col>
+      </v-row>
+    </template>
     <v-row v-else>
-      <v-col cols="9" class="text-left">
+      <v-col cols="9" class="pl-12 text-left">
         <p>U hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores </p>
       </v-col>
       <v-col cols="3">
@@ -20,25 +41,6 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-avatar class="ma-3" size="300" rounded="0">
-        <v-img src="../assets/mok34.png"></v-img>
-      </v-avatar>
-    </v-row>
-    <v-row>
-      <v-col>
-        <h3 class="text-red">Unieke mok met historische opdruk</h3>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="9" class="text-left">
-        <p>Het vragen archief<br>
-          Om te oefenen</p>
-      </v-col>
-      <v-col cols="3">
-        <v-btn :disabled="!historyAvailable()" color="purple" @click="startOldQuiz">Start</v-btn>
-      </v-col>
-    </v-row>
-    <v-row class="py-3 justify-start">
       <v-col cols="auto">
         <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('return-to-menu')">
           <template v-slot:prepend>
