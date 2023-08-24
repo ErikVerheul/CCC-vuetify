@@ -5,9 +5,8 @@
         <p><b>Zondag 13:00 wordt de ranglijst definitief</b></p>
       </v-row>
       <v-row>
-        <!-- density has no effect (yet) -->
-        <v-data-table density="compact" v-model:items-per-page="state.itemsPerPage" :headers="getHeaders()" :items="state.scores"
-          item-value="name">
+        <v-data-table density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores"
+          item-value="name" :sort-by="state.scores">
         </v-data-table>
       </v-row>
     </v-container>
@@ -46,9 +45,10 @@ const store = useAppStore()
 const emit = defineEmits(['return-to-menu'])
 
 const state = reactive({
-  itemsPerPage: 5,
+  itemsPerPage: 15,
   yearScores: {},
-  scores: []
+  scores: [],
+  sortBy: [{ key: 'sum', order: 'desc' }],
 })
 
 onBeforeMount(() => {
