@@ -29,7 +29,7 @@
           <v-btn @click="finishQuestion()">{{ getReadyText() }}</v-btn>
         </v-col>
         <v-col v-else cols="9">
-          <p>{{ state.currentQuestion.gameRules }}<br>Binnen 3 min</p>
+          <p>{{ state.currentQuestion.gameRules }}<br>Binnen 1 min</p>
         </v-col>
         <v-col cols="3">
           {{ state.clockValue }}
@@ -113,7 +113,7 @@ const state = reactive({
   playerStarted: false,
   seconds: 0,
   timerId: undefined,
-  timeout: 20,
+  timeout: 60,
   done: false,
   wrapupMsg: '',
   showExplanation: false,
