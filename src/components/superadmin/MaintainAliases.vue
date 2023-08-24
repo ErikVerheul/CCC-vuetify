@@ -101,7 +101,7 @@ const state = reactive({
       return 'Vul 2 of meer letters in.'
     },
     value => {
-      if (value.length >= 2) return true
+      if (value && value.length >= 2) return true
 
       return 'Vul minimaal 2 letters in.'
     },
@@ -131,7 +131,7 @@ const state = reactive({
       return 'Vul 2 of meer letters in.'
     },
     value => {
-      if (value.length >= 2) return true
+      if (value && value.length >= 2) return true
 
       return 'Vul minimaal 2 letters in.'
     },
@@ -215,12 +215,12 @@ const saveButtonColor = computed(() => {
 })
 
 const userAliasInputOk = computed(() => {
-  if (state.userAliasInput.length < 2 || state.userAliasInput.toUpperCase() === 'ADMIN' || state.userAliasInput.toUpperCase() === 'SYSTEM') return false
+  if (state.userAliasInput && state.userAliasInput.length < 2 || state.userAliasInput.toUpperCase() === 'ADMIN' || state.userAliasInput.toUpperCase() === 'SYSTEM') return false
   return true
 })
 
 const userNewAliasInputOk = computed(() => {
-  if (state.userNewAliasInput.length < 2 || state.userNewAliasInput.toUpperCase() === 'ADMIN' || state.userNewAliasInput.toUpperCase() === 'SYSTEM') return false
+  if (state.userNewAliasInput && state.userNewAliasInput.length < 2 || state.userNewAliasInput.toUpperCase() === 'ADMIN' || state.userNewAliasInput.toUpperCase() === 'SYSTEM') return false
   return true
 })
 
