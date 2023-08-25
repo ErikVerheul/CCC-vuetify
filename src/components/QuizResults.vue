@@ -1,46 +1,49 @@
 <template>
   <template v-if="!state.playOldQuiz">
-  <v-sheet :min-height="getHeight()">   
-    <v-container>
-      <v-row>
-        <p><b>Zondag 13:00 wordt de ranglijst definitief</b></p>
-      </v-row>
-      <v-row>
-        <v-data-table density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores"
-          item-value="name" :sort-by="state.scores">
-        </v-data-table>
-      </v-row>
-      <v-row v-if="historyAvailable()">
-        <v-col cols="9">
-          <p>Zin om een oude quiz te spelen?<br>Telt niet voor de competitie</p>
-        </v-col>
-        <v-col cols="3">
-          <v-btn @click="startOldQuiz" color="purple">Start</v-btn>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-sheet>
-  <v-divider></v-divider>
-  <v-row>
-    <v-col>
-      <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('return-to-menu')">
-        <template v-slot:prepend>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-        Terug
-      </v-btn>
-    </v-col>
-    <v-spacer></v-spacer>
-    <v-col>
-      <v-btn flat append-icon="mdi-arrow-right" @click="emit('return-to-menu')">
-        Door
-        <template v-slot:append>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-      </v-btn>
-    </v-col>
-  </v-row>
-</template>
+    <v-sheet :min-height="getHeight()">
+      <v-container>
+        <v-row>
+          <p><b>Zondag 13:00 wordt de ranglijst definitief</b></p>
+        </v-row>
+        <v-row>
+          <v-data-table density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()"
+            :items="state.scores" item-value="name" :sort-by="state.scores">
+          </v-data-table>
+        </v-row>
+        <v-row v-if="historyAvailable()">
+          <v-col cols="9">
+            <p>Zin om een oude quiz te spelen?<br>Telt niet voor de competitie</p>
+          </v-col>
+          <v-col cols="3">
+            <v-btn @click="startOldQuiz" color="purple">Start</v-btn>
+          </v-col>
+          <v-col v-if="countAll() > 0" cols="12">
+            <p><b>U heeft {{ countGood() }} van de {{ countAll() }} antwoorden goed</b></p>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-sheet>
+    <v-divider></v-divider>
+    <v-row>
+      <v-col>
+        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('return-to-menu')">
+          <template v-slot:prepend>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+          Terug
+        </v-btn>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col>
+        <v-btn flat append-icon="mdi-arrow-right" @click="emit('return-to-menu')">
+          Door
+          <template v-slot:append>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+        </v-btn>
+      </v-col>
+    </v-row>
+  </template>
   <RunQuiz v-else :quizNumber="state.qNumber" :isArchivedQuiz="true" @quiz-continue="stopOldQuiz"></RunQuiz>
 </template>
 
@@ -60,6 +63,7 @@ const state = reactive({
   metaObject: {},
   quizNumbers: [],
   playOldQuiz: false,
+  compactResult: [],
   qNumber: undefined,
   itemsPerPage: 15,
   yearScores: {},
@@ -68,7 +72,7 @@ const state = reactive({
 })
 
 onBeforeMount(() => {
-  store.screenName='Stand competitie'
+  store.screenName = 'Stand competitie'
   loadResultsData()
   loadMetaData()
 })
@@ -190,13 +194,28 @@ function historyAvailable() {
 }
 
 function startOldQuiz() {
+  state.compactResult = []
   const oldWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr)
   state.qNumber = oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))]
   state.playOldQuiz = true
 }
 
-function stopOldQuiz() {
-  store.screenName='Stand competitie'
+function countAll() {
+  return state.compactResult.length
+}
+
+function countGood() {
+  let count = 0
+  state.compactResult.forEach(el => {
+    if (el === true) count++
+  })
+  return count
+}
+
+function stopOldQuiz(result) {
+  state.compactResult = result
+  console.log('stopOldQuiz: compactResult = ' + result)
+  store.screenName = 'Stand competitie'
   state.playOldQuiz = false
 }
 </script>

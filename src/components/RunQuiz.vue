@@ -118,6 +118,7 @@ const state = reactive({
   wrapupMsg: '',
   showExplanation: false,
   counterHeight: 60,
+  compactResult: [],
   quizResult: {}
 })
 
@@ -280,9 +281,11 @@ function finishQuestion() {
   }
   if (countCorrectAnswers() === numberOfCorrectStatements() && countWrongAnswers() === 0) {
     state.wrapupMsg = 'Je antwoord was GOED en binnen de tijd!'
+    state.compactResult.push(true)
     if (!props.isArchivedQuiz) state.quizResult[state.currentQuestionIdx].correctAnswer = true
   } else {
     state.wrapupMsg = 'Je antwoord was FOUT'
+    state.compactResult.push(false)
     if (!props.isArchivedQuiz) state.quizResult[state.currentQuestionIdx].correctAnswer = false
   }
 }
@@ -305,7 +308,7 @@ function startNextQuestion() {
 
 function nextStep() {
   if (state.showExplanation) {
-    if (!startNextQuestion()) emit('quiz-continue')
+    if (!startNextQuestion()) emit('quiz-continue', state.compactResult)
   } else {
     state.showExplanation = true
   }
@@ -321,6 +324,7 @@ watch(() => state.seconds, () => {
       state.quizResult[state.currentQuestionIdx] = {}
       state.quizResult[state.currentQuestionIdx].overdue = true
     }
+    state.compactResult.push(false)
   }
 })
 
