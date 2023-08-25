@@ -1,5 +1,6 @@
 <template>
-  <v-sheet :min-height="getHeight()">
+  <template v-if="!state.playOldQuiz">
+  <v-sheet :min-height="getHeight()">   
     <v-container>
       <v-row>
         <p><b>Zondag 13:00 wordt de ranglijst definitief</b></p>
@@ -8,6 +9,14 @@
         <v-data-table density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores"
           item-value="name" :sort-by="state.scores">
         </v-data-table>
+      </v-row>
+      <v-row v-if="historyAvailable()">
+        <v-col cols="9">
+          <p>Zin om een oude quiz te spelen?<br>Telt niet voor de competitie</p>
+        </v-col>
+        <v-col cols="3">
+          <v-btn @click="startOldQuiz" color="purple">Start</v-btn>
+        </v-col>
       </v-row>
     </v-container>
   </v-sheet>
@@ -32,6 +41,8 @@
     </v-col>
   </v-row>
 </template>
+  <RunQuiz v-else :quizNumber="state.qNumber" :isArchivedQuiz="true" @quiz-continue="stopOldQuiz"></RunQuiz>
+</template>
 
 <script setup>
 import { onBeforeMount, reactive } from 'vue'
@@ -40,11 +51,16 @@ import { useAppStore } from '../store/app.js'
 import { VDataTable } from 'vuetify/labs/VDataTable'
 import { dbRef } from '../firebase'
 import { child, get } from 'firebase/database'
+import RunQuiz from './RunQuiz.vue'
 
 const store = useAppStore()
 const emit = defineEmits(['return-to-menu'])
 
 const state = reactive({
+  metaObject: {},
+  quizNumbers: [],
+  playOldQuiz: false,
+  qNumber: undefined,
   itemsPerPage: 15,
   yearScores: {},
   scores: [],
@@ -52,7 +68,9 @@ const state = reactive({
 })
 
 onBeforeMount(() => {
+  store.screenName='Stand competitie'
   loadResultsData()
+  loadMetaData()
 })
 
 function getHeight() {
@@ -88,6 +106,20 @@ function loadResultsData() {
     }
   }).catch((error) => {
     console.log('QuizResults: An eror ocurred while reading the results data: ' + error.message)
+  })
+}
+
+function loadMetaData() {
+  get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      state.metaObject = snapshot.val()
+      const quizStrNumbers = Object.keys(state.metaObject)
+      state.quizNumbers = quizStrNumbers.map((strNr) => Number(strNr))
+    } else {
+      console.log("Quiz meta data not found")
+    }
+  }).catch((error) => {
+    console.error(`Error while reading quiz meta data from database: ` + error.message)
   })
 }
 
@@ -146,5 +178,25 @@ function createScoresArray(yearScores) {
     if (scoreFound) scores.push(obj)
   })
   return scores
+}
+
+function historyAvailable() {
+  for (const qNr of state.quizNumbers)
+    if (qNr !== 0) {
+      // skip dummy quiz
+      if (Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr) return true
+    }
+  return false
+}
+
+function startOldQuiz() {
+  const oldWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr)
+  state.qNumber = oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))]
+  state.playOldQuiz = true
+}
+
+function stopOldQuiz() {
+  store.screenName='Stand competitie'
+  state.playOldQuiz = false
 }
 </script>

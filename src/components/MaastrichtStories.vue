@@ -101,16 +101,6 @@ function quizAvailable() {
   return false
 }
 
-function historyAvailable() {
-  for (const qNr of state.quizNumbers)
-    if (qNr !== 0) {
-      // skip dummy quiz
-      if (Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr) return true
-    }
-  return false
-}
-
-
 function startQuiz() {
   const currentWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) === store.currentWeekNr)
   state.qNumber = currentWeekQnumbers[0]
@@ -122,15 +112,6 @@ function startQuiz() {
     state.doQuiz = true
     state.isArchivedQuiz = false
   }
-}
-
-function startOldQuiz() {
-  // allow to run archived quizzez multiple times
-  state.quizWasCompleted = false
-  const oldWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr)
-  state.qNumber = oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))]
-  state.doQuiz = true
-  state.isArchivedQuiz = true
 }
 
 function showResultsData() {
