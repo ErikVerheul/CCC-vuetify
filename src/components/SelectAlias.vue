@@ -37,7 +37,7 @@
 <script setup>
 import { onBeforeMount, reactive, watch } from 'vue'
 import SelectAliasRow from './SelectAliasRow.vue'
-const props = defineProps(['aliasObject', 'aliasesInUse', 'aliasesNotInUse'])
+const props = defineProps(['aliasesNotInUse'])
 const emit = defineEmits(['alias-selected', 'reset-signup'])
 
 onBeforeMount(() => {
