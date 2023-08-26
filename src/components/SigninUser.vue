@@ -19,7 +19,7 @@
           <v-card-title>Login met schuilnaam en PIN code</v-card-title>
           <v-autocomplete v-model="store.userData.alias" :items="props.aliasesInUseInclAdmin" label="Uw schuilnaam" />
           <v-text-field v-model.trim="store.userData.PIN" label="PIN" :rules="state.pinRules" />
-          <!-- check for store.userData.alias not null -->
+          <!-- check for store.userData.alias not null after backspacing && PINOK -->
           <v-btn class="my-6" v-if="store.userData.alias && PINOK" type="submit" color="purple" @click='doSigninUser' rounded="l"
             size="large">Login</v-btn>
           <v-card-text v-if="state.loginErrorMsg !== undefined">
@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive } from 'vue'
 import { useAppStore } from '../store/app.js'
 import { dbRef } from '../firebase'
 import { get, child, update } from "firebase/database"
