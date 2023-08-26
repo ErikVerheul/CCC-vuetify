@@ -13,69 +13,71 @@
       <v-app-bar-title class="flex text-center">{{ store.screenName }}</v-app-bar-title>
     </template>
 
-    <v-btn icon id="menu-activator">
-      <v-icon>mdi-dots-vertical</v-icon>
-    </v-btn>
+    <template v-if="store.screenName === 'Menu'">
+      <v-btn icon id="menu-activator">
+        <v-icon>mdi-dots-vertical</v-icon>
+      </v-btn>
 
-    <v-menu activator="#menu-activator">
-      <v-list>
-        <v-list-item v-if="props.isAuthenticated && store.aliasIsCelebrity">
-          <v-btn flat size="small" @click="emit('show-alias-info')">
-            Wie was {{ store.userData.alias }}?
-          </v-btn>
-        </v-list-item>
-        <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog1 = true">
-            Inloggen op ander apparaat
-          </v-btn>
-        </v-list-item>
-        <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog2 = true">
-            Stop automatisch inloggen
-          </v-btn>
-        </v-list-item>
-        <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="emit('app-settings')">
-            Instellingen
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn flat size="small" @click="state.dialog4 = true">
-            Feedback
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn flat size="small" @click="state.dialog5 = true">
-            Contact
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn flat size="small" @click="state.dialog6 = true">
-            Veelgestelde vragen
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn flat size="small" @click="state.dialog7 = true">
-            Over de Speelmee app
-          </v-btn>
-        </v-list-item>
-        <v-list-item>
-          <v-btn flat size="small" @click="router.push({ path: '/Privacybeleid' })">
-            Privacybeleid
-          </v-btn>
-        </v-list-item>
-        <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog9 = true">
-            Log uit
-          </v-btn>
-        </v-list-item>
-        <v-list-item v-if="props.isAuthenticated && store.userData.alias !== 'admin'">
-          <v-btn color="red" flat size="small" @click="state.dialog10 = true">
-            Ik speel niet meer mee.<br>Verwijder mijn gegevens
-          </v-btn>
-        </v-list-item>
-      </v-list>
-    </v-menu>
+      <v-menu activator="#menu-activator">
+        <v-list>
+          <v-list-item v-if="props.isAuthenticated && store.aliasIsCelebrity">
+            <v-btn flat size="small" @click="emit('show-alias-info')">
+              Wie was {{ store.userData.alias }}?
+            </v-btn>
+          </v-list-item>
+          <v-list-item v-if="props.isAuthenticated">
+            <v-btn flat size="small" @click="state.dialog1 = true">
+              Inloggen op ander apparaat
+            </v-btn>
+          </v-list-item>
+          <v-list-item v-if="props.isAuthenticated">
+            <v-btn flat size="small" @click="state.dialog2 = true">
+              Stop automatisch inloggen
+            </v-btn>
+          </v-list-item>
+          <v-list-item v-if="props.isAuthenticated">
+            <v-btn flat size="small" @click="emit('app-settings')">
+              Instellingen
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn flat size="small" @click="state.dialog4 = true">
+              Feedback
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn flat size="small" @click="state.dialog5 = true">
+              Contact
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn flat size="small" @click="state.dialog6 = true">
+              Veelgestelde vragen
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn flat size="small" @click="state.dialog7 = true">
+              Over de Speelmee app
+            </v-btn>
+          </v-list-item>
+          <v-list-item>
+            <v-btn flat size="small" @click="router.push({ path: '/Privacybeleid' })">
+              Privacybeleid
+            </v-btn>
+          </v-list-item>
+          <v-list-item v-if="props.isAuthenticated">
+            <v-btn flat size="small" @click="state.dialog9 = true">
+              Log uit
+            </v-btn>
+          </v-list-item>
+          <v-list-item v-if="props.isAuthenticated && store.userData.alias !== 'admin'">
+            <v-btn color="red" flat size="small" @click="state.dialog10 = true">
+              Ik speel niet meer mee.<br>Verwijder mijn gegevens
+            </v-btn>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </template>
   </v-app-bar>
 
   <v-dialog v-model="state.dialog1" :max-width="store.screenWidth">
