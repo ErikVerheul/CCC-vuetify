@@ -16,6 +16,7 @@ export const useAppStore = defineStore('app', {
     backContinueHeight: 60,
     firebaseUser: undefined,
     userData: {},
+    aliasIsCelebrity: false,
     screenName: '',
     currentYear: new Date().getFullYear(),
     currentWeekNr: getWeekNumber()

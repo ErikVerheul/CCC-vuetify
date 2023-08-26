@@ -19,6 +19,11 @@
 
     <v-menu activator="#menu-activator">
       <v-list>
+        <v-list-item v-if="props.isAuthenticated && store.aliasIsCelebrity">
+          <v-btn flat size="small" @click="emit('show-alias-info')">
+            Wie was {{ store.userData.alias }}?
+          </v-btn>
+        </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
           <v-btn flat size="small" @click="state.dialog1 = true">
             Inloggen op ander apparaat
@@ -231,7 +236,7 @@ import { reactive } from 'vue'
 import { useAppStore } from '../store/app.js'
 import Cookies from 'universal-cookie'
 import { dbRef } from '../firebase'
-import { child, update, remove } from "firebase/database"
+import { update } from 'firebase/database'
 import router from '../router'
 
 const store = useAppStore()
@@ -243,7 +248,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['logout-app', 'reset-app', 'app-settings'])
+const emit = defineEmits(['logout-app', 'reset-app', 'app-settings', 'show-alias-info'])
 
 const state = reactive({
   dialog1: false,

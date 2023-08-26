@@ -1,34 +1,46 @@
 <template>
-  <v-row v-if="PINOK">
-    <v-col cols="12">
-      <v-card class="mx-auto" color="yellow-lighten-3" theme="dark"  :max-width="store.screenWidth">
-        <v-card-title class="text-h5">
-          Welkom in de Speelmee.app
-        </v-card-title>
-        <v-card-text>
-          Uw schuilnaam is <b>{{ store.userData.alias }}</b><br>
-          Uw PIN is <b>{{ store.userData.PIN }}</b>
-          <p>Gebruik deze schuilnaam en pin code om op een ander apparaat in te loggen.<br>
-            Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt.</p>
-        </v-card-text>
-      </v-card>
-    </v-col>
-  </v-row>
-  <v-row v-else>
-    <v-sheet class="ma-2">
-      <v-col cols="12">
-        <h1 class="titleLine">Hallo -{{ store.userData.alias }} </h1>
-        <h3>Kies een pin code</h3>
-        <v-text-field v-model.trim="store.userData.PIN" label="pin code" :rules="state.pinRules" />
-      </v-col>
-    </v-sheet>
-  </v-row>
-
-  <v-sheet class="pa-2" :max-width="store.screenWidth">
+  <v-sheet :min-height="getHeight()" :max-width="store.screenWidth" class="ma-2">
     <v-row>
       <v-col cols="12">
-        <h4>De speelmee.app neemt uw privacy serieus.</h4>
-        <p>Daarom maken we het mogelijk alle persoonlijke data te wissen als je geen gebruik meer wil maken van de app.</p>
+        <h1>Hallo -{{ store.userData.alias }} </h1>
+        <h3>Kies een pin code</h3>
+        <v-col cols="6">
+          <v-text-field v-model.trim="store.userData.PIN" label="pin code" :rules="state.pinRules" />
+        </v-col>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" :max-width="store.screenWidth">
+          <v-card-title class="text-h5">
+            Welkom in de Speelmee.app
+          </v-card-title>
+          <v-card-text>
+            <h4>De speelmee.app neemt uw privacy serieus.</h4>
+            <p>Daarom maken we het mogelijk alle persoonlijke data te wissen als je geen gebruik meer wil maken van de app.</p>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row v-if="PINOK">
+      <v-col cols="12">
+        <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" :max-width="store.screenWidth">
+          <v-card-title class="text-h5">
+            Een ander apparaat?
+          </v-card-title>
+          <v-card-text>
+            Uw schuilnaam is <b>{{ store.userData.alias }}</b><br>
+            Uw PIN is <b>{{ store.userData.PIN }}</b>
+            <p>Gebruik deze schuilnaam en pin code om op een ander apparaat in te loggen.<br>
+              Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt.</p>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row v-if="props.isCelebrity">
+      <v-col cols="12">
+        <h4>{{ store.userData.alias }} is een historisch interessante figuur</h4>
+        <p>Voor info tab op <v-icon>mdi-dots-vertical</v-icon> rechts boven nadat u bent ingelogd.</p>
       </v-col>
     </v-row>
   </v-sheet>
@@ -58,6 +70,7 @@
 import { computed, reactive } from 'vue'
 import { useAppStore } from '../store/app.js'
 
+const props = defineProps(['isCelebrity'])
 const emit = defineEmits(['signup-continue', 'exit-signup'])
 const store = useAppStore()
 
@@ -90,10 +103,8 @@ const newsFeedLabel = computed(() => {
   return 'Nee'
 })
 
-</script>
-
-<style scoped>
-.titleLine {
-  text-align: left;
+function getHeight() {
+  return store.screenHeight - store.backContinueHeight
 }
-</style>
+
+</script>

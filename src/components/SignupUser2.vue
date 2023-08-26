@@ -1,7 +1,7 @@
 <template>
   <ReportFbError v-if="state.onError" :firebaseError="state.firebaseError" :fbErrorContext="state.fbErrorContext"
     @return-to="emit('exit-signup')"></ReportFbError>
-  <v-sheet v-else :max-width="store.screenWidth">
+  <v-sheet v-else :min-height="getHeight()" :max-width="store.screenWidth">
     <v-row>
       <v-col cols="12" class="text-center">
         <h1>Hallo -{{ store.userData.alias }} </h1>
@@ -48,27 +48,27 @@
         <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
       </v-col>
     </v-row>
-    <v-divider></v-divider>
-    <v-row>
-      <v-col>
-        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
-          <template v-slot:prepend>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-          Terug
-        </v-btn>
-      </v-col>
-      <v-spacer></v-spacer>
-      <v-col>
-        <v-btn :disabled="!yearOfBirthOk" flat append-icon="mdi-arrow-right" @click="doSignupUser">
-          Door
-          <template v-slot:append>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-        </v-btn>
-      </v-col>
-    </v-row>
   </v-sheet>
+  <v-divider></v-divider>
+  <v-row>
+    <v-col>
+      <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
+        <template v-slot:prepend>
+          <v-icon size="x-large" color="purple"></v-icon>
+        </template>
+        Terug
+      </v-btn>
+    </v-col>
+    <v-spacer></v-spacer>
+    <v-col>
+      <v-btn :disabled="!yearOfBirthOk" flat append-icon="mdi-arrow-right" @click="doSignupUser">
+        Door
+        <template v-slot:append>
+          <v-icon size="x-large" color="purple"></v-icon>
+        </template>
+      </v-btn>
+    </v-col>
+  </v-row>
 </template>
 
 <script setup>
@@ -133,6 +133,10 @@ const newsFeedLabel = computed(() => {
   if (state.newsFeed) return 'Ja'
   return 'Nee'
 })
+
+function getHeight() {
+  return store.screenHeight - store.backContinueHeight
+}
 
 function replaceSpacesForHyphen(name) {
   return name.replaceAll(' ', '-')

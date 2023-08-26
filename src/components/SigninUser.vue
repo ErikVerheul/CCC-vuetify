@@ -17,10 +17,10 @@
       <v-col cols="12">
         <v-card variant="text">
           <v-card-title>Login met schuilnaam en PIN code</v-card-title>
-          <v-autocomplete v-model="store.userData.alias" :items="props.aliasesInUseInclAdmin" label="Uw schuilnaam" />
+          <v-autocomplete v-model="state.selectedAlias" :items="props.aliasesInUseInclAdmin" label="Uw schuilnaam" />
           <v-text-field v-model.trim="store.userData.PIN" label="PIN" :rules="state.pinRules" />
-          <!-- check for store.userData.alias not null after backspacing && PINOK -->
-          <v-btn class="my-6" v-if="store.userData.alias && PINOK" type="submit" color="purple" @click='doSigninUser' rounded="l"
+          <!-- check for state.selectedAlias not null after backspacing && PINOK -->
+          <v-btn class="my-6" v-if="state.selectedAlias && PINOK" type="submit" color="purple" @click='doSigninUser' rounded="l"
             size="large">Login</v-btn>
           <v-card-text v-if="state.loginErrorMsg !== undefined">
             <h3>Controleer of uw schuilnaam en pin code kloppen en probeer opnieuw</h3>
@@ -53,6 +53,7 @@ const emit = defineEmits(['signin-completed', 'change-to-signup', 'exit-signin']
 const store = useAppStore()
 
 const state = reactive({
+  selectedAlias: '',
   pinRules: [
     value => {
       if (value) return true
@@ -82,7 +83,7 @@ function replaceSpacesForHyphen(name) {
 }
 
 function doSigninUser() {
-  const fakeEmail = replaceSpacesForHyphen(store.userData.alias) + '@speelmee.app'
+  const fakeEmail = replaceSpacesForHyphen(state.selectedAlias) + '@speelmee.app'
   const fakePassword = (Number(store.userData.PIN + store.userData.PIN) * 7).toString()
   const auth = getAuth()
   signInWithEmailAndPassword(auth, fakeEmail, fakePassword)
@@ -92,7 +93,12 @@ function doSigninUser() {
       // get user data from the database
       get(child(dbRef, `users/` + store.firebaseUser.uid)).then((snapshot) => {
         if (snapshot.exists()) {
+          // save the user data in the store including its alias
           store.userData = snapshot.val()
+          if (state.selectedAlias !== store.userData.alias) {
+            console.log('doSigninUser: SOMETHING WENT WRONG: the alias of the retrieved user is different from the selected alias. STOP')
+            return
+          }
           // save a cookie for auto login next time
           const cookies = new Cookies()
           cookies.set('speelMee', { alias: store.userData.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })

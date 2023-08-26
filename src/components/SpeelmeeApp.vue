@@ -1,6 +1,7 @@
 <template>
   <v-app :max-width="store.screenWidth">
-    <AppBar :is-authenticated="state.isAuthenticated" @logout-app="returnToLogin" @reset-app="resetApp" @app-settings="doAppSettings" />
+    <AppBar :is-authenticated="state.isAuthenticated" @logout-app="returnToLogin" @reset-app="resetApp" @app-settings="doAppSettings"
+      @show-alias-info="showAliasInfo" />
     <v-main>
       <v-row class="d-flex justify-center">
         <v-col cols="auto">
@@ -20,13 +21,11 @@
               </template>
               <template v-if="state.userEntryMode === 'signup'">
                 <template v-if="store.userData.alias === undefined">
-                  <SelectAlias :alias-object="state.aliasObject" :aliases-in-use="state.aliasesInUse"
-                    :aliases-not-in-use="state.aliasesNotInUse" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin">
-                  </SelectAlias>
+                  <SelectAlias :aliases-not-in-use="state.aliasesNotInUse" @alias-selected="setSelectedAlias" @reset-signup="returnToLogin" />
                 </template>
                 <template v-else>
                   <template class="py-2" v-if="state.signupStep === 1">
-                    <SignupUser @signup-continue="continueSignup" @exit-signup="returnToLogin" />
+                    <SignupUser :isCelebrity="state.isCelebrity" @signup-continue="continueSignup" @exit-signup="returnToLogin" />
                   </template>
                   <template v-if="state.signupStep === 2">
                     <SignupUser2 @signup-completed="finishSignup" @exit-signup="returnToLogin" />
@@ -36,12 +35,9 @@
             </div>
           </div>
           <div else>
-            <template v-if="state.maastrichtStoriesActive">
-              <MaastrichtStories @return-to-menu="showMenu" />
-            </template>
-            <template v-if="state.userSettingsActive">
-              <AppSettings @return-to-menu="showMenu" />
-            </template>
+            <MaastrichtStories v-if="state.maastrichtStoriesActive" @return-to-menu="showMenu" />
+            <AppSettings v-if="state.userSettingsActive" @return-to-menu="showMenu" />
+            <ShowCelebrity v-if="state.showAliasInfoActive" @return-to="showMenu"></ShowCelebrity>
           </div>
         </v-col>
       </v-row>
@@ -60,10 +56,12 @@ import SignupUser from './SignupUser.vue'
 import SignupUser2 from './SignupUser2.vue'
 import SigninUser from './SigninUser.vue'
 import { dbRef } from '../firebase'
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth"
 import { child, get, update } from "firebase/database"
 import MaastrichtStories from './MaastrichtStories.vue'
 import AppSettings from './AppSettings.vue'
-import { getAuth, signInWithEmailAndPassword, signOut, fetchSignInMethodsForEmail } from "firebase/auth"
+import ShowCelebrity from './ShowCelebrity.vue'
+
 
 const auth = getAuth()
 const store = useAppStore()
@@ -106,6 +104,8 @@ onBeforeMount(() => {
                     store.userData = snapshot.val()
                     // the user is authenticated by having this cookie
                     state.isAuthenticated = true
+                    // the choosen alias can be a celebrity
+                    store.aliasIsCelebrity = state.aliasObject[store.userData.alias].celebrity || false
                     // refresh cookie to maintain a year long subscription
                     cookies.remove('speelMee', { sameSite: true })
                     cookies.set('speelMee', { alias: retrievedCookie.alias, fpw: retrievedCookie.fpw }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
@@ -160,8 +160,10 @@ const state = reactive({
   userEntryMode: undefined,
   aliasesNotInUse: [],
   aliasesInUse: [],
+  isCelebrity: false,
   maastrichtStoriesActive: false,
   userSettingsActive: false,
+  showAliasInfoActive: false,
   loginErrorMsg: undefined
 })
 
@@ -179,12 +181,17 @@ const nowPlaying = computed(() => {
 
 // returns true if any other activity is active (not login or signin)
 const nowOther = computed(() => {
-  return state.userSettingsActive
+  return state.userSettingsActive || state.showAliasInfoActive
 })
 
 function doAppSettings() {
   store.screenName = 'Instellingen'
   state.userSettingsActive = true
+}
+
+function showAliasInfo() {
+  store.screenName = 'Scuilnaam info'
+  state.showAliasInfoActive = true
 }
 
 function doGame(game) {
@@ -220,6 +227,8 @@ function switchToSignup() {
 }
 
 function finishSignin() {
+  // the choosen alias can be a celebrity
+  store.aliasIsCelebrity = state.aliasObject[store.userData.alias].celebrity || false
   state.isAuthenticated = true
   store.screenName = 'Menu'
 }
@@ -233,6 +242,8 @@ function finishSignup() {
   state.aliasesNotInUse = state.aliasesNotInUse.filter(a => a !== store.userData.alias)
   // add new alias to aliases in use
   state.aliasesInUse.push(store.userData.alias)
+  // the choosen alias can be a celebrity
+  store.aliasIsCelebrity = state.aliasObject[store.userData.alias].celebrity || false
   // reset signup step
   state.signupStep = 1
   state.isAuthenticated = true
@@ -248,8 +259,9 @@ function setSelectedAlias(alias) {
 }
 
 function showMenu() {
-  state.userSettingsActive = false
   state.maastrichtStoriesActive = false
+  state.userSettingsActive = false
+  state.showAliasInfoActive = false
   store.screenName = 'Menu'
 }
 
