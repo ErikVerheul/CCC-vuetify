@@ -10,6 +10,10 @@
         ".read": "auth.uid != null",
         ".write": "auth.uid != null"
       },
+      "aliasInfo": {
+        ".read": "auth.uid != null",
+        ".write": "auth.uid != null"
+      },
       "quizzes": {
         ".read": "auth.uid != null",
         ".write": "auth.uid != null"
