@@ -77,12 +77,12 @@ onBeforeMount(() => {
       // get all available aliases
       get(child(dbRef, `aliases/`)).then((snapshot) => {
         if (snapshot.exists()) {
-          state.aliasObject = snapshot.val()
-          const allAliases = Object.keys(state.aliasObject)
+          store.aliasesObject = snapshot.val()
+          const allAliases = Object.keys(store.aliasesObject)
           // extract the aliases not in use
-          state.aliasesNotInUse = allAliases.filter(el => !state.aliasObject[el].inUse)
+          state.aliasesNotInUse = allAliases.filter(el => !store.aliasesObject[el].inUse)
           // extract the aliases in use
-          state.aliasesInUse = allAliases.filter(el => state.aliasObject[el].inUse)
+          state.aliasesInUse = allAliases.filter(el => store.aliasesObject[el].inUse)
         } else {
           console.log("No aliases data available")
         }
@@ -104,8 +104,6 @@ onBeforeMount(() => {
                     store.userData = snapshot.val()
                     // the user is authenticated by having this cookie
                     state.isAuthenticated = true
-                    // the choosen alias can be a celebrity
-                    store.aliasIsCelebrity = state.aliasObject[store.userData.alias].celebrity || false
                     // refresh cookie to maintain a year long subscription
                     cookies.remove('speelMee', { sameSite: true })
                     cookies.set('speelMee', { alias: retrievedCookie.alias, fpw: retrievedCookie.fpw }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
@@ -152,7 +150,6 @@ onBeforeMount(() => {
 })
 
 const state = reactive({
-  aliasObject: {},
   signupStep: 1,
   isAuthenticated: false,
   showOpeningScreen: undefined,
@@ -227,8 +224,6 @@ function switchToSignup() {
 }
 
 function finishSignin() {
-  // the choosen alias can be a celebrity
-  store.aliasIsCelebrity = state.aliasObject[store.userData.alias].celebrity || false
   state.isAuthenticated = true
   store.screenName = 'Menu'
 }
@@ -242,8 +237,6 @@ function finishSignup() {
   state.aliasesNotInUse = state.aliasesNotInUse.filter(a => a !== store.userData.alias)
   // add new alias to aliases in use
   state.aliasesInUse.push(store.userData.alias)
-  // the choosen alias can be a celebrity
-  store.aliasIsCelebrity = state.aliasObject[store.userData.alias].celebrity || false
   // reset signup step
   state.signupStep = 1
   state.isAuthenticated = true

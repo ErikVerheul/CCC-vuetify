@@ -1,5 +1,5 @@
 <template>
-  <v-sheet :min-height="getHeight()" :max-width="store.screenWidth" class="ma-2">
+  <v-sheet :max-width="store.screenWidth" class="ma-2">
     <v-row>
       <v-col cols="12">
         <h1>Hallo -{{ store.userData.alias }} </h1>
@@ -102,9 +102,5 @@ const newsFeedLabel = computed(() => {
   if (state.newsFeed) return 'Ja'
   return 'Nee'
 })
-
-function getHeight() {
-  return store.screenHeight - store.backContinueHeight
-}
 
 </script>

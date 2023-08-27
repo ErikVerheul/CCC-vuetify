@@ -14,9 +14,9 @@ export const useAppStore = defineStore('app', {
     // allow 120 px for unknown space usage like browser adres bar
     screenHeight: window.screen.availHeight - 180,
     backContinueHeight: 60,
+    aliasesObject: {},
     firebaseUser: undefined,
     userData: {},
-    aliasIsCelebrity: false,
     screenName: '',
     currentYear: new Date().getFullYear(),
     currentWeekNr: getWeekNumber()

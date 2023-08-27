@@ -20,7 +20,7 @@
 
       <v-menu activator="#menu-activator">
         <v-list>
-          <v-list-item v-if="props.isAuthenticated && store.aliasIsCelebrity">
+          <v-list-item v-if="props.isAuthenticated && aliasIsCelebrity(store.userData.alias)">
             <v-btn flat size="small" @click="emit('show-alias-info')">
               Wie was {{ store.userData.alias }}?
             </v-btn>
@@ -161,7 +161,7 @@
   <v-dialog v-model="state.dialog7" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
-        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.7.1</p>
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.7.3</p>
         <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>
@@ -294,6 +294,10 @@ function removeAccount() {
   }).catch((error) => {
     console.log(`Removal of ${store.userData.alias} data failed: ${error.message}`)
   })
+}
+
+function aliasIsCelebrity(alias) {
+  return store.aliasesObject[alias] && store.aliasesObject[alias].celebrity
 }
 
 function logout() {
