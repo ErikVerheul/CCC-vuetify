@@ -33,15 +33,6 @@
           Terug
         </v-btn>
       </v-col>
-      <v-spacer></v-spacer>
-      <v-col>
-        <v-btn flat append-icon="mdi-arrow-right" @click="emit('return-to-menu')">
-          Door
-          <template v-slot:append>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-        </v-btn>
-      </v-col>
     </v-row>
   </template>
   <RunQuiz v-else :quizNumber="state.qNumber" :isArchivedQuiz="true" @quiz-continue="stopOldQuiz"></RunQuiz>
@@ -82,26 +73,30 @@ function getHeight() {
 }
 
 function loadResultsData() {
-  get(child(dbRef, `/quizzes/results/${store.currentYear}`)).then((snapshot) => {
+  get(child(dbRef, `/quizzes/results`)).then((snapshot) => {
     if (snapshot.exists()) {
-      const yearsObj = snapshot.val()
-      const aliasArray = Object.keys(yearsObj)
-
+      const resultsObj = snapshot.val()
+      const yearsArray = Object.keys(resultsObj)
       let yearScores = {}
-      aliasArray.forEach(alias => {
-        yearScores[alias] = {}
-        const aliasObj = yearsObj[alias]
-        const weeksArray = Object.keys(aliasObj)
-        weeksArray.forEach(weekNr => {
-          // calculate the score
-          const weekObj = aliasObj[weekNr]
-          const answersArray = Object.keys(weekObj)
-          let score = 0
-          answersArray.forEach(answerNr => {
-            const answerObj = weekObj[answerNr]
-            if (answerObj.correctAnswer) score++
+      yearsArray.forEach(year => {
+        const yearsObj = resultsObj[year]
+        const aliasArray = Object.keys(yearsObj)
+        aliasArray.forEach(alias => {
+          yearScores[alias] = {}
+          yearScores[alias][year] = {}
+          const aliasObj = yearsObj[alias]
+          const weeksArray = Object.keys(aliasObj)
+          weeksArray.forEach(weekNr => {
+            // calculate the score
+            const weekObj = aliasObj[weekNr]
+            const answersArray = Object.keys(weekObj)
+            let score = 0
+            answersArray.forEach(answerNr => {
+              const answerObj = weekObj[answerNr]
+              if (answerObj.correctAnswer) score++
+            })
+            yearScores[alias][year][weekNr] = { score }
           })
-          yearScores[alias][weekNr] = { score }
         })
       })
       state.scores = createScoresArray(yearScores)
@@ -135,7 +130,6 @@ function getHeaders() {
       sortable: false,
       key: 'name',
     },
-    // for now skip one column
     { title: store.currentWeekNr - 3, align: 'end', key: 'week_3' },
     { title: store.currentWeekNr - 2, align: 'end', key: 'week_2' },
     { title: store.currentWeekNr - 1, align: 'end', key: 'week_1' },
@@ -144,22 +138,30 @@ function getHeaders() {
   ]
 }
 
+function weeksInYear(year) {
+  const getWeekFor = (date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    const utc = new Date(d.setUTCDate(d.getUTCDate() + 4 - dayNum));
+    const yearStart = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1)).getTime();
+    return Math.ceil(((d.getTime() - yearStart) / 86400000 + 1) / 7);
+  }
+  return getWeekFor(new Date(year, 11, 28))
+}
+
 /* 
 Create an array of weeknumbers to report about. 
-Weeknumbers in the previous year are not included and undefined. 
+Weeknumbers in the previous year are accounted for. 
 */
 function calcWeeks() {
   const weekArray = []
-  if (store.currentWeekNr - 3 > 0) {
-    weekArray.push(store.currentWeekNr - 3)
-  } else weekArray.push(undefined)
-  if (store.currentWeekNr - 2 > 0) {
-    weekArray.push(store.currentWeekNr - 2)
-  } else weekArray.push(undefined)
-  if (store.currentWeekNr - 1 > 0) {
-    weekArray.push(store.currentWeekNr - 1)
-  } else weekArray.push(undefined)
-  weekArray.push(store.currentWeekNr)
+  for (let i = 3; i >= 0; i--) {
+    if (store.currentWeekNr - i > 0) {
+      weekArray.push({ 'year': store.currentYear, 'weekNr': store.currentWeekNr - i })
+    } else {
+      weekArray.push({ 'year': store.currentYear - 1, 'weekNr': weeksInYear(store.currentYear - 1) + store.currentWeekNr - i })
+    }
+  }
   return weekArray
 }
 
@@ -172,9 +174,9 @@ function createScoresArray(yearScores) {
     let sum = 0
     let scoreFound = false
     for (let i = 0; i < weeks.length; i++) {
-      if (weeks[i] && yearScores[n][weeks[i]]) {
-        obj[`week_${weeks.length - i - 1}`] = yearScores[n][weeks[i]].score
-        sum += yearScores[n][weeks[i]].score
+      if (weeks[i] && yearScores[n][weeks[i].year][weeks[i].weekNr]) {
+        obj[`week_${weeks.length - i - 1}`] = yearScores[n][weeks[i].year][weeks[i].weekNr].score
+        sum += yearScores[n][weeks[i].year][weeks[i].weekNr].score
         scoreFound = true
       } else obj[`week_${weeks.length - i - 1}`] = '-'
     }
