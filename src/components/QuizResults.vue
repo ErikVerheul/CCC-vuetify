@@ -7,7 +7,7 @@
         </v-row>
         <v-row>
           <v-data-table density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()"
-            :items="state.scores" item-value="name" :sort-by="state.scores">
+            :items="state.scores" item-value="name">
           </v-data-table>
         </v-row>
         <v-row v-if="historyAvailable()">
@@ -87,18 +87,21 @@ function loadResultsData() {
           const aliasObj = yearsObj[alias]
           const weeksArray = Object.keys(aliasObj)
           weeksArray.forEach(weekNr => {
-            // calculate the score
+            // calculate the score and time used
             const weekObj = aliasObj[weekNr]
             const answersArray = Object.keys(weekObj)
             let score = 0
+            let time = 0
             answersArray.forEach(answerNr => {
               const answerObj = weekObj[answerNr]
               if (answerObj.correctAnswer) score++
+              if (answerObj.time) time += answerObj.time
             })
-            yearScores[alias][year][weekNr] = { score }
+            yearScores[alias][year][weekNr] = { score, time }
           })
         })
       })
+      console.log('yearScores = ' + JSON.stringify(yearScores, null, 2))
       state.scores = createScoresArray(yearScores)
     } else {
       console.log('QuizResults: no results data available')
@@ -135,6 +138,8 @@ function getHeaders() {
     { title: store.currentWeekNr - 1, align: 'end', key: 'week_1' },
     { title: store.currentWeekNr, align: 'end', key: 'week_0' },
     { title: 'tot', align: 'end', key: 'sum' },
+    // prepare for showing the winners
+    // { title: 'Mok', align: 'end', key: 'winner' },
   ]
 }
 
@@ -167,22 +172,49 @@ function calcWeeks() {
 
 function createScoresArray(yearScores) {
   let scores = []
+  let highestScore = 0
   const weeks = calcWeeks()
   const names = Object.keys(yearScores)
   names.forEach(n => {
     let obj = { 'name': n }
-    let sum = 0
+    let totalScore = 0
+    let totalTime = 0
     let scoreFound = false
     for (let i = 0; i < weeks.length; i++) {
       if (weeks[i] && yearScores[n][weeks[i].year][weeks[i].weekNr]) {
         obj[`week_${weeks.length - i - 1}`] = yearScores[n][weeks[i].year][weeks[i].weekNr].score
-        sum += yearScores[n][weeks[i].year][weeks[i].weekNr].score
+        totalScore += yearScores[n][weeks[i].year][weeks[i].weekNr].score
+        totalTime += yearScores[n][weeks[i].year][weeks[i].weekNr].time
         scoreFound = true
       } else obj[`week_${weeks.length - i - 1}`] = '-'
     }
-    obj.sum = sum
+    if (totalScore > highestScore) highestScore = totalScore
+    obj.sum = totalScore
+    obj.time = totalTime
     if (scoreFound) scores.push(obj)
   })
+  // add the winners
+  const maxWinners = scores.length < store.maxQuizWinners ? scores.length : store.maxQuizWinners
+  let assignedWinners = 0
+  let scoreNeeded = highestScore
+  while (assignedWinners < maxWinners) {
+    let candidates = []
+    for (const obj of scores) {
+      if (obj.sum === scoreNeeded) {
+        // collect the candidates with equal score
+        candidates.push(obj)
+      }
+    }
+    // sort candidates ascending on lowest time
+    let sortedCandidates = candidates.sort((c1, c2) => c1.time - c2.time)
+    for (const obj of sortedCandidates) {
+      obj.winner = `${String.fromCodePoint(128276)}`
+      assignedWinners++
+      if (assignedWinners === maxWinners) break
+    }
+    scoreNeeded--
+  }
+  console.log('scores = ' + JSON.stringify(scores, null, 2))
   return scores
 }
 

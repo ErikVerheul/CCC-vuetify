@@ -19,6 +19,7 @@ export const useAppStore = defineStore('app', {
     userData: {},
     screenName: '',
     currentYear: new Date().getFullYear(),
-    currentWeekNr: getWeekNumber()
+    currentWeekNr: getWeekNumber(),
+    maxQuizWinners: 3
   }),
 })
