@@ -2,20 +2,19 @@
   <QuizResults v-if="state.showResults" @return-to-menu="emit('return-to-menu')"></QuizResults>
   <v-sheet v-else-if="!state.doQuiz" class="pa-2 text-center mx-auto" :max-width="store.screenWidth">
     <v-row>
-      <v-col class="mt-8 pl-12 text-left">
+      <v-col cols="1"></v-col>
+      <v-col cols="11" class="mt-2 text-left">
         <h4>De vijf vragen van deze week ({{ store.currentWeekNr }})<br>
           Per vraag krijg je 1 min de tijd</h4>
       </v-col>
     </v-row>
     <v-row>
       <v-col class="text-center">
-        <h3 class="py-3 text-red">Doe mee en win!</h3>
+        <h3 class="mt-3 text-red">Doe mee en win!</h3>
       </v-col>
     </v-row>
     <v-row>
-      <v-avatar class="ml-12" size="300" rounded="0">
-        <v-img src="../assets/mok34.png"></v-img>
-      </v-avatar>
+      <v-img :height="250" src="../assets/mok.png"></v-img>
     </v-row>
     <v-row>
       <v-col>
@@ -24,7 +23,8 @@
     </v-row>
     <template v-if="!state.quizWasCompleted">
       <v-row>
-        <v-col cols="9" class="pl-12 text-left">
+        <v-col cols="1"></v-col>
+        <v-col cols="8" class="text-left">
           <h4>Elke vier weken met nieuwe opdruk. Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</h4>
         </v-col>
         <v-col cols="3">

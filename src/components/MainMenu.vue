@@ -10,17 +10,17 @@
           </v-btn>
         </li>
         <li>
-          <v-btn class="my-2" size="small" @click="">
+          <v-btn :disabled="true" class="my-2" size="small" @click="">
             Natuurhistorie en biodiversiteit
           </v-btn>
         </li>
         <li>
-          <v-btn class="my-2" size="small" @click="">
+          <v-btn :disabled="true" class="my-2" size="small" @click="">
             Natuur in en rond Maastricht
           </v-btn>
         </li>
         <li>
-          <v-btn class="my-2" size="small" @click="">
+          <v-btn :disabled="true" class="my-2" size="small" @click="">
             Groeten uit Maastricht
           </v-btn>
         </li>
@@ -36,7 +36,7 @@
           Hersengym
           <ul>
             <li>
-              <v-btn class="my-2" size="small" @click="">
+              <v-btn :disabled="true" class="my-2" size="small" @click="">
                 Woordpuzzel
               </v-btn>
             </li>
@@ -46,12 +46,12 @@
           Schaken
           <ul>
             <li>
-              <v-btn class="my-2" size="small" @click="">
+              <v-btn :disabled="true" class="my-2" size="small" @click="">
                 Probleem
               </v-btn>
             </li>
             <li>
-              <v-btn class="my-2" size="small" @click="">
+              <v-btn :disabled="true" class="my-2" size="small" @click="">
                 Schaak Slag Der Steden
               </v-btn>
             </li>
@@ -61,22 +61,22 @@
           Bewegen
           <ul>
             <li>
-              <v-btn class="my-2" size="small" @click="">
+              <v-btn :disabled="true" class="my-2" size="small" @click="">
                 Sprint 30 meter
               </v-btn>
             </li>
             <li>
-              <v-btn class="my-2" size="small" @click="">
+              <v-btn :disabled="true" class="my-2" size="small" @click="">
                 Sprint 30 meter Para
               </v-btn>
             </li>
             <li>
-              <v-btn class="my-2" size="small" @click="">
+              <v-btn :disabled="true" class="my-2" size="small" @click="">
                 Estafette
               </v-btn>
             </li>
             <li>
-              <v-btn class="my-2" size="small" @click="">
+              <v-btn :disabled="true" class="my-2" size="small" @click="">
                 Wandelen 600 met chrono
               </v-btn>
             </li>

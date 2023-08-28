@@ -4,15 +4,14 @@
       <v-col cols="12">
         <h1>Hallo -{{ store.userData.alias }} </h1>
         <h3>Kies een pin code</h3>
-        <v-col cols="6">
-          <v-text-field v-model.trim="store.userData.PIN" label="pin code" :rules="state.pinRules" />
-        </v-col>
       </v-col>
-    </v-row>
-    <v-row>
+      <v-col cols="4">
+        <v-text-field v-model.trim="store.userData.PIN" label="pin code" :rules="state.pinRules" />
+      </v-col>
+      <v-col cols="8"></v-col>
       <v-col cols="12">
         <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" :max-width="store.screenWidth">
-          <v-card-title class="text-h5">
+          <v-card-title class="text-h6">
             Welkom in de Speelmee.app
           </v-card-title>
           <v-card-text>
@@ -25,13 +24,13 @@
     <v-row v-if="PINOK">
       <v-col cols="12">
         <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" :max-width="store.screenWidth">
-          <v-card-title class="text-h5">
+          <v-card-title class="text-h6">
             Een ander apparaat?
           </v-card-title>
           <v-card-text>
             Uw schuilnaam is <b>{{ store.userData.alias }}</b><br>
             Uw PIN is <b>{{ store.userData.PIN }}</b>
-            <p>Gebruik deze schuilnaam en pin code om op een ander apparaat in te loggen.<br>
+            <p>Gebruik deze schuilnaam en pin code om op een ander apparaat in te loggen.
               Op dit apparaat wordt u automatisch ingelogd totdat u de app een jaar niet hebt gebruikt.</p>
           </v-card-text>
         </v-card>
