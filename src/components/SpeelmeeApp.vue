@@ -131,7 +131,6 @@ onBeforeMount(() => {
                 store.screenName = 'Welkom'
               })
           } else {
-            console.log('No cookie found')
             // no cookie available; manual login or signup needed
             state.showOpeningScreen = true
             store.screenName = 'Welkom'

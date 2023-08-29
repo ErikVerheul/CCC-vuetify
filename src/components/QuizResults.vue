@@ -56,7 +56,7 @@ const state = reactive({
   playOldQuiz: false,
   compactResult: [],
   qNumber: undefined,
-  itemsPerPage: 15,
+  itemsPerPage: 7,
   yearScores: {},
   scores: [],
   sortBy: [{ key: 'sum', order: 'desc' }],
@@ -77,13 +77,13 @@ function loadResultsData() {
     if (snapshot.exists()) {
       const resultsObj = snapshot.val()
       const yearsArray = Object.keys(resultsObj)
-      let yearScores = {}
+      let allScores = {}
       yearsArray.forEach(year => {
         const yearsObj = resultsObj[year]
         const aliasArray = Object.keys(yearsObj)
         aliasArray.forEach(alias => {
-          yearScores[alias] = {}
-          yearScores[alias][year] = {}
+          allScores[alias] = {}
+          allScores[alias][year] = {}
           const aliasObj = yearsObj[alias]
           const weeksArray = Object.keys(aliasObj)
           weeksArray.forEach(weekNr => {
@@ -97,12 +97,12 @@ function loadResultsData() {
               if (answerObj.correctAnswer) score++
               if (answerObj.time) time += answerObj.time
             })
-            yearScores[alias][year][weekNr] = { score, time }
+            allScores[alias][year][weekNr] = { score, time }
           })
         })
       })
-      console.log('yearScores = ' + JSON.stringify(yearScores, null, 2))
-      state.scores = createScoresArray(yearScores)
+      console.log('allScores = ' + JSON.stringify(allScores, null, 2))
+      state.scores = createScoresArray(allScores)
     } else {
       console.log('QuizResults: no results data available')
     }
@@ -158,33 +158,33 @@ function weeksInYear(year) {
 Create an array of weeknumbers to report about. 
 Weeknumbers in the previous year are accounted for. 
 */
-function calcWeeks() {
+function calcWeeks(year, finalWeekNr) {
   const weekArray = []
   for (let i = 3; i >= 0; i--) {
-    if (store.currentWeekNr - i > 0) {
-      weekArray.push({ 'year': store.currentYear, 'weekNr': store.currentWeekNr - i })
+    if (finalWeekNr - i > 0) {
+      weekArray.push({ 'year': year, 'weekNr': store.currentWeekNr - i })
     } else {
-      weekArray.push({ 'year': store.currentYear - 1, 'weekNr': weeksInYear(store.currentYear - 1) + store.currentWeekNr - i })
+      weekArray.push({ 'year': year - 1, 'weekNr': weeksInYear(year - 1) + store.currentWeekNr - i })
     }
   }
   return weekArray
 }
 
-function createScoresArray(yearScores) {
+function createScoresArray(allScores) {
   let scores = []
   let highestScore = 0
-  const weeks = calcWeeks()
-  const names = Object.keys(yearScores)
+  const weeks = calcWeeks(store.currentYear, store.currentWeekNr)
+  const names = Object.keys(allScores)
   names.forEach(n => {
     let obj = { 'name': n }
     let totalScore = 0
     let totalTime = 0
     let scoreFound = false
     for (let i = 0; i < weeks.length; i++) {
-      if (weeks[i] && yearScores[n][weeks[i].year][weeks[i].weekNr]) {
-        obj[`week_${weeks.length - i - 1}`] = yearScores[n][weeks[i].year][weeks[i].weekNr].score
-        totalScore += yearScores[n][weeks[i].year][weeks[i].weekNr].score
-        totalTime += yearScores[n][weeks[i].year][weeks[i].weekNr].time
+      if (weeks[i] && allScores[n][weeks[i].year][weeks[i].weekNr]) {
+        obj[`week_${weeks.length - i - 1}`] = allScores[n][weeks[i].year][weeks[i].weekNr].score
+        totalScore += allScores[n][weeks[i].year][weeks[i].weekNr].score
+        totalTime += allScores[n][weeks[i].year][weeks[i].weekNr].time
         scoreFound = true
       } else obj[`week_${weeks.length - i - 1}`] = '-'
     }

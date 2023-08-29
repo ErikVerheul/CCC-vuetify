@@ -1,23 +1,19 @@
 <template>
   <QuizResults v-if="state.showResults" @return-to-menu="emit('return-to-menu')"></QuizResults>
-  <v-sheet v-else-if="!state.doQuiz" class="pa-2 text-center mx-auto" :max-width="store.screenWidth">
+  <v-sheet v-else-if="!state.doQuiz" class="text-center" :max-width="store.screenWidth">
     <v-row>
       <v-col cols="1"></v-col>
       <v-col cols="11" class="mt-2 text-left">
         <h4>De vijf vragen van deze week ({{ store.currentWeekNr }})<br>
           Per vraag krijg je 1 min de tijd</h4>
       </v-col>
-    </v-row>
-    <v-row>
-      <v-col class="text-center">
-        <h3 class="mt-3 text-red">Doe mee en win!</h3>
+      <v-col cols="12" class="my-0 py-0">
+        <h3 class="text-red">Doe mee en win!</h3>
       </v-col>
-    </v-row>
-    <v-row>
-      <v-img :height="250" src="../assets/mok.png"></v-img>
-    </v-row>
-    <v-row>
-      <v-col>
+      <v-col cols="12">
+        <v-img :height="240" src="../assets/mok.png"></v-img>
+      </v-col>
+      <v-col cols="12" class="my-0 py-0">
         <h3 class="text-red">Unieke erfgoed beker</h3>
       </v-col>
     </v-row>
@@ -25,15 +21,17 @@
       <v-row>
         <v-col cols="1"></v-col>
         <v-col cols="8" class="text-left">
-          <h4>Elke vier weken met nieuwe opdruk. Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</h4>
+          <p>Elke vier weken met nieuwe opdruk. Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</p>
         </v-col>
-        <v-col cols="3">
+        <v-col cols="2">
           <v-btn :disabled="!quizAvailable()" color="purple" @click="startQuiz">Start</v-btn>
         </v-col>
+        <v-col cols="1"></v-col>
       </v-row>
     </template>
     <v-row v-else>
-      <v-col cols="9" class="pl-12 text-left">
+      <v-col cols="1"></v-col>
+      <v-col cols="8" class="text-left">
         <p>U hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores </p>
       </v-col>
       <v-col cols="3">
@@ -57,8 +55,8 @@
 <script setup>
 import { onBeforeMount, reactive } from 'vue'
 import { useAppStore } from '../store/app.js'
-import { db, dbRef } from '../firebase'
-import { ref, child, get, set, remove, update } from 'firebase/database'
+import { dbRef } from '../firebase'
+import { child, get } from 'firebase/database'
 import RunQuiz from './RunQuiz.vue'
 import QuizResults from './QuizResults.vue'
 const emit = defineEmits(['return-to-menu'])
@@ -96,16 +94,18 @@ function quizAvailable() {
   for (const qNr of state.quizNumbers)
     if (qNr !== 0) {
       // skip dummy quiz
-      if (Number(state.metaObject[qNr].actionWeek) === store.currentWeekNr) return true
+      if (Number(state.metaObject[qNr].actionWeek) === store.currentWeekNr) {
+        // if more quizzez are set to the current week number, pick the first
+        state.qNumber = qNr
+        return true
+      }
     }
   return false
 }
 
 function startQuiz() {
-  const currentWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) === store.currentWeekNr)
-  state.qNumber = currentWeekQnumbers[0]
   if (store.userData.alias !== 'admin' && store.userData.completedQuizNumbers && store.userData.completedQuizNumbers.includes(state.qNumber)) {
-    // admin can run a quiz multiple times
+    // admin can run a quiz multiple times but not take part in a competition
     state.quizWasCompleted = true
   } else {
     state.quizWasCompleted = false
