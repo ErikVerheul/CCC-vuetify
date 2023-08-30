@@ -91,10 +91,6 @@
         <v-col class="mt-12" cols="12">
           <v-text-field v-model="state.gameRules" label="Spelregels (verplicht)" />
         </v-col>
-        <v-col cols="6">
-          <v-text-field v-model="state.explanationUrl" :rules="state.urlRules" placeholder="https://speelmee.app/toelichting1"
-            label="URL naar meer info (optioneel)" />
-        </v-col>
       </v-row>
     </template>
     <v-divider class="my-5"></v-divider>
@@ -169,7 +165,7 @@
     </v-col>
   </v-row>
 
-  <v-dialog v-model="state.showQuestionSelect" width="50%">
+  <v-dialog v-model="state.showQuestionSelect" width="70%">
     <v-card>
       <v-card-title>Kies een bestaande quiz-vraag</v-card-title>
       <v-select :items="state.questionItems" item-value="key" v-model="state.selectedQuestionItem" return-object single-line />
@@ -198,7 +194,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.showQuestionRemove" width="50%">
+  <v-dialog v-model="state.showQuestionRemove" width="70%">
     <v-card>
       <v-card-title>Kies een te verwijderen quiz-vraag</v-card-title>
       <v-select :items="state.questionItems" item-value="key" v-model="state.selectedQuestionItem" return-object single-line />
@@ -266,7 +262,6 @@ const state = reactive({
   gameRules: '',
   quizQAnswers: {},
   resultInfo: undefined,
-  explanationUrl: '',
   questionNumberRules: [
     value => {
       if (value) return true
@@ -336,7 +331,6 @@ function clearAll() {
   state.quizQAnswers = []
   state.resultInfo = undefined
   state.gameRules = ''
-  state.explanationUrl = ''
   state.quizNumber = ''
 }
 
@@ -413,7 +407,6 @@ function doLoadQuestion() {
       state.quizQAnswers = quizObject.answers
       state.resultInfo = quizObject.resultInfo
       state.gameRules = quizObject.gameRules
-      state.explanationUrl = quizObject.explanationUrl
       state.statementNumber = state.statementsArray.length - 1
       // assign the quiz number
       state.quizNumber = state.indexObject[state.questionNumber].quizNumber
@@ -505,8 +498,7 @@ function doSaveQuestion() {
     "statementsArray": state.statementsArray,
     "answers": state.quizQAnswers,
     "resultInfo": state.resultInfo,
-    "gameRules": state.gameRules,
-    "explanationUrl": state.explanationUrl
+    "gameRules": state.gameRules
   }).then(() => {
     const newIndexObject = { 'quizNumber': state.quizNumber, 'title': state.questionTitle, 'creationDate': Number(new Date()) }
     set(ref(db, '/quizzes/questions/index/' + state.questionNumber.toString()), newIndexObject).then(() => {
