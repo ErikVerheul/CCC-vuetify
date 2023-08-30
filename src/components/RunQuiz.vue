@@ -5,6 +5,7 @@
     :tipToResolve="state.tipToResolve" @return-to="emit('quiz-continue')"></ReportWarning>
   <template v-else>
     <v-sheet class="ma-2" :min-height="getHeight()" :max-width="store.screenWidth">
+      <p>Testers: Dit is quiz {{ props.quizNumber }} en vraag {{ state.questionId }}</p>
       <template v-if="!state.showExplanation">
         <v-row no-gutters>
           <div v-html="state.currentQuestion.body"></div>
@@ -97,6 +98,7 @@ onBeforeMount(() => {
 })
 
 const state = reactive({
+  questionId: undefined,
   onError: false,
   onWarning: false,
   firebaseError: {},
@@ -187,9 +189,9 @@ function loadQuestionIds(quizNumber) {
 }
 
 function loadQuestion() {
-  const questionId = state.questionIds[state.currentQuestionIdx]
-  store.screenName = state.indexObject[questionId].title
-  get(child(dbRef, `/quizzes/questions/${Number(questionId)}`)).then((snapshot) => {
+  state.questionId = state.questionIds[state.currentQuestionIdx]
+  store.screenName = state.indexObject[state.questionId].title
+  get(child(dbRef, `/quizzes/questions/${Number(state.questionId)}`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.currentQuestion = snapshot.val()
       // initialize answers to false
@@ -200,13 +202,13 @@ function loadQuestion() {
     } else {
       state.onWarning = true
       state.problemText = `Kan de quiz vraag niet vinden`
-      state.problemCause = `De quiz vraag met nummer ${questionId} bestaat niet.`
+      state.problemCause = `De quiz vraag met nummer ${state.questionId} bestaat niet.`
       state.tipToResolve = `Vraag de redacteur om deze quiz vraag aan te maken`
     }
   }).catch((error) => {
     state.onError = true
     state.firebaseError = error
-    state.fbErrorContext = `De fout is opgetreden bij het lezen van quiz vraag met nummer ${questionId}`
+    state.fbErrorContext = `De fout is opgetreden bij het lezen van quiz vraag met nummer ${state.questionId}`
   })
 }
 
