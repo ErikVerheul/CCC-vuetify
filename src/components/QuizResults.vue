@@ -21,6 +21,9 @@
             <p><b>U heeft {{ countGood() }} van de {{ countAll() }} antwoorden goed</b></p>
           </v-col>
         </v-row>
+        <v-row>
+          <p v-if="state.showWinners">Bij gelijke scrore wint de speler die de minste tijd nodig had</p>
+        </v-row>
       </v-container>
     </v-sheet>
     <v-divider></v-divider>
@@ -33,6 +36,17 @@
           Terug
         </v-btn>
       </v-col>
+      <template v-if="state.showWinners === false">
+        <v-spacer></v-spacer>
+        <v-col>
+          <v-btn flat append-icon="mdi-arrow-right" @click="showWinners">
+            Toon winnaars
+            <template v-slot:append>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+          </v-btn>
+        </v-col>
+      </template>
     </v-row>
   </template>
   <RunQuiz v-else :quizNumber="state.qNumber" :isArchivedQuiz="true" @quiz-continue="stopOldQuiz"></RunQuiz>
@@ -60,6 +74,7 @@ const state = reactive({
   yearScores: {},
   scores: [],
   sortBy: [{ key: 'sum', order: 'desc' }],
+  showWinners: false
 })
 
 onBeforeMount(() => {
@@ -126,7 +141,23 @@ function loadMetaData() {
 }
 
 function getHeaders() {
-  return [
+  if (state.showWinners) {
+    return [
+      {
+        title: 'Week',
+        align: 'start',
+        sortable: false,
+        key: 'name',
+      },
+      { title: store.currentWeekNr - 3, align: 'end', key: 'week_3' },
+      { title: store.currentWeekNr - 2, align: 'end', key: 'week_2' },
+      { title: store.currentWeekNr - 1, align: 'end', key: 'week_1' },
+      { title: store.currentWeekNr, align: 'end', key: 'week_0' },
+      { title: 'tot', align: 'end', key: 'sum' },
+      // prepare for showing the winners
+      { title: 'Mok', align: 'end', key: 'winner' },
+    ]
+  } else return [
     {
       title: 'Week',
       align: 'start',
@@ -138,8 +169,6 @@ function getHeaders() {
     { title: store.currentWeekNr - 1, align: 'end', key: 'week_1' },
     { title: store.currentWeekNr, align: 'end', key: 'week_0' },
     { title: 'tot', align: 'end', key: 'sum' },
-    // prepare for showing the winners
-    // { title: 'Mok', align: 'end', key: 'winner' },
   ]
 }
 
@@ -251,5 +280,9 @@ function stopOldQuiz(result) {
   console.log('stopOldQuiz: compactResult = ' + result)
   store.screenName = 'Stand competitie'
   state.playOldQuiz = false
+}
+
+function showWinners() {
+  state.showWinners = true
 }
 </script>
