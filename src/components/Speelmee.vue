@@ -3,6 +3,9 @@
     <v-col cols="auto">
       <h1>speelmee.app</h1>
     </v-col>
+    <v-col cols="auto">
+      <v-btn @click="testPopup">Test hier popup url</v-btn>
+    </v-col>
   </v-row>
   <v-row class="py-2 d-flex align-center justify-center">
     <v-col cols="auto" class="text-center">
@@ -47,10 +50,13 @@ const emit = defineEmits(['exit-opening-screen'])
 const state = reactive({
   showHowTo: false
 })
+
+function testPopup() {
+  window.open("https://verheulconsultants.nl", "popupWindow", "popup")
+}
 </script>
 
 <style scoped>
-
 h1 {
   font-size: 50px;
 }
