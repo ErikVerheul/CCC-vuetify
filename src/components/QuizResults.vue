@@ -55,8 +55,6 @@
 <script setup>
 import { onBeforeMount, reactive } from 'vue'
 import { useAppStore } from '../store/app.js'
-// VDataTable is experimental
-import { VDataTable } from 'vuetify/labs/VDataTable'
 import { dbRef } from '../firebase'
 import { child, get } from 'firebase/database'
 import RunQuiz from './RunQuiz.vue'
