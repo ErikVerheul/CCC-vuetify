@@ -9,7 +9,7 @@ import { loadFonts } from './webfontloader'
 import vuetify from './vuetify'
 import pinia from '../store'
 import router from '../router'
-// must alse import Quill to prevent error in Vue3-quill editor.vue line 10
+// must also import Quill to prevent error in Vue3-quill editor.vue line 10
 import { quillEditor, Quill } from 'vue3-quill'
 
 
