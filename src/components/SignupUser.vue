@@ -3,12 +3,7 @@
     <v-row>
       <v-col cols="12">
         <h1>Hallo -{{ store.userData.alias }} </h1>
-        <h3>Kies een pin code</h3>
       </v-col>
-      <v-col cols="4">
-        <v-text-field v-model.trim="store.userData.PIN" label="pin code" :rules="state.pinRules" />
-      </v-col>
-      <v-col cols="8"></v-col>
       <v-col cols="12">
         <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" :max-width="store.screenWidth">
           <v-card-title class="text-h6">
@@ -21,7 +16,7 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-row v-if="PINOK">
+    <v-row>
       <v-col cols="12">
         <v-card class="mx-auto" color="yellow-lighten-3" theme="dark" :max-width="store.screenWidth">
           <v-card-title class="text-h6">
@@ -55,7 +50,7 @@
     </v-col>
     <v-spacer></v-spacer>
     <v-col>
-      <v-btn :disabled="!PINOK" flat append-icon="mdi-arrow-right" @click="emit('signup-continue')">
+      <v-btn flat append-icon="mdi-arrow-right" @click="emit('signup-continue')">
         Door
         <template v-slot:append>
           <v-icon size="x-large" color="purple"></v-icon>
@@ -72,30 +67,6 @@ import { useAppStore } from '../store/app.js'
 const props = defineProps(['isCelebrity'])
 const emit = defineEmits(['signup-continue', 'exit-signup'])
 const store = useAppStore()
-
-const state = reactive({
-  pinRules: [
-    value => {
-      if (value) return true
-
-      return 'Vul 4 of meer cijfers in.'
-    },
-    value => {
-      if (!isNaN(value)) return true
-
-      return 'Vul alleen cijfers in.'
-    },
-    value => {
-      if (value && value.length >= 4) return true
-
-      return 'Vul minimaal 4 cijfers in.'
-    },
-  ]
-})
-
-const PINOK = computed(() => {
-  return !isNaN(store.userData.PIN) && store.userData.PIN.length >= 4
-})
 
 const newsFeedLabel = computed(() => {
   if (state.newsFeed) return 'Ja'
