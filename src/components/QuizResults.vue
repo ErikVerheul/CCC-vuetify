@@ -114,7 +114,7 @@ function loadResultsData() {
           })
         })
       })
-      console.log('allScores = ' + JSON.stringify(allScores, null, 2))
+      // console.log('allScores = ' + JSON.stringify(allScores, null, 2))
       state.scores = createScoresArray(allScores)
     } else {
       console.log('QuizResults: no results data available')
@@ -208,7 +208,7 @@ function createScoresArray(allScores) {
     let totalTime = 0
     let scoreFound = false
     for (let i = 0; i < weeks.length; i++) {
-      if (weeks[i] && allScores[n][weeks[i].year][weeks[i].weekNr]) {
+      if (weeks[i] && allScores[n][weeks[i].year] && allScores[n][weeks[i].year][weeks[i].weekNr]) {
         obj[`week_${weeks.length - i - 1}`] = allScores[n][weeks[i].year][weeks[i].weekNr].score
         totalScore += allScores[n][weeks[i].year][weeks[i].weekNr].score
         totalTime += allScores[n][weeks[i].year][weeks[i].weekNr].time
@@ -241,7 +241,7 @@ function createScoresArray(allScores) {
     }
     scoreNeeded--
   }
-  console.log('scores = ' + JSON.stringify(scores, null, 2))
+  // console.log('scores = ' + JSON.stringify(scores, null, 2))
   return scores
 }
 
@@ -275,7 +275,7 @@ function countGood() {
 
 function stopOldQuiz(result) {
   state.compactResult = result
-  console.log('stopOldQuiz: compactResult = ' + result)
+  // console.log('stopOldQuiz: compactResult = ' + result)
   store.screenName = 'Stand competitie'
   state.playOldQuiz = false
 }
