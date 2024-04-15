@@ -1,70 +1,71 @@
 <template>
-  <ReportFbError v-if="state.onError" :firebaseError="state.firebaseError" :fbErrorContext="state.fbErrorContext"
-    @return-to="emit('exit-signup')"></ReportFbError>
-  <v-sheet v-else :min-height="getHeight()" :max-width="store.screenWidth">
+  <ReportFbError v-if="state.onError" :firebaseError="state.firebaseError" :fbErrorContext="state.fbErrorContext" @return-to="emit('exit-signup')"></ReportFbError>
+  <template v-else>
+    <v-sheet :min-height="getHeight()" :max-width="store.screenWidth">
+      <v-row>
+        <v-col cols="12" class="text-center">
+          <h1>Hallo -{{ store.userData.alias }} </h1>
+          <h3>Vervolg aanmelding</h3>
+        </v-col>
+        <v-col cols="12">
+          <v-btn size="x-small" color="yellow-lighten-3" @click="state.showWhy = !state.showWhy">Waarom deze informatie?</v-btn>
+          <p v-if="state.showWhy" class="ml-5">Het geboortejaar is nodig om uw prestaties in een leeftijds-categorie te plaatsen. Zonder geboortejaar komt u
+            terecht in de categorie 'Alle leeftijden'. Om de zelfde reden willen we weten of u man, vrouw of iets anders bent.
+          </p>
+        </v-col>
+        <v-col cols="12" class="py-3 text-left">
+          <p class="ml-5">De volgende vragen zijn optioneel:</p>
+        </v-col>
+        <v-col cols="5" offset="1">
+          <v-text-field density="compact" label="Geboorte Jaar" v-model.trim="state.yearOfBirth" :rules="state.yearOfBirthRules" />
+        </v-col>
+      </v-row>
+      <v-row class="d-flex align-center justify-center">
+        <v-col cols="12" class="ml-5">
+          <v-btn-toggle v-model="state.gender" variant="outlined" group>
+            <v-btn value="0">
+              Man
+            </v-btn>
+            <v-btn value="1">
+              Vrouw
+            </v-btn>
+            <v-btn value="2">
+              Anders
+            </v-btn>
+            <v-btn value="3">
+              Sla over
+            </v-btn>
+          </v-btn-toggle>
+        </v-col>
+        <v-col cols="8">
+          <p class="ml-5">Wil je maandelijks via de app op de hoogte gehouden worden van nieuws over het speelmee.app platform?</p>
+        </v-col>
+        <v-col cols="4">
+          <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
+        </v-col>
+      </v-row>
+    </v-sheet>
+    <v-divider></v-divider>
     <v-row>
-      <v-col cols="12" class="text-center">
-        <h1>Hallo -{{ store.userData.alias }} </h1>
-        <h3>Vervolg aanmelding</h3>
+      <v-col>
+        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
+          <template v-slot:prepend>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+          Terug
+        </v-btn>
       </v-col>
-      <v-col cols="12">
-        <v-btn size="x-small" color="yellow-lighten-3" @click="state.showWhy = !state.showWhy">Waarom deze informatie?</v-btn>
-        <p v-if="state.showWhy" class="ml-5">Het geboortejaar is nodig om uw prestaties in een leeftijds-categorie te plaatsen. Zonder geboortejaar komt u
-          terecht in de categorie 'Alle leeftijden'. Om de zelfde reden willen we weten of u man, vrouw of iets anders bent.
-        </p>
-      </v-col>
-      <v-col cols="12" class="py-3 text-left">
-        <p class="ml-5">De volgende vragen zijn optioneel:</p>
-      </v-col>
-      <v-col cols="5" offset="1">
-        <v-text-field density="compact" label="Geboorte Jaar" v-model.trim="state.yearOfBirth" :rules="state.yearOfBirthRules" />
-      </v-col>
-    </v-row>
-    <v-row class="d-flex align-center justify-center">
-      <v-col cols="12" class="ml-5">
-        <v-btn-toggle v-model="state.gender" variant="outlined" group>
-          <v-btn value="0">
-            Man
-          </v-btn>
-          <v-btn value="1">
-            Vrouw
-          </v-btn>
-          <v-btn value="2">
-            Anders
-          </v-btn>
-          <v-btn value="3">
-            Sla over
-          </v-btn>
-        </v-btn-toggle>
-      </v-col>
-      <v-col cols="8">
-        <p class="ml-5">Wil je maandelijks via de app op de hoogte gehouden worden van nieuws over het speelmee.app platform?</p>
-      </v-col>
-      <v-col cols="4">
-        <v-switch :label="newsFeedLabel" v-model="state.newsFeed"></v-switch>
+      <v-spacer></v-spacer>
+      <v-col>
+        <v-btn :disabled="!yearOfBirthOk" flat append-icon="mdi-arrow-right" @click="doSignupUser">
+          Door
+          <template v-slot:append>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+        </v-btn>
       </v-col>
     </v-row>
-  </v-sheet>
-  <v-divider></v-divider>
-  <v-row>
-    <v-col>
-      <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
-        <template v-slot:prepend>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-        Terug
-      </v-btn>
-    </v-col>
-    <v-spacer></v-spacer>
-    <v-col>
-      <v-btn :disabled="!yearOfBirthOk" flat append-icon="mdi-arrow-right" @click="doSignupUser">
-        Door
-        <template v-slot:append>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-      </v-btn>
-    </v-col>
-  </v-row>
+  </template>
 </template>
 
 <script setup>

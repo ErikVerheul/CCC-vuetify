@@ -1,8 +1,6 @@
 <template>
-  <ReportFbError v-if="state.onError" :firebaseError="state.firebaseError" :fbErrorContext="state.fbErrorContext"
-    @return-to="emit('quiz-continue')"></ReportFbError>
-  <ReportWarning v-else-if="state.onWarning" :problemText="state.problemText" :problemCause="state.problemCause"
-    :tipToResolve="state.tipToResolve" @return-to="emit('quiz-continue')"></ReportWarning>
+  <ReportFbError v-if="state.onError" :firebaseError="state.firebaseError" :fbErrorContext="state.fbErrorContext" @return-to="emit('quiz-continue')"></ReportFbError>
+  <ReportWarning v-else-if="state.onWarning" :problemText="state.problemText" :problemCause="state.problemCause" :tipToResolve="state.tipToResolve" @return-to="emit('quiz-continue')"></ReportWarning>
   <template v-else>
     <v-sheet class="ma-2" :min-height="getHeight()" :max-width="store.screenWidth">
       <p>Testers: Dit is quiz {{ props.quizNumber }} en vraag {{ state.questionId }}</p>
@@ -12,8 +10,8 @@
         </v-row>
         <v-row no-gutters>
           <v-list lines="two" density="compact">
-            <v-list-item v-for="(num, index) in state.currentQuestion.statementsArray" :subtitle="composeStatement(index)"
-              @click="qAnswer(index)" :style="{ 'background-color': bgColor }"></v-list-item>
+            <v-list-item v-for="(num, index) in state.currentQuestion.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)"
+              :style="{ 'background-color': bgColor }"></v-list-item>
           </v-list>
         </v-row>
       </template>
@@ -73,7 +71,7 @@
 import { onBeforeMount, reactive, watch } from 'vue'
 import { useAppStore } from '../store/app.js'
 import { db, dbRef } from '../firebase'
-import { ref, child, get, set, update } from 'firebase/database'
+import { ref, child, get, set } from 'firebase/database'
 import ReportFbError from "./ReportFbError.vue"
 import ReportWarning from "./ReportWarning.vue"
 
