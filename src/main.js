@@ -25,6 +25,7 @@ app.use(VueFire, {
     ],
 })
 
+// note: DuckDuckGo blocks loading this script
 app.use(VueGtag, {
     config: { id: "G-JYFV02BZH6" }
 }, router)
