@@ -20,7 +20,7 @@ const routes = [
         component: PrivacyView
       },
       {
-        path: '/SuperAdmin',
+        path: '/superAdmin',
         name: 'SuperAdmin',
         // route level code-splitting
         // this generates a separate chunk for this route

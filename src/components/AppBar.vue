@@ -307,7 +307,7 @@ function logout() {
 }
 
 function doSuperAdmin() {
-  router.push({ path: 'superadmin' })
+  router.push({ path: 'superAdmin' })
 }
 
 </script>
