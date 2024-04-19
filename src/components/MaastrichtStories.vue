@@ -1,13 +1,11 @@
 <template>
-  <QuizResults v-if="state.showResults" @return-to-menu="emit('return-to-menu')"></QuizResults>
+  <QuizResults v-if="state.showResults" @return-to-menu="state.showResults = false"></QuizResults>
   <v-sheet v-else-if="!state.doQuiz" class="text-center" :max-width="store.screenWidth">
     <v-row>
-      <v-col cols="1"></v-col>
-      <v-col cols="11" class="mt-2 text-left">
+      <v-col cols="12" class="my-0 py-0">
+        <h4>Hallo {{ store.userData.alias }}</h4>
         <h4>De vijf vragen van deze week ({{ store.currentWeekNr }})<br>
           Per vraag krijg je 1 min de tijd</h4>
-      </v-col>
-      <v-col cols="12" class="my-0 py-0">
         <h3 class="text-red">Doe mee en win!</h3>
       </v-col>
       <v-col cols="12">
@@ -17,35 +15,26 @@
         <h3 class="text-red">Unieke erfgoed beker</h3>
       </v-col>
     </v-row>
-    <template v-if="!state.quizWasCompleted">
-      <v-row>
-        <v-col cols="1"></v-col>
-        <v-col cols="8" class="text-left">
-          <p>Elke vier weken met nieuwe opdruk. Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</p>
-        </v-col>
-        <v-col cols="2">
-          <v-btn :disabled="!quizAvailable()" color="purple" @click="startQuiz">Start</v-btn>
-        </v-col>
-        <v-col cols="1"></v-col>
-      </v-row>
-    </template>
+    <v-row v-if="!state.quizWasCompleted">
+      <v-col cols="1"></v-col>
+      <v-col cols="8" class="my-0 py-0 text-left">
+        <h4>Elke vier weken met nieuwe opdruk *)<br>Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</h4>
+      </v-col>
+      <v-col cols="2">
+        <v-btn :disabled="!quizAvailable()" color="purple" @click="startQuiz">Start</v-btn>
+      </v-col>
+      <v-col cols="1"></v-col>
+      <v-col cols="12">
+        <p>*) Voor 12.50 ook verkrijgbaar bij CoffeeLovers</p>
+      </v-col>
+    </v-row>
     <v-row v-else>
       <v-col cols="1"></v-col>
       <v-col cols="8" class="text-left">
-        <p>U hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores </p>
+        <p>Je hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores </p>
       </v-col>
       <v-col cols="3">
         <v-btn color="purple" @click="state.showResults = true">Toon</v-btn>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="auto">
-        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('return-to-menu')">
-          <template v-slot:prepend>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-          Terug
-        </v-btn>
       </v-col>
     </v-row>
   </v-sheet>
@@ -59,7 +48,7 @@ import { dbRef } from '../firebase'
 import { child, get } from 'firebase/database'
 import RunQuiz from './RunQuiz.vue'
 import QuizResults from './QuizResults.vue'
-const emit = defineEmits(['return-to-menu'])
+
 const store = useAppStore()
 
 const state = reactive({

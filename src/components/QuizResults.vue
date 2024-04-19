@@ -6,8 +6,7 @@
           <p><b>Zondag 13:00 wordt de ranglijst definitief</b></p>
         </v-row>
         <v-row>
-          <v-data-table density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()"
-            :items="state.scores" item-value="name">
+          <v-data-table density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores" item-value="name">
           </v-data-table>
         </v-row>
         <v-row v-if="historyAvailable()">
@@ -141,27 +140,13 @@ function loadMetaData() {
 function getHeaders() {
   if (state.showWinners) {
     return [
-      {
-        title: 'Week',
-        align: 'start',
-        sortable: false,
-        key: 'name',
-      },
-      { title: store.currentWeekNr - 3, align: 'end', key: 'week_3' },
-      { title: store.currentWeekNr - 2, align: 'end', key: 'week_2' },
-      { title: store.currentWeekNr - 1, align: 'end', key: 'week_1' },
-      { title: store.currentWeekNr, align: 'end', key: 'week_0' },
+      { title: 'Week', align: 'start', sortable: false, key: 'name' },
       { title: 'tot', align: 'end', key: 'sum' },
       // prepare for showing the winners
       { title: 'Mok', align: 'end', key: 'winner' },
     ]
   } else return [
-    {
-      title: 'Week',
-      align: 'start',
-      sortable: false,
-      key: 'name',
-    },
+    { title: 'Week', align: 'start', sortable: false, key: 'name' },
     { title: store.currentWeekNr - 3, align: 'end', key: 'week_3' },
     { title: store.currentWeekNr - 2, align: 'end', key: 'week_2' },
     { title: store.currentWeekNr - 1, align: 'end', key: 'week_1' },

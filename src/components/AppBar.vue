@@ -1,83 +1,64 @@
 <template>
   <v-app-bar density="compact" color="purple">
-    <template v-if="props.isAuthenticated">
-      <template v-if="store.screenName === 'Menu'">
-        <v-app-bar-title>Welkom {{ store.userData.alias }}</v-app-bar-title>
-        <v-app-bar-title>{{ store.screenName }}</v-app-bar-title>
-      </template>
-      <v-app-bar-title v-else class="flex text-center">{{ store.screenName }}</v-app-bar-title>
-      <v-btn v-if="props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined"
-        @click="doSuperAdmin">superAdmin</v-btn>
-    </template>
-    <template v-else>
-      <v-app-bar-title class="flex text-center">{{ store.screenName }}</v-app-bar-title>
-    </template>
-
-    <template v-if="store.screenName === 'Menu'">
-      <v-btn icon id="menu-activator">
-        <v-icon>mdi-dots-vertical</v-icon>
-      </v-btn>
-
-      <v-menu activator="#menu-activator">
-        <v-list>
-          <v-list-item v-if="props.isAuthenticated && aliasIsCelebrity(store.userData.alias)">
-            <v-btn flat size="small" @click="emit('show-alias-info')">
-              Wie was {{ store.userData.alias }}?
-            </v-btn>
-          </v-list-item>
-          <v-list-item v-if="props.isAuthenticated">
-            <v-btn flat size="small" @click="state.dialog1 = true">
-              Inloggen op ander apparaat
-            </v-btn>
-          </v-list-item>
-          <v-list-item v-if="props.isAuthenticated">
-            <v-btn flat size="small" @click="state.dialog2 = true">
-              Stop automatisch inloggen
-            </v-btn>
-          </v-list-item>
-          <v-list-item v-if="props.isAuthenticated">
-            <v-btn flat size="small" @click="emit('app-settings')">
-              Instellingen
-            </v-btn>
-          </v-list-item>
-          <v-list-item>
-            <v-btn flat size="small" @click="state.dialog4 = true">
-              Feedback
-            </v-btn>
-          </v-list-item>
-          <v-list-item>
-            <v-btn flat size="small" @click="state.dialog5 = true">
-              Contact
-            </v-btn>
-          </v-list-item>
-          <v-list-item>
-            <v-btn flat size="small" @click="state.dialog6 = true">
-              Veelgestelde vragen
-            </v-btn>
-          </v-list-item>
-          <v-list-item>
-            <v-btn flat size="small" @click="state.dialog7 = true">
-              Over de Speelmee app
-            </v-btn>
-          </v-list-item>
-          <v-list-item>
-            <v-btn flat size="small" @click="router.push({ path: '/Privacybeleid' })">
-              Privacybeleid
-            </v-btn>
-          </v-list-item>
-          <v-list-item v-if="props.isAuthenticated">
-            <v-btn flat size="small" @click="state.dialog9 = true">
-              Log uit
-            </v-btn>
-          </v-list-item>
-          <v-list-item v-if="props.isAuthenticated && store.userData.alias !== 'admin'">
-            <v-btn color="red" flat size="small" @click="state.dialog10 = true">
-              Ik speel niet meer mee.<br>Verwijder mijn gegevens
-            </v-btn>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </template>
+      <v-app-bar-title class="flex text-center">Hoe goed ken je Maastricht?</v-app-bar-title>
+      <v-btn v-if="props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined" @click="doAdmin">Admin</v-btn>
+    <v-btn icon id="menu-activator">
+      <v-icon>mdi-dots-vertical</v-icon>
+    </v-btn>
+    <v-menu activator="#menu-activator">
+      <v-list>
+        <v-list-item v-if="props.isAuthenticated && aliasIsCelebrity(store.userData.alias)">
+          <v-btn flat size="small" @click="emit('show-alias-info')">
+            Wie was {{ store.userData.alias }}?
+          </v-btn>
+        </v-list-item>
+        <v-list-item v-if="props.isAuthenticated">
+          <v-btn flat size="small" @click="state.dialog1 = true">
+            Schuilnaam en pincode
+          </v-btn>
+        </v-list-item>
+        <v-list-item v-if="props.isAuthenticated">
+          <v-btn flat size="small" @click="state.dialog2 = true">
+            Stop automatisch inloggen
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn flat size="small" @click="state.dialog4 = true">
+            Feedback
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn flat size="small" @click="state.dialog5 = true">
+            Contact
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn flat size="small" @click="state.dialog6 = true">
+            Veelgestelde vragen
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn flat size="small" @click="state.dialog7 = true">
+            Over de Speelmee app
+          </v-btn>
+        </v-list-item>
+        <v-list-item>
+          <v-btn flat size="small" @click="router.push({ path: '/Privacybeleid' })">
+            Privacybeleid
+          </v-btn>
+        </v-list-item>
+        <v-list-item v-if="props.isAuthenticated">
+          <v-btn flat size="small" @click="state.dialog9 = true">
+            Log uit
+          </v-btn>
+        </v-list-item>
+        <v-list-item v-if="props.isAuthenticated && store.userData.alias !== 'admin'">
+          <v-btn color="red" flat size="small" @click="state.dialog10 = true">
+            Ik speel niet meer mee.<br>Verwijder mijn gegevens
+          </v-btn>
+        </v-list-item>
+      </v-list>
+    </v-menu>
   </v-app-bar>
 
   <v-dialog v-model="state.dialog1" :max-width="store.screenWidth">
@@ -277,10 +258,10 @@ function removeAccount() {
   updates[`users/${store.firebaseUser.uid}`] = null
   // update alias in use value for future use
   updates[`aliases/${store.userData.alias}/inUse`] = false
-  // remove the quiz results of the last 3 years, if existing
-  updates[`quizzes/results/${store.currentYear}/${store.userData.alias}`] = null
-  updates[`quizzes/results/${store.currentYear - 1}/${store.userData.alias}`] = null
-  updates[`quizzes/results/${store.currentYear - 2}/${store.userData.alias}`] = null
+  // remove the quiz results of the current and last 9 years, if existing
+  for (let n = 0; n < 10; n++) {
+    updates[`quizzes/results/${store.currentYear - n}/${store.userData.alias}`] = null
+  }
   // remove the users account and cookie
   update(dbRef, updates).then(() => {
     store.firebaseUser.delete().then(() => {
@@ -306,7 +287,7 @@ function logout() {
   emit('logout-app')
 }
 
-function doSuperAdmin() {
+function doAdmin() {
   router.push({ path: 'superAdmin' })
 }
 

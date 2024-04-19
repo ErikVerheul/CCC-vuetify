@@ -10,7 +10,6 @@ node_modules
 *.log
 
 # Editor directories and files
-.yarn
 .idea
 .vscode
 *.suo

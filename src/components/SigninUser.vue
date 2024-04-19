@@ -1,55 +1,67 @@
 <template>
-  <v-sheet class="ma-2" :max-width="store.screenWidth">
-    <v-row class="d-flex align-center justify-center">
-      <v-col cols="12">
-        <v-card variant="text">
-          <v-card-title>Gebruikt u deze app voor het eerst?</v-card-title>
-          <v-btn size="x-large" variant="outlined" @click="emit('change-to-signup')">Ga naar nieuwe aanmelding</v-btn>
-        </v-card>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <p>of hebt u al een account</p>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <v-card variant="text">
-          <v-card-title>Login met schuilnaam en PIN code</v-card-title>
+  <v-container fill-height>
+    <v-sheet class="mx-auto" color="yellow-lighten-3" theme="dark" :max-width="store.screenWidth">
+      <v-row>
+        <v-col cols="12">
+          <p>Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of tablet?<br>
+            Haal dan <b>eerst schuilnaam en pincode</b> op van dat apparaat en voer hier onder in.</p>
+        </v-col>
+        <v-col cols="12" class="d-flex align-center justify-center">
+          <p><small>De schuilnaam en pincode vind je via het menu <v-icon>mdi-dots-vertical</v-icon> (rechtsboven)</small></p>
+        </v-col>
+        <v-col cols="2"></v-col>
+        <v-col cols="8">
           <v-autocomplete v-model="state.selectedAlias" :items="props.aliasesInUseInclAdmin" label="Uw schuilnaam" />
+        </v-col>
+        <v-col cols="2"></v-col>
+        <v-col cols="2"></v-col>
+        <v-col cols="8">
           <v-text-field v-model.trim="store.userData.PIN" label="PIN" :rules="state.pinRules" />
-          <!-- check for state.selectedAlias not null after backspacing && PINOK -->
-          <v-btn class="my-6" v-if="state.selectedAlias && PINOK" type="submit" color="purple" @click='doSigninUser' rounded="l"
-            size="large">Login</v-btn>
-          <v-card-text v-if="state.loginErrorMsg !== undefined">
-            <h3>Controleer of uw schuilnaam en pin code kloppen en probeer opnieuw</h3>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-    <v-row class="py-12">
-      <v-col cols="12">
-        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signin')">
-          <template v-slot:prepend>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-          Terug
-        </v-btn>
-      </v-col>
-    </v-row>
-  </v-sheet>
+        </v-col>
+        <v-col cols="2"></v-col>
+        <v-col cols="12">
+          <p>De app <b>onthoudt</b> je schuilnaam en pincode <b>ook</b> op dit apparaat en login gaat dan <b>automatisch</b></p>
+        </v-col>
+        <div v-if="state.loginErrorMsg !== undefined">
+          <h3>Controleer of uw schuilnaam en pin code kloppen en probeer opnieuw</h3>
+        </div>
+        <v-col cols="12" v-if="props.isCelebrity">
+          <h4>{{ store.userData.alias }} is een historisch interessante figuur</h4>
+          <p>Voor info tab op <v-icon>mdi-dots-vertical</v-icon> rechts boven nadat u bent ingelogd.</p>
+        </v-col>
+        <v-divider class="mb-5"></v-divider>
+        <v-col>
+          <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
+            <template v-slot:prepend>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+            Terug
+          </v-btn>
+        </v-col>
+        <v-spacer></v-spacer>
+        <v-col>
+          <v-btn :disabled="!state.selectedAlias || !PINOK" flat append-icon="mdi-arrow-right" @click="doSigninUser">
+            Door
+            <template v-slot:append>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-sheet>
+  </v-container>
 </template>
 
 <script setup>
 import { computed, reactive } from 'vue'
 import { useAppStore } from '../store/app.js'
-import { dbRef } from '../firebase'
+import { dbRef } from '../firebase.js'
 import { get, child, update } from "firebase/database"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
 import Cookies from 'universal-cookie'
-const props = defineProps(['aliasesInUseInclAdmin'])
-const emit = defineEmits(['signin-completed', 'change-to-signup', 'exit-signin'])
+
+const props = defineProps(['isCelebrity', 'aliasesInUseInclAdmin'])
+const emit = defineEmits(['signin-completed', 'exit-signup'])
 const store = useAppStore()
 
 const state = reactive({
@@ -76,6 +88,11 @@ const state = reactive({
 
 const PINOK = computed(() => {
   return !isNaN(store.userData.PIN) && store.userData.PIN.length >= 4
+})
+
+const newsFeedLabel = computed(() => {
+  if (state.newsFeed) return 'Ja'
+  return 'Nee'
 })
 
 function replaceSpacesForHyphen(name) {
@@ -121,10 +138,5 @@ function doSigninUser() {
       state.loginErrorMsg = error.message
     })
 }
-</script>
 
-<style scoped>
-h3 {
-  color: #311B92
-}
-</style>
+</script>
