@@ -9,7 +9,10 @@
       </v-row>
       <v-row v-if="state.isInitDone" class="d-flex justify-center">
         <v-col cols="auto">
-          <MaastrichtStories v-if="state.isAuthenticated" />
+          <template v-if="!nowPlaying && state.showAliasInfoActive">
+            <ShowCelebrity @return-to="state.showAliasInfoActive = false" />
+          </template>
+          <MaastrichtStories v-else-if="state.isAuthenticated" />
           <template v-else>
             <NewUser v-if="state.userEntryMode === 'login'" :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" @change-to-signin="switchToSignin" @change-to-signup="switchToSignup"
               @exit-signin="resetApp" />
@@ -17,10 +20,7 @@
             <SelectAlias v-if="state.userEntryMode === 'signup'" :aliases-not-in-use="state.aliasesNotInUse" @alias-selected="doCreateUser" @reset-signup="returnToLogin" />
             <!-- Sign in an existing user -->
             <SigninUser v-if="state.userEntryMode === 'signin'" :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" :isCelebrity="state.isCelebrity" @signin-completed="continueSignup" @exit-signup="returnToLogin" />
-          </template>
-          <template v-if="!nowPlaying && state.showAliasInfoActive">
-            <ShowCelebrity @return-to="state.showAliasInfoActive = false" />
-          </template>
+          </template>         
         </v-col>
       </v-row>
     </v-main>

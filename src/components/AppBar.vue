@@ -53,7 +53,7 @@
           </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated && store.userData.alias !== 'admin'">
-          <v-btn color="red" flat size="small" @click="state.dialog10 = true">
+          <v-btn color="pink" flat  @click="state.dialog10 = true">
             Ik speel niet meer mee.<br>Verwijder mijn gegevens
           </v-btn>
         </v-list-item>
@@ -142,7 +142,7 @@
   <v-dialog v-model="state.dialog7" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
-        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.9.0</p>
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.9.1</p>
         <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>

@@ -1,35 +1,35 @@
 <template>
-  <v-container fill-height>
-    <v-sheet class="mx-auto" color="yellow-lighten-3" theme="dark" :max-width="store.screenWidth">
-      <v-row>
+  <v-container class="pa-0 mt-n8">
+    <v-card flat color="amber-lighten-3" :width="store.screenWidth">
+      <v-row dense>
         <v-col cols="12">
-          <p>Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of tablet?<br>
-            Haal dan <b>eerst schuilnaam en pincode</b> op van dat apparaat en voer hier onder in.</p>
+          <v-card-text>Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of tablet?<br>
+            Haal dan <b>eerst schuilnaam en pincode</b> op van dat apparaat en voer hier onder in.</v-card-text>
         </v-col>
-        <v-col cols="12" class="d-flex align-center justify-center">
-          <p><small>De schuilnaam en pincode vind je via het menu <v-icon>mdi-dots-vertical</v-icon> (rechtsboven)</small></p>
+        <v-col cols="1"></v-col>
+        <v-col cols="10" class="d-flex align-center justify-center">
+          <v-card-text><small>De schuilnaam en pincode vind je via het menu <v-icon>mdi-dots-vertical</v-icon> (rechtsboven)</small></v-card-text>
         </v-col>
+        <v-col cols="1"></v-col>
+
         <v-col cols="2"></v-col>
         <v-col cols="8">
           <v-autocomplete v-model="state.selectedAlias" :items="props.aliasesInUseInclAdmin" label="Uw schuilnaam" />
         </v-col>
         <v-col cols="2"></v-col>
+
         <v-col cols="2"></v-col>
         <v-col cols="8">
           <v-text-field v-model.trim="store.userData.PIN" label="PIN" :rules="state.pinRules" />
         </v-col>
         <v-col cols="2"></v-col>
+
         <v-col cols="12">
-          <p>De app <b>onthoudt</b> je schuilnaam en pincode <b>ook</b> op dit apparaat en login gaat dan <b>automatisch</b></p>
+          <v-card-text>De app <b>onthoudt</b> je schuilnaam en pincode <b>ook</b> op dit apparaat en login gaat dan <b>automatisch</b></v-card-text>
         </v-col>
         <div v-if="state.loginErrorMsg !== undefined">
-          <h3>Controleer of uw schuilnaam en pin code kloppen en probeer opnieuw</h3>
+          <v-card-text class="color-red mx-3">Controleer of uw schuilnaam en pin code kloppen en probeer opnieuw</v-card-text>
         </div>
-        <v-col cols="12" v-if="props.isCelebrity">
-          <h4>{{ store.userData.alias }} is een historisch interessante figuur</h4>
-          <p>Voor info tab op <v-icon>mdi-dots-vertical</v-icon> rechts boven nadat u bent ingelogd.</p>
-        </v-col>
-        <v-divider class="mb-5"></v-divider>
         <v-col>
           <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
             <template v-slot:prepend>
@@ -48,9 +48,15 @@
           </v-btn>
         </v-col>
       </v-row>
-    </v-sheet>
+    </v-card>
   </v-container>
 </template>
+
+<style scoped>
+.color-red {
+  color: red
+}
+</style>
 
 <script setup>
 import { computed, reactive } from 'vue'
