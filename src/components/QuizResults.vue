@@ -67,10 +67,10 @@ const state = reactive({
   playOldQuiz: false,
   compactResult: [],
   qNumber: undefined,
-  itemsPerPage: 7,
+  itemsPerPage: 10,
   yearScores: {},
   scores: [],
-  sortBy: [{ key: 'sum', order: 'desc' }],
+  sortBy: [{ key: 'sum', order: 'desc' }, { key: 'time', order: 'asc' }],
   showWinners: false
 })
 
@@ -141,17 +141,17 @@ function getHeaders() {
   if (state.showWinners) {
     return [
       { title: 'Week', align: 'start', sortable: false, key: 'name' },
-      { title: 'tot', align: 'end', key: 'sum' },
-      // prepare for showing the winners
-      { title: 'Mok', align: 'end', key: 'winner' },
+      { title: 'score', sortable: false, align: 'end', key: 'sum' },
+      { title: 'tijd (sec)', sortable: false, align: 'end', key: 'time' },
+      { title: 'mok', sortable: false, align: 'end', key: 'winner' },
     ]
   } else return [
     { title: 'Week', align: 'start', sortable: false, key: 'name' },
-    { title: store.currentWeekNr - 3, align: 'end', key: 'week_3' },
-    { title: store.currentWeekNr - 2, align: 'end', key: 'week_2' },
-    { title: store.currentWeekNr - 1, align: 'end', key: 'week_1' },
-    { title: store.currentWeekNr, align: 'end', key: 'week_0' },
-    { title: 'tot', align: 'end', key: 'sum' },
+    { title: store.currentWeekNr - 3, sortable: false, align: 'end', key: 'week_3' },
+    { title: store.currentWeekNr - 2, sortable: false, align: 'end', key: 'week_2' },
+    { title: store.currentWeekNr - 1, sortable: false, align: 'end', key: 'week_1' },
+    { title: store.currentWeekNr, sortable: false, align: 'end', key: 'week_0' },
+    { title: 'score', sortable: false, align: 'end', key: 'sum' },
   ]
 }
 
