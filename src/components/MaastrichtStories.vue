@@ -28,7 +28,7 @@
         <p>*) Voor 12.50 ook verkrijgbaar bij CoffeeLovers</p>
       </v-col>
     </v-row>
-    <v-row v-else>
+    <v-row v-else class="mr-2">
       <v-col cols="1"></v-col>
       <v-col cols="8" class="text-left">
         <p>Je hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores </p>
