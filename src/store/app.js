@@ -10,8 +10,9 @@ function getWeekNumber() {
 
 export const useAppStore = defineStore('app', {
   state: () => ({
+    largeScreenDetected: window.screen.availWidth >= 1280,
     screenWidth: window.screen.availWidth > 600 ? 600 : window.screen.availWidth,
-    // allow 120 px for unknown space usage like browser adres bar
+    // allow 120 px for unknown space usage like browser address bar
     screenHeight: window.screen.availHeight - 180,
     backContinueHeight: 120,
     aliasesObject: {},
