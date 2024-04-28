@@ -18,7 +18,7 @@
     <v-row v-if="!state.quizWasCompleted">
       <v-col cols="1"></v-col>
       <v-col cols="8" class="my-0 py-0 text-left">
-        <h4>Elke vier weken met nieuwe opdruk.<br>Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</h4>
+        <h4>Elke vier weken met nieuwe opdruk. Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</h4>
       </v-col>
       <v-col cols="2">
         <v-btn :disabled="!quizAvailable()" color="purple" @click="startQuiz">Start</v-btn>
