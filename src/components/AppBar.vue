@@ -57,6 +57,11 @@
             Ik speel niet meer mee.<br>Verwijder mijn gegevens
           </v-btn>
         </v-list-item>
+        <v-list-item v-if="props.isAuthenticated && store.userData.alias === 'admin'">
+          <v-btn color="green" flat  @click="state.dialog11 = true">
+            Toon de scores en de winnaars
+          </v-btn>
+        </v-list-item>
       </v-list>
     </v-menu>
   </v-app-bar>
@@ -142,7 +147,7 @@
   <v-dialog v-model="state.dialog7" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
-        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.9.2</p>
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.9.3</p>
         <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>
@@ -212,6 +217,15 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
+  <v-dialog v-model="state.dialog11" :max-width="store.screenWidth">
+    <v-card>
+      <v-card-text>
+        <h3>De scores en de winnaars van de afgelopen 4 weken</h3>
+      </v-card-text>
+      <QuizResults @return-to-menu="state.dialog11 = false"></QuizResults>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
@@ -221,6 +235,7 @@ import Cookies from 'universal-cookie'
 import { dbRef } from '../firebase'
 import { update } from 'firebase/database'
 import router from '../router'
+import QuizResults from './QuizResults.vue'
 
 const store = useAppStore()
 
@@ -242,6 +257,7 @@ const state = reactive({
   dialog7: false,
   dialog9: false,
   dialog10: false,
+  dialog11: false,
   cookieIsRemoved: false
 })
 
