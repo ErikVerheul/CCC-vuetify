@@ -4,7 +4,7 @@
     <v-row>
       <v-col cols="12" class="my-0 py-0">
         <h4>Hallo {{ store.userData.alias }}</h4>
-        <h4>De vijf vragen van deze week ({{ store.currentWeekNr }})<br>
+        <h4>De vragen van deze week ({{ store.currentWeekNr }})<br>
           Per vraag krijg je 1 min de tijd</h4>
         <h3 class="text-red">Doe mee en win!</h3>
       </v-col>

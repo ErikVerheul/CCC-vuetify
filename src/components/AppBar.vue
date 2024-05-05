@@ -1,7 +1,7 @@
 <template>
   <v-app-bar density="compact" color="purple">
-      <v-app-bar-title class="flex text-center">Hoe goed ken je Maastricht?</v-app-bar-title>
-      <v-btn v-if="store.largeScreenDetected && props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined" @click="doAdmin">Admin</v-btn>
+    <v-app-bar-title class="flex text-center">Hoe goed ken je Maastricht?</v-app-bar-title>
+    <v-btn v-if="store.largeScreenDetected && props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined" @click="doAdmin">Admin</v-btn>
     <v-btn icon id="menu-activator">
       <v-icon>mdi-dots-vertical</v-icon>
     </v-btn>
@@ -53,12 +53,12 @@
           </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated && store.userData.alias !== 'admin'">
-          <v-btn color="pink" flat  @click="state.dialog10 = true">
+          <v-btn color="pink" flat @click="state.dialog10 = true">
             Ik speel niet meer mee.<br>Verwijder mijn gegevens
           </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated && store.userData.alias === 'admin'">
-          <v-btn color="green" flat  @click="state.dialog11 = true">
+          <v-btn color="green" flat @click="router.push({ path: '/QuizResultsView' })">
             Toon de scores en de winnaars
           </v-btn>
         </v-list-item>

@@ -2,6 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import PrivacyView from '@/views/PrivacyView.vue'
+import QuizResultsView from '@/views/QuizResultsView.vue'
 import { useAppStore } from '../store/app.js'
 
 const routes = [
@@ -18,6 +19,11 @@ const routes = [
         path: '/Privacybeleid',
         name: 'Privacy',
         component: PrivacyView
+      },
+      {
+        path: '/QuizResultsView',
+        name: 'QuizResults',
+        component: QuizResultsView
       },
       {
         path: '/superAdmin',
