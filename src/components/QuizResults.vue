@@ -6,7 +6,7 @@
           <p><b>Zondag 13:00 wordt de ranglijst definitief</b></p>
         </v-row>
         <v-row>
-          <v-data-table density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores" item-value="name">
+          <v-data-table mobile-breakpoint="0" density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores" item-value="name">
           </v-data-table>
         </v-row>
         <v-row v-if="historyAvailable()">
