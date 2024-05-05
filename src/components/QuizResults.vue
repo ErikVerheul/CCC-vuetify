@@ -6,7 +6,8 @@
           <p><b>Zondag 13:00 wordt de ranglijst definitief</b></p>
         </v-row>
         <v-row>
-          <v-data-table mobile-breakpoint="0" density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores" item-value="name">
+          <v-data-table mobile-breakpoint="0" density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores"
+            item-value="name">
           </v-data-table>
         </v-row>
         <v-row v-if="historyAvailable()">
@@ -239,6 +240,7 @@ function historyAvailable() {
   return false
 }
 
+/* Starts a quiz with a randomly selected weeknumber in the past. Note that the assupmtion is that all existing quizzes have 1 or more questions assigned */
 function startOldQuiz() {
   state.compactResult = []
   const oldWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr)
@@ -247,15 +249,19 @@ function startOldQuiz() {
 }
 
 function countAll() {
-  return state.compactResult.length
+  if (state.compactResult) return state.compactResult.length
+  return 0
 }
 
 function countGood() {
-  let count = 0
-  state.compactResult.forEach(el => {
-    if (el === true) count++
-  })
-  return count
+  if (state.compactResult) {
+    let count = 0
+    state.compactResult.forEach(el => {
+      if (el === true) count++
+    })
+    return count
+  }
+  return 0
 }
 
 function stopOldQuiz(result) {
