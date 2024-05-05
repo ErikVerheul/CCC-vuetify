@@ -147,7 +147,7 @@
   <v-dialog v-model="state.dialog7" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
-        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.9.4</p>
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.9.5</p>
         <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>

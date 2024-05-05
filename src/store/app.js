@@ -1,10 +1,14 @@
 import { defineStore } from 'pinia'
 
-/* See https://www.geeksforgeeks.org/calculate-current-week-number-in-javascript/ */
+/*
+* Calculate the weeknumber since the beginning of the year shifted 11 hours ahead to create a weeknumber break at 13:00 hrs.
+* see: https://thetechthunder.com/posts/calculate-current-week-number-in-javascript
+*/
 function getWeekNumber() {
-  const currentDate = new Date()
-  const startDate = new Date(currentDate.getFullYear(), 0, 1)
-  const days = Math.floor((currentDate - startDate) / (24 * 60 * 60 * 1000))
+  const dayShift = (24 - 13) * 60 * 60 * 1000
+  const now = Date.now()
+  const startDate = new Date(new Date().getFullYear(), 0, 1).getTime() - dayShift 
+  const days = (now - startDate) / (24 * 60 * 60 * 1000)
   return Number(Math.ceil(days / 7))
 }
 
