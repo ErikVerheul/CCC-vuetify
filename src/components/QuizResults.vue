@@ -1,31 +1,29 @@
 <template>
   <template v-if="!state.playOldQuiz">
-    <v-sheet :min-height="getHeight()">
-      <v-container>
-        <v-row>
-          <p><b>Zondag 13:00 wordt de ranglijst definitief</b></p>
-        </v-row>
-        <v-row>
-          <v-data-table mobile-breakpoint="0" density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores"
-            item-value="name">
-          </v-data-table>
-        </v-row>
-        <v-row v-if="historyAvailable()">
-          <v-col cols="9">
-            <p>Zin om een oude quiz te spelen?<br>Telt niet voor de competitie</p>
-          </v-col>
-          <v-col cols="3">
-            <v-btn @click="startOldQuiz" color="purple">Start</v-btn>
-          </v-col>
-          <v-col v-if="countAll() > 0" cols="12">
-            <p><b>U heeft {{ countGood() }} van de {{ countAll() }} antwoorden goed</b></p>
-          </v-col>
-        </v-row>
-        <v-row>
-          <p v-if="state.showWinners">Bij gelijke scrore wint de speler die de minste tijd nodig had</p>
-        </v-row>
-      </v-container>
-    </v-sheet>
+    <v-container>
+      <v-row>
+        <b>Zondag 13:00 wordt de ranglijst definitief</b>
+      </v-row>
+      <v-row>
+        <v-data-table mobile-breakpoint="0" density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores"
+          item-value="name">
+        </v-data-table>
+      </v-row>
+      <v-row v-if="historyAvailable()" class="ml-n6">
+        <v-col cols="9">
+          Zin om een oude quiz te spelen?<br>Telt niet voor de competitie
+        </v-col>
+        <v-col cols="3">
+          <v-btn @click="startOldQuiz" color="purple">Start</v-btn>
+        </v-col>
+      </v-row>
+      <v-row v-if="countAll() > 0" cols="12">
+        <b>U heeft {{ countGood() }} van de {{ countAll() }} antwoorden goed</b>
+      </v-row>
+      <v-row v-if="state.showWinners">
+        Bij gelijke scrore wint de speler die de minste tijd nodig had
+      </v-row>
+    </v-container>
     <v-divider></v-divider>
     <v-row>
       <v-col>
