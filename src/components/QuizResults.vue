@@ -119,26 +119,33 @@ function loadResultsData() {
   })
 }
 
-function checkIfhistoryAvailable(quizNrsFound) {
-  for (const qNr of quizNrsFound)
-    if (qNr !== 0) {
-      // skip dummy quiz
-      if (Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr) state.isHistoryAvailable = true
-    } else
-      state.isHistoryAvailable = false
+/* Set state.isHistoryAvailable to true if at least one old quiz (assigned to a weeknumber in the past) was found */
+function checkIfHistoryAvailable(quizNrsFound) {
+  const currentYear = new Date().getFullYear()
+  for (const qNr of quizNrsFound) {
+    if (Number(state.metaObject[qNr].actionYear) < currentYear || Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr) {
+      state.isHistoryAvailable = true
+      break
+    }
+  }
 }
 
+/* Store array of quiz numbers with assigned questions, and if found, call checkIfHistoryAvailable */
 function getQuizNumersWithAssignedQuestions() {
+  state.isHistoryAvailable = false
   get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
     const quizNrsFound = []
     if (snapshot.exists()) {
       const questionsIndex = snapshot.val()
+      // skip the dummy quiz (i = 0)
       for (let i = 1; i < questionsIndex.length; i++) {
         const quizNr = questionsIndex[i].quizNumber
         if (!quizNrsFound.includes(quizNr)) quizNrsFound.push(quizNr)
       }
-      checkIfhistoryAvailable(quizNrsFound)
-      state.quizNumersWithAssignedQuestions = quizNrsFound.sort((a, b) => a - b )
+      // call now we have the quiz numbers with at least one quiz with assigned question
+      checkIfHistoryAvailable(quizNrsFound)
+      // sort in ascending order
+      state.quizNumersWithAssignedQuestions = quizNrsFound.sort((a, b) => a - b)
     } else {
       console.log("Quiz assigned questions data not found")
     }
@@ -258,7 +265,6 @@ function startOldQuiz() {
   state.compactResult = []
   const oldWeekQnumbers = state.quizNumersWithAssignedQuestions.filter(qNr => Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr)
   state.oldQuizNumber = Number(oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))])
-  console.log('startOldQuiz: state.qNumber = ' + state.oldQuizNumber)
   state.playOldQuiz = true
 }
 
