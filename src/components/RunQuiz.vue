@@ -2,7 +2,7 @@
   <ReportFbError v-if="state.onError" :firebaseError="state.firebaseError" :fbErrorContext="state.fbErrorContext" @return-to="emit('quiz-continue')"></ReportFbError>
   <ReportWarning v-else-if="state.onWarning" :problemText="state.problemText" :problemCause="state.problemCause" :tipToResolve="state.tipToResolve" @return-to="emit('quiz-continue')"></ReportWarning>
   <template v-else>
-    <v-sheet class="ma-2" :min-height="getHeight()" :max-width="store.screenWidth">
+    <v-sheet class="ma-2" :max-width="store.screenWidth">
       <template v-if="!state.showExplanation">
         <v-row no-gutters>
           <div v-html="state.currentQuestion.body"></div>
@@ -124,11 +124,6 @@ const state = reactive({
 function getReadyText() {
   if (props.isArchivedQuiz) return 'Onthul het resultaat'
   return 'Verzend jouw antwoord'
-}
-
-function getHeight() {
-  if (!state.showExplanation) return store.screenHeight - store.backContinueHeight - state.counterHeight
-  return store.screenHeight - store.backContinueHeight
 }
 
 function loadQuiz(quizNumber) {

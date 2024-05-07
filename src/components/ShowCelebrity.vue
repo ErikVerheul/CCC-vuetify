@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="ma-2" :min-height="getHeight()" :max-width="store.screenWidth">
+  <v-sheet class="ma-2" :max-width="store.screenWidth">
     <v-row no-gutters>
       <div v-html="state.aliasInfoContent"></div>
     </v-row>
@@ -46,8 +46,4 @@ function loadAliasInfo() {
   })
 }
 
-function getHeight() {
-  if (!state.showExplanation) return store.screenHeight - store.backContinueHeight - state.counterHeight
-  return store.screenHeight - store.backContinueHeight
-}
 </script>
