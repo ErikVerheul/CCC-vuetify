@@ -161,6 +161,11 @@
       <v-card-text>
         <p>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten.
           Als u hier uitlogt stopt u ook de automatische login.</p>
+        <h3>Om opnieuw in te loggen noteer deze gegevens:</h3>
+        <ul class="mx-5">
+          <li>Uw schuilnaam: {{ store.userData.alias }}</li>
+          <li>Uw pin code: {{ store.userData.PIN }}</li>
+        </ul>
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions style="height: 60px;">
@@ -244,7 +249,7 @@ const props = defineProps({
     type: Boolean,
   },
   withActivator: {
-    type:Boolean,
+    type: Boolean,
     required: true
   }
 })
