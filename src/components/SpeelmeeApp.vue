@@ -1,7 +1,7 @@
 <template>
-  <v-app :max-width="store.screenWidth">
-    <AppBar :is-authenticated="state.isAuthenticated" @logout-app="returnToLogin" @reset-app="resetApp" @show-alias-info="showAliasInfo" />
+  <v-app>  
     <v-main>
+      <AppBar :is-authenticated="state.isAuthenticated" :withActivator=true @logout-app="returnToLogin" @reset-app="resetApp" @show-alias-info="showAliasInfo" />
       <v-row>
         <v-col cols="auto">
           <h2 v-if="state.loginErrorMsg !== undefined" class="py-4">Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>

@@ -1,6 +1,7 @@
 <template>
   <v-container>
     <v-row class="d-flex align-center justify-center">
+      <AppBar :withActivator=false />
       <v-sheet class="mx-3" :width="store.screenWidth">
         <h2>Privacy functies</h2>
 

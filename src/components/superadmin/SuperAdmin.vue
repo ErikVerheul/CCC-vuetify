@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <AppBar :withActivator=false />
     <v-sheet v-if="state.action === 'menu'">
       <v-row>
         <v-navigation-drawer width="100%" class="bg-deep-purple" theme="dark" permanent>

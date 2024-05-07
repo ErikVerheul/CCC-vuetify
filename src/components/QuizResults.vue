@@ -9,7 +9,7 @@
           item-value="name">
         </v-data-table>
       </v-row>
-      <v-row v-if="historyAvailable()" class="ml-n6">
+      <v-row v-if="state.isHistoryAvailable" class="ml-n6">
         <v-col cols="9">
           Zin om een oude quiz te spelen?<br>Telt niet voor de competitie
         </v-col>
@@ -47,7 +47,7 @@
       </template>
     </v-row>
   </template>
-  <RunQuiz v-else :quizNumber="state.qNumber" :isArchivedQuiz="true" @quiz-continue="stopOldQuiz"></RunQuiz>
+  <RunQuiz v-else :quizNumber="state.oldQuizNumber" :isArchivedQuiz="true" @quiz-continue="stopOldQuiz"></RunQuiz>
 </template>
 
 <script setup>
@@ -62,10 +62,11 @@ const emit = defineEmits(['return-to-menu'])
 
 const state = reactive({
   metaObject: {},
-  quizNumbers: [],
+  quizNumersWithAssignedQuestions: [],
+  isHistoryAvailable: false,
   playOldQuiz: false,
   compactResult: [],
-  qNumber: undefined,
+  oldQuizNumber: undefined,
   itemsPerPage: 10,
   yearScores: {},
   scores: [],
@@ -78,10 +79,6 @@ onBeforeMount(() => {
   loadResultsData()
   loadMetaData()
 })
-
-function getHeight() {
-  return store.screenHeight - store.backContinueHeight
-}
 
 function loadResultsData() {
   get(child(dbRef, `/quizzes/results`)).then((snapshot) => {
@@ -122,12 +119,39 @@ function loadResultsData() {
   })
 }
 
+function checkIfhistoryAvailable(quizNrsFound) {
+  for (const qNr of quizNrsFound)
+    if (qNr !== 0) {
+      // skip dummy quiz
+      if (Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr) state.isHistoryAvailable = true
+    } else
+      state.isHistoryAvailable = false
+}
+
+function getQuizNumersWithAssignedQuestions() {
+  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
+    const quizNrsFound = []
+    if (snapshot.exists()) {
+      const questionsIndex = snapshot.val()
+      for (let i = 1; i < questionsIndex.length; i++) {
+        const quizNr = questionsIndex[i].quizNumber
+        if (!quizNrsFound.includes(quizNr)) quizNrsFound.push(quizNr)
+      }
+      checkIfhistoryAvailable(quizNrsFound)
+      state.quizNumersWithAssignedQuestions = quizNrsFound.sort((a, b) => a - b )
+    } else {
+      console.log("Quiz assigned questions data not found")
+    }
+  }).catch((error) => {
+    console.error(`Error while reading questions index data from database: ` + error.message)
+  })
+}
+
 function loadMetaData() {
   get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.metaObject = snapshot.val()
-      const quizStrNumbers = Object.keys(state.metaObject)
-      state.quizNumbers = quizStrNumbers.map((strNr) => Number(strNr))
+      getQuizNumersWithAssignedQuestions()
     } else {
       console.log("Quiz meta data not found")
     }
@@ -229,20 +253,12 @@ function createScoresArray(allScores) {
   return scores
 }
 
-function historyAvailable() {
-  for (const qNr of state.quizNumbers)
-    if (qNr !== 0) {
-      // skip dummy quiz
-      if (Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr) return true
-    }
-  return false
-}
-
-/* Starts a quiz with a randomly selected weeknumber in the past. Note that the assupmtion is that all existing quizzes have 1 or more questions assigned */
+/* Starts a quiz with assigned questions and with a (randomly selected) weeknumber in the past */
 function startOldQuiz() {
   state.compactResult = []
-  const oldWeekQnumbers = state.quizNumbers.filter(qNr => Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr)
-  state.qNumber = oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))]
+  const oldWeekQnumbers = state.quizNumersWithAssignedQuestions.filter(qNr => Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr)
+  state.oldQuizNumber = Number(oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))])
+  console.log('startOldQuiz: state.qNumber = ' + state.oldQuizNumber)
   state.playOldQuiz = true
 }
 
