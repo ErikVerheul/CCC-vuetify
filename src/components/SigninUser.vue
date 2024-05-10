@@ -96,11 +96,6 @@ const PINOK = computed(() => {
   return !isNaN(store.userData.PIN) && store.userData.PIN.length >= 4
 })
 
-const newsFeedLabel = computed(() => {
-  if (state.newsFeed) return 'Ja'
-  return 'Nee'
-})
-
 function replaceSpacesForHyphen(name) {
   return name.replaceAll(' ', '-')
 }
@@ -116,7 +111,7 @@ function doSigninUser() {
       // get user data from the database
       get(child(dbRef, `users/` + store.firebaseUser.uid)).then((snapshot) => {
         if (snapshot.exists()) {
-          // save the user data in the store including its alias
+          // get the user data in the store including its alias
           store.userData = snapshot.val()
           if (state.selectedAlias !== store.userData.alias) {
             console.log('doSigninUser: SOMETHING WENT WRONG: the alias of the retrieved user is different from the selected alias. STOP')
