@@ -46,16 +46,16 @@
 
     <v-divider></v-divider>
     <v-row class="mt-2">
-      <v-col>
+      <!-- <v-col>
         <v-btn :disabled="true" flat prepend-icon="mdi-arrow-left">
           <template v-slot:prepend>
             <v-icon size="x-large" color="purple"></v-icon>
           </template>
           Terug
         </v-btn>
-      </v-col>
+      </v-col> -->
       <v-spacer></v-spacer>
-      <v-col>
+      <v-col class="text-right">
         <v-btn :disabled="!state.done" flat append-icon="mdi-arrow-right" @click="nextStep()">
           Door
           <template v-slot:append>
@@ -129,7 +129,7 @@ const state = reactive({
 })
 
 function getReadyText() {
-  if (props.isArchivedQuiz) return 'Onthul het resultaat'
+  if (props.isArchivedQuiz) return 'Onthul resultaat'
   return 'Verzend antwoord'
 }
 
