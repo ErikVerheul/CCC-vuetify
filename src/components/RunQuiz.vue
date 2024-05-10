@@ -46,15 +46,6 @@
 
     <v-divider></v-divider>
     <v-row class="mt-2">
-      <!-- <v-col>
-        <v-btn :disabled="true" flat prepend-icon="mdi-arrow-left">
-          <template v-slot:prepend>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-          Terug
-        </v-btn>
-      </v-col> -->
-      <v-spacer></v-spacer>
       <v-col class="text-right">
         <v-btn :disabled="!state.done" flat append-icon="mdi-arrow-right" @click="nextStep()">
           Door
