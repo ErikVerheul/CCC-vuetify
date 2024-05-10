@@ -9,7 +9,7 @@
         <h3 class="text-red">Doe mee en win!</h3>
       </v-col>
       <v-col cols="12">
-        <v-img :height="240" src="../assets/mok.png"></v-img>
+        <v-img :height="240" alt="Afbeelding mok" src="../assets/mok.png"></v-img>
       </v-col>
       <v-col cols="12" class="my-0 py-0">
         <h3 class="text-red">Unieke erfgoed beker *)</h3>

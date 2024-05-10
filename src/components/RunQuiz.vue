@@ -23,22 +23,23 @@
     </v-sheet>
     <v-sheet v-if="!state.showExplanation" class="pa-2" :height="state.counterHeight" :max-width="store.screenWidth">
       <v-row v-if="!state.done">
-        <v-col v-if="state.playerStarted" cols="9">
+        <v-col v-if="state.playerStarted" cols="7">
           <v-btn @click="finishQuestion()">{{ getReadyText() }}</v-btn>
         </v-col>
-        <v-col v-else cols="9">
+        <v-col v-else cols="7">
           <p>{{ state.currentQuestion.gameRules }}<br>Binnen 1 min</p>
         </v-col>
-        <v-col cols="3">
-          {{ state.clockValue }}
+        <v-col cols="5">
+          <p class="text-right">Resterende tijd</p>
+          <p class="text-right color-red">{{ state.clockValue }}</p>
         </v-col>
       </v-row>
       <v-row v-else>
-        <v-col cols="9">
+        <v-col cols="7">
           {{ state.wrapupMsg }}
         </v-col>
-        <v-col cols="3">
-          {{ state.clockValue }}
+        <v-col cols="5">
+          <p class="text-right">Resterende tijd<br>{{ state.clockValue }}</p>
         </v-col>
       </v-row>
     </v-sheet>
@@ -65,6 +66,12 @@
     </v-row>
   </template>
 </template>
+
+<style scoped>
+.color-red {
+  color: red
+}
+</style>
 
 <script setup>
 import { onBeforeMount, reactive, watch } from 'vue'
@@ -123,7 +130,7 @@ const state = reactive({
 
 function getReadyText() {
   if (props.isArchivedQuiz) return 'Onthul het resultaat'
-  return 'Verzend jouw antwoord'
+  return 'Verzend antwoord'
 }
 
 function loadQuiz(quizNumber) {
@@ -256,11 +263,11 @@ function startTimer() {
   state.seconds = 0
   state.timerId = setInterval(() => {
     state.seconds++
-    const minutes = Math.floor(state.seconds / 60)
-    const seconds = state.seconds - minutes * 60
-    let secondsStr = seconds.toString()
+    const minutesLeft = Math.floor((state.timeout - state.seconds) / 60)
+    const secondsLeft = state.timeout - state.seconds - minutesLeft * 60
+    let secondsStr = secondsLeft.toString()
     if (secondsStr.length === 1) secondsStr = '0' + secondsStr
-    state.clockValue = `${minutes}:${secondsStr}`
+    state.clockValue = `${minutesLeft}:${secondsStr}`
   }, 1000)
 }
 
@@ -289,7 +296,7 @@ function startNextQuestion() {
   if (state.currentQuestionIdx < state.questionIds.length) {
     state.done = false
     state.showExplanation = false
-    state.clockValue = `0:00`
+    state.clockValue = `1:00`
     state.playerStarted = false
     loadQuestion()
     return true
