@@ -17,8 +17,7 @@
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
-    <v-row
-      v-if="state.action === 'replaceAlias' && aliasExists(state.selectedAlias) && !isAliasInUse(state.selectedAlias)">
+    <v-row v-if="state.action === 'replaceAlias' && aliasExists(state.selectedAlias) && !isAliasInUse(state.selectedAlias)">
       <v-col cols="3"></v-col>
       <v-col cols="6">
         <v-text-field v-model.trim="state.replaceAlias" label="Nieuwe schuilnaam" :rules="state.newNameRules" />
@@ -53,7 +52,7 @@
     <v-row v-if="showEditInfo()" class="d-flex align-center justify-center">
       <h2>Onderhoud schuilnaam info</h2>
       <v-sheet>
-        <quill-editor v-model:value="state.aliasInfoContent"></quill-editor>
+        <QuillEditor v-model:content="state.aliasInfoContent" contentType="html" :toolbar="editorToolbar"></QuillEditor>
       </v-sheet>
       <v-row justify="space-around">
         <v-col cols="6" md="4">
@@ -87,6 +86,14 @@ const emit = defineEmits(['m-done'])
 onBeforeMount(() => {
   resetAndLoadAliases()
 })
+
+const editorToolbar = [
+  [{ header: [false, 1, 2, 3, 4, 5, 6] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
+  ['link', 'image', 'code-block']
+]
 
 const state = reactive({
   aliasesObj: {},

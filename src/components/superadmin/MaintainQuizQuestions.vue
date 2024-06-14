@@ -2,7 +2,7 @@
   <v-sheet>
     <v-row class="d-flex align-center justify-center">
       <h2 v-if="state.quizNumber && state.questionNumber !== ''">Onderhoud quiz-vraag {{ state.questionNumber }} voor quiz {{ state.quizNumber
-      }}</h2>
+        }}</h2>
       <h2 v-else>Onderhoud quiz-vraag gegevens</h2>
     </v-row>
     <v-row>
@@ -26,7 +26,7 @@
     <template v-if="showInputFields()">
       <v-row>
         <v-col cols="6">
-          <v-select v-model="state.selectedQuizItem" :items="state.quizItems" item-value="key" return-object single-line />
+          <v-select v-model="state.selectedQuizItem" label="Kies of verander de quiz voor deze vraag" :items="state.quizItems" item-value="key" return-object />
         </v-col>
         <v-col cols="6">
           <v-text-field v-model="state.questionTitle" label="Quiz-vraag titel" />
@@ -37,7 +37,7 @@
       <v-row>
         <v-col cols="12">
           <p>Body met optionele afbeelding:</p>
-          <quill-editor v-model:value="state.content"></quill-editor>
+          <QuillEditor v-model:content="state.content" contentType="html" :toolbar="editorToolbar"></QuillEditor>
         </v-col>
       </v-row>
       <v-row class="py-15">
@@ -86,7 +86,7 @@
       <v-row>
         <v-col cols="12">
           <p>Toelichting op goed/fout antwoord:</p>
-          <quill-editor v-model:value="state.resultInfo"></quill-editor>
+          <QuillEditor v-model:content="state.resultInfo" contentType="html" :toolbar="editorToolbar"></QuillEditor>
         </v-col>
         <v-col class="mt-12" cols="12">
           <v-text-field v-model="state.gameRules" label="Spelregels (verplicht)" />
@@ -105,8 +105,7 @@
       </v-col>
       <v-spacer></v-spacer>
       <v-col class="text-right">
-        <v-btn :disabled="!canSave()" append-icon="mdi-arrow-right"
-          @click="doSaveQuestion()">
+        <v-btn :disabled="!canSave()" append-icon="mdi-arrow-right" @click="doSaveQuestion()">
           Bewaar Quiz-vraag
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
@@ -129,8 +128,7 @@
         </v-row>
         <v-row no-gutters>
           <v-list lines="two" density="compact">
-            <v-list-item v-for="(num, index) in state.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)"
-              :style="{ 'background-color': bgColor }"></v-list-item>
+            <v-list-item v-for="(num, index) in state.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)" :style="{ 'background-color': bgColor }"></v-list-item>
           </v-list>
         </v-row>
         <v-row v-if="state.gameRules !== ''" no-gutters>
@@ -150,8 +148,7 @@
         </v-row>
         <v-row no-gutters>
           <v-list lines="two" density="compact">
-            <v-list-item v-for="(num, index) in state.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)"
-              :style="{ 'background-color': bgColor }"></v-list-item>
+            <v-list-item v-for="(num, index) in state.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)" :style="{ 'background-color': bgColor }"></v-list-item>
           </v-list>
         </v-row>
         <v-row v-if="state.gameRules !== ''" no-gutters>
@@ -235,6 +232,14 @@ onBeforeMount(() => {
   doLoadMetaData()
 })
 
+const editorToolbar = [
+  [{ header: [false, 1, 2, 3, 4, 5, 6] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
+  ['link', 'image', 'code-block']
+]
+
 const state = reactive({
   quizzesObject: {},
   indexObject: {},
@@ -244,7 +249,7 @@ const state = reactive({
   quizNumber: undefined,
   quizTitle: '',
   quizItems: [],
-  selectedQuizItem: { "key": 0, "title": "Kies of verander de quiz voor deze vraag" },
+  selectedQuizItem: { "key": 0, "title": "" },
 
   questionNumber: undefined,
   questionTitle: '',
@@ -320,7 +325,7 @@ function clearAll() {
   state.showQuestionSelect = false
   state.showQuestionRemove = false
 
-  state.selectedQuizItem = { "key": 0, "title": "Kies of verander de quiz voor deze vraag" }
+  state.selectedQuizItem = { "key": 0, "title": "" }
   state.selectedQuestionItem = { "key": undefined, "title": "Kies een quiz-vraag" }
   state.questionNumber = ''
   state.questionTitle = ''
@@ -553,5 +558,4 @@ watch(
     }
   }
 )
-</script> 
-
+</script>

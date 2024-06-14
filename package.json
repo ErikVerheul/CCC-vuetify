@@ -19,7 +19,7 @@
     "vue": "^3.4.27",
     "vue-gtag": "^2.0.1",
     "vue-router": "^4.3.2",
-    "vue3-quill": "^0.3.1",
+    "@vueup/vue-quill": "^1.2.0",
     "vuefire": "^3.1.23",
     "vuetify": "^3.6.8",
     "webfontloader": "^1.6.28"
