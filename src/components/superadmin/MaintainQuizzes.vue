@@ -45,6 +45,11 @@
               <v-text-field v-model="state.actionWeek" label="Actie week" :rules="state.weekRules" />
             </v-col>
             <v-col cols="3"></v-col>
+            <v-col cols="3"></v-col>
+            <v-col cols="6" v-if="actionWeekInUse">
+              <p class="color-red">Er is al een quiz aan dit actie jaar en week gekoppeld</p>
+            </v-col>
+            <v-col cols="3"></v-col>
           </template>
         </v-row>
       </template>
@@ -271,7 +276,7 @@ function changeMode() {
 
 const allowSave = computed(() => {
   if (state.action === '1') return actionSettingsOk() && QNumberOk() && QNameOk() && !QNumberExists()
-  if (state.action === '2') return actionSettingsOk() && QNameOk() && QNumberExists()
+  if (state.action === '2') return !actionWeekInUse.value && actionSettingsOk() && QNameOk() && QNumberExists()
   if (state.action === '3') return QNumberOk() && QNumberExists()
   return false
 })
@@ -286,6 +291,17 @@ const saveButtonText = computed(() => {
   if (state.action === '2') return 'Sla op'
   if (state.action === '3') return 'Verwijder'
   return ''
+})
+
+const actionWeekInUse = computed(() => {
+  for (let i = 1; i < state.quizesObject.length; i++) {
+    // skip i === 0 (Dummy quiz for unassigned questions)
+    const q = state.quizesObject[i]
+    if (!q) continue // skip unused index numbers
+    // skip values from loaded quiz; note that state.quizNumberInput is of type string
+    if (i != state.quizNumberInput && q.actionYear === state.actionYear && q.actionWeek === state.actionWeek) return true
+  }
+  return false
 })
 
 function composeLine(item) {
@@ -348,6 +364,10 @@ watch(() => state.quizNumberInput, () => {
   state.actionYear = ''
   state.actionWeek = ''
 })
-
-
 </script>
+
+<style scoped>
+.color-red {
+  color: red
+}
+</style>
