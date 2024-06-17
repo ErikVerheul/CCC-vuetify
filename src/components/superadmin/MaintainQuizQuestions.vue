@@ -26,7 +26,7 @@
     <template v-if="showInputFields()">
       <v-row>
         <v-col cols="6">
-          <v-select v-model="state.selectedQuizItem" label="Kies of verander de quiz voor deze vraag" :items="state.quizItems" item-value="key" return-object />
+          <v-select v-model="state.selectedQuizItem" label="Kies of verander de quiz voor deze quiz-vraag" :items="state.quizItems" item-value="key" return-object />
         </v-col>
         <v-col cols="6">
           <v-text-field v-model="state.questionTitle" label="Quiz-vraag titel" />
@@ -307,7 +307,7 @@ const state = reactive({
 let bgColor = undefined
 
 const sLabel = computed(() => {
-  return 'Quiz-stelling ' + (state.statementNumber + 1)
+  return 'Quizvraag-stelling ' + (state.statementNumber + 1)
 })
 
 const editMode = computed(() => {
