@@ -75,7 +75,6 @@ const state = reactive({
 })
 
 onBeforeMount(() => {
-  store.screenName = 'Stand competitie'
   loadResultsData()
   loadMetaData()
 })
@@ -287,7 +286,6 @@ function countGood() {
 function stopOldQuiz(result) {
   state.compactResult = result
   // console.log('stopOldQuiz: compactResult = ' + result)
-  store.screenName = 'Stand competitie'
   state.playOldQuiz = false
 }
 

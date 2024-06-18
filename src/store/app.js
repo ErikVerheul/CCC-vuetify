@@ -19,7 +19,6 @@ export const useAppStore = defineStore('app', {
     aliasesObject: {},
     firebaseUser: undefined,
     userData: {},
-    screenName: '',
     currentYear: new Date().getFullYear(),
     currentWeekNr: getWeekNumber(),
     maxQuizWinners: 3

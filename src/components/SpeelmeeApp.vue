@@ -146,7 +146,6 @@ const nowPlaying = computed(() => {
 })
 
 function showAliasInfo() {
-  store.screenName = 'Scuilnaam info'
   state.showAliasInfoActive = true
 }
 
