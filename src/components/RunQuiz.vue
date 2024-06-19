@@ -157,7 +157,7 @@ function loadQuestionIds(quizNumber) {
       if (state.questionIds.length > 0) {
         // load the first question
         state.currentQuestionIdx = 0
-        loadQuestion()
+        loadQuestion(state.questionIds[state.currentQuestionIdx])
       } else {
         state.onWarning = true
         state.problemText = `Kan geen vragen vinden voor deze quiz`
@@ -177,8 +177,7 @@ function loadQuestionIds(quizNumber) {
   })
 }
 
-function loadQuestion() {
-  const questionId = state.questionIds[state.currentQuestionIdx]
+function loadQuestion(questionId) {
   get(child(dbRef, `/quizzes/questions/${Number(questionId)}`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.currentQuestion = snapshot.val()
@@ -287,7 +286,7 @@ function startNextQuestion() {
     state.showExplanation = false
     state.clockValue = `1:00`
     state.playerStarted = false
-    loadQuestion()
+    loadQuestion(state.questionIds[state.currentQuestionIdx])
     return true
   }
   // save quiz result
