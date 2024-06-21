@@ -64,6 +64,8 @@
 }
 </style>
 
+// to allow to exit the app and return to the state where left, the needed data is collected in the object state.progress and saved in the cookie spleelmee-progress
+
 <script setup>
 import { onBeforeMount, reactive, watch } from 'vue'
 import { useAppStore } from '../store/app.js'
@@ -71,6 +73,7 @@ import { db, dbRef } from '../firebase'
 import { ref, child, get, set } from 'firebase/database'
 import ReportFbError from "./ReportFbError.vue"
 import ReportWarning from "./ReportWarning.vue"
+import Cookies from 'universal-cookie'
 
 const props = defineProps({
   quizNumber: {
@@ -91,6 +94,8 @@ let bgColor = undefined
 onBeforeMount(() => {
   loadQuiz(props.quizNumber)
 })
+
+const cookies = new Cookies()
 
 const state = reactive({
   onError: false,
@@ -115,7 +120,9 @@ const state = reactive({
   showExplanation: false,
   counterHeight: 60,
   compactResult: [],
-  quizResult: {}
+  quizResult: {},
+  lastCookieQuestionResult: null,
+  quizProgress: {}
 })
 
 function getReadyText() {
@@ -124,11 +131,32 @@ function getReadyText() {
 }
 
 function loadQuiz(quizNumber) {
-  // get the quiz
+  // get the quiz and the unfinished results if present
   get(child(dbRef, `/quizzes/metaData/${quizNumber}`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.quizObject = snapshot.val()
-      loadQuestionIds(quizNumber)
+      // get the unfinished quiz data if available
+      const retrievedCookie = cookies.get('speelMee-progress')
+      if (retrievedCookie) {
+        state.showExplanation = retrievedCookie.showExplanation
+        const cookieQuizResults = retrievedCookie.quizResult
+        if (cookieQuizResults) {
+          const allKeys = Object.keys(cookieQuizResults)
+          const lastKey = allKeys.slice(-1)[0]
+          state.lastCookieQuestionResult = cookieQuizResults[lastKey]
+          // assign the unfinished quiz results to the running quiz results
+          state.quizResult = cookieQuizResults
+          createRightOrWrongMessage(state.lastCookieQuestionResult.correctAnswer)
+          state.clockValue = state.timeout - state.lastCookieQuestionResult.time
+        } else {
+          state.onWarning = true
+          state.problemText = `De cookie met de gegevens van de afgebroken sessie is niet compleet`
+          state.problemCause = `De voorlopige resultaten zijn niet beschikbaar`
+          state.tipToResolve = `De cookie wordt nu verwijderd. Start de app opnieuw`
+          cookies.remove('speelmee-progress', { sameSite: true })
+        }
+      }
+      loadQuestionIds(quizNumber, retrievedCookie)
     } else {
       state.onWarning = true
       state.problemText = `Kan quiz niet vinden`
@@ -142,27 +170,49 @@ function loadQuiz(quizNumber) {
   })
 }
 
-function loadQuestionIds(quizNumber) {
+function loadQuestionIds(quizNumber, unfinishedQuizData) {
   get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.indexObject = snapshot.val()
       const allQuestionKeys = Object.keys(state.indexObject)
+      // get the question ids of the questions assigned to this quiz
       state.questionIds = []
       for (const key of allQuestionKeys) {
-        // allow type casting although isNaN says both are numbers
-        if (state.indexObject[key].quizNumber == quizNumber) {
+        if (Number(state.indexObject[key].quizNumber) === quizNumber) {
           state.questionIds.push(key)
         }
       }
-      if (state.questionIds.length > 0) {
-        // load the first question
-        state.currentQuestionIdx = 0
-        loadQuestion(state.questionIds[state.currentQuestionIdx])
+
+      /* Process the data from the cookie saved when the quiz was started but unfinished only if the quiz id had not changed. 
+       * E.g. during the lifetime of the cookie another action week was started with another quiz.
+       */
+      if (unfinishedQuizData && unfinishedQuizData.quizNumber === quizNumber) {
+        // continue unfinished quiz
+        state.quizProgress.quizNumber = unfinishedQuizData.quizNumber
+        state.quizProgress.questionId = unfinishedQuizData.questionId
+        // find the current question index
+        for (let i = 0; i < state.questionIds.length; i++) {
+          if (state.questionIds[i] === unfinishedQuizData.questionId) state.currentQuestionIdx = i
+        }
+        // find the last answered questionIdx
+        const lastQuestionIdxAnswered = Number(Object.keys(unfinishedQuizData.quizResult).splice(-1)[0])
+        state.done = lastQuestionIdxAnswered === state.currentQuestionIdx
+        state.quizProgress.showExplanation = unfinishedQuizData.showExplanation
+        loadQuestion()
       } else {
-        state.onWarning = true
-        state.problemText = `Kan geen vragen vinden voor deze quiz`
-        state.problemCause = `De quiz met nummer ${quizNumber} bestaat maar er zijn geen vragen voor gemaakt.`
-        state.tipToResolve = `Vraag de redacteur om voor deze quiz vragen aan te maken`
+        // start quiz from start
+        state.quizProgress.quizNumber = quizNumber
+        if (state.questionIds.length > 0) {
+          // load the first question
+          state.currentQuestionIdx = 0
+          state.quizProgress.showExplanation = false
+          loadQuestion()
+        } else {
+          state.onWarning = true
+          state.problemText = `Kan geen vragen vinden voor deze quiz`
+          state.problemCause = `De quiz met nummer ${quizNumber} bestaat maar er zijn geen vragen voor gemaakt.`
+          state.tipToResolve = `Vraag de redacteur om voor deze quiz vragen aan te maken`
+        }
       }
     } else {
       state.onWarning = true
@@ -177,15 +227,22 @@ function loadQuestionIds(quizNumber) {
   })
 }
 
-function loadQuestion(questionId) {
+function loadQuestion() {
+  const questionId = state.questionIds[state.currentQuestionIdx]
+  state.quizProgress.questionId = questionId
   get(child(dbRef, `/quizzes/questions/${Number(questionId)}`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.currentQuestion = snapshot.val()
-      // initialize answers to false
+      // initialize answers set to false (not selected)
+      state.quizQAnswers = []
       for (let i = 0; i < state.currentQuestion.statementsArray.length; i++) {
-        state.quizQAnswers[i] = false
+        state.quizQAnswers.push(false)
       }
-      startTimer()
+      if (state.done && state.lastCookieQuestionResult && !state.lastCookieQuestionResult.overdue) {
+        // restore answers of last question
+        state.quizQAnswers = state.lastCookieQuestionResult.answers
+      }
+      if (!state.done) startTimer()
     } else {
       state.onWarning = true
       state.problemText = `Kan de quiz vraag niet vinden`
@@ -210,6 +267,8 @@ function composeStatement(idx) {
 }
 
 function qAnswer(idx) {
+  if (state.done) return
+
   state.playerStarted = true
   if (state.quizQAnswers[idx]) {
     state.quizQAnswers[idx] = false
@@ -259,24 +318,32 @@ function startTimer() {
   }, 1000)
 }
 
+function createRightOrWrongMessage(allRight) {
+  if (allRight) {
+    state.wrapupMsg = 'Je antwoord was GOED en binnen de tijd!'
+  } else state.wrapupMsg = 'Je antwoord was FOUT'
+}
+
 function finishQuestion() {
   state.done = true
   // stop the timer
   clearInterval(state.timerId)
-  if (!props.isArchivedQuiz) {
-    state.quizResult[state.currentQuestionIdx] = {}
-    state.quizResult[state.currentQuestionIdx].answers = state.quizQAnswers.slice()
-    state.quizResult[state.currentQuestionIdx].time = state.seconds
-  }
+  state.quizResult[state.currentQuestionIdx] = {}
+  state.quizResult[state.currentQuestionIdx].answers = state.quizQAnswers.slice()
+  state.quizResult[state.currentQuestionIdx].time = state.seconds
   if (countCorrectAnswers() === numberOfCorrectStatements() && countWrongAnswers() === 0) {
-    state.wrapupMsg = 'Je antwoord was GOED en binnen de tijd!'
+    createRightOrWrongMessage(true)
     state.compactResult.push(true)
-    if (!props.isArchivedQuiz) state.quizResult[state.currentQuestionIdx].correctAnswer = true
+    state.quizResult[state.currentQuestionIdx].correctAnswer = true
   } else {
-    state.wrapupMsg = 'Je antwoord was FOUT'
+    createRightOrWrongMessage(false)
     state.compactResult.push(false)
-    if (!props.isArchivedQuiz) state.quizResult[state.currentQuestionIdx].correctAnswer = false
+    state.quizResult[state.currentQuestionIdx].correctAnswer = false
   }
+  // save the answers of all answered questions so far
+  state.quizProgress.quizResult = state.quizResult
+  // save the progress in a cookie for 1 hour
+  cookies.set('speelMee-progress', state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
 }
 
 function startNextQuestion() {
@@ -284,13 +351,14 @@ function startNextQuestion() {
   if (state.currentQuestionIdx < state.questionIds.length) {
     state.done = false
     state.showExplanation = false
+    state.quizProgress.showExplanation = false
     state.clockValue = `1:00`
     state.playerStarted = false
-    loadQuestion(state.questionIds[state.currentQuestionIdx])
+    loadQuestion()
     return true
   }
-  // save quiz result
-  if (!props.isArchivedQuiz) saveResults()
+  // the user finished the quiz: save quiz result only if not an archived quiz and it is not admin who is playing
+  if (!props.isArchivedQuiz && store.userData.alias !== 'admin') saveResults()
 
   return false
 }
@@ -300,7 +368,12 @@ function nextStep() {
     if (!startNextQuestion()) emit('quiz-continue', state.compactResult)
   } else {
     state.showExplanation = true
+    state.quizProgress.showExplanation = true
   }
+  // save the answers of all answered questions so far
+  state.quizProgress.quizResult = state.quizResult
+  // save the progress in a cookie for 1 hour
+  cookies.set('speelMee-progress', state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
 }
 
 watch(() => state.seconds, () => {
@@ -309,23 +382,26 @@ watch(() => state.seconds, () => {
     clearInterval(state.timerId)
     state.done = true
     state.wrapupMsg = 'Je antwoord was niet binnen de tijd'
-    if (!props.isArchivedQuiz) {
-      state.quizResult[state.currentQuestionIdx] = {}
-      state.quizResult[state.currentQuestionIdx].overdue = true
-    }
+    state.quizResult[state.currentQuestionIdx] = {}
+    state.quizResult[state.currentQuestionIdx].overdue = true
     state.compactResult.push(false)
+    // save the answers of all answered questions so far
+    state.quizProgress.quizResult = state.quizResult
+    // save the progress in a cookie for 1 hour
+    cookies.set('speelMee-progress', state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
   }
 })
 
 function saveResults() {
-  if (store.userData.alias !== 'admin') {
-    set(ref(db, `/quizzes/results/${store.currentYear}/${store.userData.alias}/${state.quizObject.actionWeek}/`), state.quizResult)
-    // save the completed quiz number to user data
-    if (store.userData.completedQuizNumbers) {
-      store.userData.completedQuizNumbers.push(props.quizNumber)
-    } else store.userData.completedQuizNumbers = [props.quizNumber]
-    set(ref(db, `users/${store.firebaseUser.uid}/completedQuizNumbers`), store.userData.completedQuizNumbers)
-  }
+  // save the results of this quiz for presentaion purposes
+  set(ref(db, `/quizzes/results/${store.currentYear}/${store.userData.alias}/${state.quizObject.actionWeek}/`), state.quizResult)
+  // save this quiz number as completed to user data
+  if (store.userData.completedQuizNumbers) {
+    store.userData.completedQuizNumbers.push(props.quizNumber)
+  } else store.userData.completedQuizNumbers = [props.quizNumber]
+  set(ref(db, `users/${store.firebaseUser.uid}/completedQuizNumbers`), store.userData.completedQuizNumbers)
+  // remove the cookie containing the progress as it is obsolete now that the user finished the quiz to the end
+  cookies.remove('speelmee-progress', { sameSite: true })
 }
 
 </script>
