@@ -285,7 +285,6 @@ function countGood() {
 
 function stopOldQuiz(result) {
   state.compactResult = result
-  // console.log('stopOldQuiz: compactResult = ' + result)
   state.playOldQuiz = false
 }
 

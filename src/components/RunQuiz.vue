@@ -131,33 +131,41 @@ function getReadyText() {
 }
 
 function loadQuiz(quizNumber) {
-  // get the quiz and the unfinished results if present
+  // start with registering progress
+  state.quizProgress.alias = store.userData.alias
+  state.quizProgress.quizNumber = quizNumber
+  // get the unfinished quiz data if available
+  const retrievedCookie = cookies.get('speelMeeProgress')
+  if (retrievedCookie) {
+    state.showExplanation = retrievedCookie.showExplanation
+    const cookieQuizResults = retrievedCookie.quizResult
+    if (cookieQuizResults) {
+      const allKeys = Object.keys(cookieQuizResults)
+      if (allKeys.length > 0) {
+        const lastKey = allKeys.slice(-1)[0]
+        state.lastCookieQuestionResult = cookieQuizResults[lastKey]
+        // assign the unfinished quiz results to the running quiz results
+        state.quizResult = cookieQuizResults
+        createRightOrWrongMessage(state.lastCookieQuestionResult.correctAnswer)
+        if (state.lastCookieQuestionResult.time) {
+          state.clockValue = state.timeout - state.lastCookieQuestionResult.time
+        } else {
+          // time was overdue
+          state.clockValue = 0
+        }
+      }
+    } else {
+      state.onWarning = true
+      state.problemText = `De cookie met de gegevens van de afgebroken sessie is niet compleet`
+      state.problemCause = `De voorlopige resultaten zijn niet beschikbaar`
+      state.tipToResolve = `De cookie wordt nu verwijderd. Start de app opnieuw`
+      cookies.remove('speelMeeProgress', { sameSite: true })
+    }
+  }
+  // get the quiz
   get(child(dbRef, `/quizzes/metaData/${quizNumber}`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.quizObject = snapshot.val()
-      // get the unfinished quiz data if available
-      const retrievedCookie = cookies.get('speelMeeProgress')
-      if (retrievedCookie) {
-        state.showExplanation = retrievedCookie.showExplanation
-        const cookieQuizResults = retrievedCookie.quizResult
-        if (cookieQuizResults) {
-          const allKeys = Object.keys(cookieQuizResults)
-          if (allKeys.length > 0) {
-            const lastKey = allKeys.slice(-1)[0]
-            state.lastCookieQuestionResult = cookieQuizResults[lastKey]
-            // assign the unfinished quiz results to the running quiz results
-            state.quizResult = cookieQuizResults
-            createRightOrWrongMessage(state.lastCookieQuestionResult.correctAnswer)
-            state.clockValue = state.timeout - state.lastCookieQuestionResult.time
-          }
-        } else {
-          state.onWarning = true
-          state.problemText = `De cookie met de gegevens van de afgebroken sessie is niet compleet`
-          state.problemCause = `De voorlopige resultaten zijn niet beschikbaar`
-          state.tipToResolve = `De cookie wordt nu verwijderd. Start de app opnieuw`
-          cookies.remove('speelMeeProgress', { sameSite: true })
-        }
-      }
       loadQuestionIds(quizNumber, retrievedCookie)
     } else {
       state.onWarning = true
@@ -185,12 +193,12 @@ function loadQuestionIds(quizNumber, unfinishedQuizData) {
         }
       }
 
-      /* Process the data from the cookie saved when the quiz was started but unfinished only if the quiz id had not changed. 
+      /* Process the data from the cookie saved when the quiz was started but unfinished only if picked up by the same user and the quiz id had not changed.
+       * E.g. the user signed out and signed in with another alias.
        * E.g. during the lifetime of the cookie another action week was started with another quiz.
        */
-      if (unfinishedQuizData && unfinishedQuizData.quizNumber === quizNumber) {
+      if (unfinishedQuizData && unfinishedQuizData.alias === store.userData.alias && unfinishedQuizData.quizNumber === quizNumber) {
         // continue unfinished quiz
-        state.quizProgress.quizNumber = unfinishedQuizData.quizNumber
         state.quizProgress.questionId = unfinishedQuizData.questionId
         // find the current question index
         for (let i = 0; i < state.questionIds.length; i++) {
@@ -203,7 +211,6 @@ function loadQuestionIds(quizNumber, unfinishedQuizData) {
         loadQuestion()
       } else {
         // start quiz from start
-        state.quizProgress.quizNumber = quizNumber
         if (state.questionIds.length > 0) {
           // load the first question
           state.currentQuestionIdx = 0
@@ -321,14 +328,17 @@ function startTimer() {
   }, 1000)
 }
 
-function createRightOrWrongMessage(allRight) {
-  if (allRight) {
-    state.wrapupMsg = 'Je antwoord was GOED en binnen de tijd!'
-  } else state.wrapupMsg = 'Je antwoord was FOUT'
+function createRightOrWrongMessage(val) {
+  if (val === undefined) {
+    state.wrapupMsg = 'Je antwoord was niet binnen de tijd'
+  } else
+    if (val) {
+      state.wrapupMsg = 'Je antwoord was GOED en binnen de tijd!'
+    } else state.wrapupMsg = 'Je antwoord was FOUT'
 }
 /* Save the progress in a cookie with a lifterime of 1 hour */
 function saveProgress() {
-  // save the answers of all answered questions so far
+  // save the collected progress and the answers of all answered questions so far
   state.quizProgress.quizResult = state.quizResult
   cookies.set('speelMeeProgress', state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
 }
@@ -357,7 +367,6 @@ function nextStep() {
     if (state.currentQuestionIdx < state.questionIds.length - 1) {
       state.showExplanation = false
       state.quizProgress.showExplanation = false
-      saveProgress()
       state.currentQuestionIdx++
       state.done = false
       state.clockValue = `1:00`

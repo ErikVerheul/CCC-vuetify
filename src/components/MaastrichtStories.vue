@@ -84,7 +84,7 @@ function quizAvailable() {
     if (qNr !== 0) {
       // skip dummy quiz
       if (Number(state.metaObject[qNr].actionWeek) === store.currentWeekNr) {
-        // if more quizzez are set to the current week number, pick the first
+        // if more quizzes are set to the current week number, pick the first
         state.qNumber = qNr
         return true
       }
