@@ -137,7 +137,6 @@ function loadQuiz(quizNumber) {
       state.quizObject = snapshot.val()
       // get the unfinished quiz data if available
       const retrievedCookie = cookies.get('speelMeeProgress')
-      console.log('loadQuiz: retrievedCookie = ' + JSON.stringify(retrievedCookie, null, 2))
       if (retrievedCookie) {
         state.showExplanation = retrievedCookie.showExplanation
         const cookieQuizResults = retrievedCookie.quizResult
@@ -331,7 +330,6 @@ function createRightOrWrongMessage(allRight) {
 function saveProgress() {
   // save the answers of all answered questions so far
   state.quizProgress.quizResult = state.quizResult
-  console.log('saveProgress: create/update cookie')
   cookies.set('speelMeeProgress', state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
 }
 
@@ -367,7 +365,6 @@ function nextStep() {
       loadQuestion()
     } else {
       // the user finished the quiz; remove the cookie containing the progress as it is obsolete now that the user finished the quiz to the end
-      console.log('nextStep: verwijder cookie')
       cookies.remove('speelMeeProgress', { sameSite: true })
       // save quiz result only if not an archived quiz and it is not admin who is playing
       if (!props.isArchivedQuiz && store.userData.alias !== 'admin') saveResults()
