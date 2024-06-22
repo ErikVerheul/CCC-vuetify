@@ -136,24 +136,27 @@ function loadQuiz(quizNumber) {
     if (snapshot.exists()) {
       state.quizObject = snapshot.val()
       // get the unfinished quiz data if available
-      const retrievedCookie = cookies.get('speelMee-progress')
+      const retrievedCookie = cookies.get('speelMeeProgress')
+      console.log('loadQuiz: retrievedCookie = ' + JSON.stringify(retrievedCookie, null, 2))
       if (retrievedCookie) {
         state.showExplanation = retrievedCookie.showExplanation
         const cookieQuizResults = retrievedCookie.quizResult
         if (cookieQuizResults) {
           const allKeys = Object.keys(cookieQuizResults)
-          const lastKey = allKeys.slice(-1)[0]
-          state.lastCookieQuestionResult = cookieQuizResults[lastKey]
-          // assign the unfinished quiz results to the running quiz results
-          state.quizResult = cookieQuizResults
-          createRightOrWrongMessage(state.lastCookieQuestionResult.correctAnswer)
-          state.clockValue = state.timeout - state.lastCookieQuestionResult.time
+          if (allKeys.length > 0) {
+            const lastKey = allKeys.slice(-1)[0]
+            state.lastCookieQuestionResult = cookieQuizResults[lastKey]
+            // assign the unfinished quiz results to the running quiz results
+            state.quizResult = cookieQuizResults
+            createRightOrWrongMessage(state.lastCookieQuestionResult.correctAnswer)
+            state.clockValue = state.timeout - state.lastCookieQuestionResult.time
+          }
         } else {
           state.onWarning = true
           state.problemText = `De cookie met de gegevens van de afgebroken sessie is niet compleet`
           state.problemCause = `De voorlopige resultaten zijn niet beschikbaar`
           state.tipToResolve = `De cookie wordt nu verwijderd. Start de app opnieuw`
-          cookies.remove('speelmee-progress', { sameSite: true })
+          cookies.remove('speelMeeProgress', { sameSite: true })
         }
       }
       loadQuestionIds(quizNumber, retrievedCookie)
@@ -230,6 +233,7 @@ function loadQuestionIds(quizNumber, unfinishedQuizData) {
 function loadQuestion() {
   const questionId = state.questionIds[state.currentQuestionIdx]
   state.quizProgress.questionId = questionId
+  saveProgress()
   get(child(dbRef, `/quizzes/questions/${Number(questionId)}`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.currentQuestion = snapshot.val()
@@ -323,6 +327,13 @@ function createRightOrWrongMessage(allRight) {
     state.wrapupMsg = 'Je antwoord was GOED en binnen de tijd!'
   } else state.wrapupMsg = 'Je antwoord was FOUT'
 }
+/* Save the progress in a cookie with a lifterime of 1 hour */
+function saveProgress() {
+  // save the answers of all answered questions so far
+  state.quizProgress.quizResult = state.quizResult
+  console.log('saveProgress: create/update cookie')
+  cookies.set('speelMeeProgress', state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
+}
 
 function finishQuestion() {
   state.done = true
@@ -340,40 +351,33 @@ function finishQuestion() {
     state.compactResult.push(false)
     state.quizResult[state.currentQuestionIdx].correctAnswer = false
   }
-  // save the answers of all answered questions so far
-  state.quizProgress.quizResult = state.quizResult
-  // save the progress in a cookie for 1 hour
-  cookies.set('speelMee-progress', state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
-}
-
-function startNextQuestion() {
-  state.currentQuestionIdx++
-  if (state.currentQuestionIdx < state.questionIds.length) {
-    state.done = false
-    state.showExplanation = false
-    state.quizProgress.showExplanation = false
-    state.clockValue = `1:00`
-    state.playerStarted = false
-    loadQuestion()
-    return true
-  }
-  // the user finished the quiz: save quiz result only if not an archived quiz and it is not admin who is playing
-  if (!props.isArchivedQuiz && store.userData.alias !== 'admin') saveResults()
-
-  return false
+  saveProgress()
 }
 
 function nextStep() {
   if (state.showExplanation) {
-    if (!startNextQuestion()) emit('quiz-continue', state.compactResult)
+    if (state.currentQuestionIdx < state.questionIds.length - 1) {
+      state.showExplanation = false
+      state.quizProgress.showExplanation = false
+      saveProgress()
+      state.currentQuestionIdx++
+      state.done = false
+      state.clockValue = `1:00`
+      state.playerStarted = false
+      loadQuestion()
+    } else {
+      // the user finished the quiz; remove the cookie containing the progress as it is obsolete now that the user finished the quiz to the end
+      console.log('nextStep: verwijder cookie')
+      cookies.remove('speelMeeProgress', { sameSite: true })
+      // save quiz result only if not an archived quiz and it is not admin who is playing
+      if (!props.isArchivedQuiz && store.userData.alias !== 'admin') saveResults()
+      emit('quiz-continue', state.compactResult)
+    }
   } else {
     state.showExplanation = true
     state.quizProgress.showExplanation = true
+    saveProgress()
   }
-  // save the answers of all answered questions so far
-  state.quizProgress.quizResult = state.quizResult
-  // save the progress in a cookie for 1 hour
-  cookies.set('speelMee-progress', state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
 }
 
 watch(() => state.seconds, () => {
@@ -385,23 +389,18 @@ watch(() => state.seconds, () => {
     state.quizResult[state.currentQuestionIdx] = {}
     state.quizResult[state.currentQuestionIdx].overdue = true
     state.compactResult.push(false)
-    // save the answers of all answered questions so far
-    state.quizProgress.quizResult = state.quizResult
-    // save the progress in a cookie for 1 hour
-    cookies.set('speelMee-progress', state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
+    saveProgress()
   }
 })
 
 function saveResults() {
-  // save the results of this quiz for presentaion purposes
+  // save the results of this quiz for presentation purposes
   set(ref(db, `/quizzes/results/${store.currentYear}/${store.userData.alias}/${state.quizObject.actionWeek}/`), state.quizResult)
   // save this quiz number as completed to user data
   if (store.userData.completedQuizNumbers) {
     store.userData.completedQuizNumbers.push(props.quizNumber)
   } else store.userData.completedQuizNumbers = [props.quizNumber]
   set(ref(db, `users/${store.firebaseUser.uid}/completedQuizNumbers`), store.userData.completedQuizNumbers)
-  // remove the cookie containing the progress as it is obsolete now that the user finished the quiz to the end
-  cookies.remove('speelmee-progress', { sameSite: true })
 }
 
 </script>
