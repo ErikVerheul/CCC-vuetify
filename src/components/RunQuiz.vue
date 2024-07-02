@@ -48,7 +48,7 @@
     <v-row class="mt-2">
       <v-col class="text-right">
         <v-btn :disabled="!state.done" flat append-icon="mdi-arrow-right" @click="nextStep()">
-          Door
+          Verder
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
           </template>

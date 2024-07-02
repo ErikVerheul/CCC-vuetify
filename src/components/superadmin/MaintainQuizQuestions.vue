@@ -180,7 +180,7 @@
           <v-spacer></v-spacer>
           <v-col>
             <v-btn :disabled="!canLoad()" append-icon="mdi-arrow-right" @click="doLoadQuestion">
-              Door
+              Verder
               <template v-slot:append>
                 <v-icon size="x-large" color="purple"></v-icon>
               </template>
@@ -209,7 +209,7 @@
           <v-spacer></v-spacer>
           <v-col>
             <v-btn :disabled="!canRemove()" append-icon="mdi-arrow-right" @click="doRemoveQuestion">
-              Door
+              Verder
               <template v-slot:append>
                 <v-icon size="x-large" color="red"></v-icon>
               </template>

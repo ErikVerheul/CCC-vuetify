@@ -41,7 +41,7 @@
         <v-spacer></v-spacer>
         <v-col>
           <v-btn :disabled="!state.selectedAlias || !PINOK" flat append-icon="mdi-arrow-right" @click="doSigninUser">
-            Door
+            Verder
             <template v-slot:append>
               <v-icon size="x-large" color="purple"></v-icon>
             </template>
