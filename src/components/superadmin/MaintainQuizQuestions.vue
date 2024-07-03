@@ -1,5 +1,8 @@
 <template>
-  <v-sheet>
+  <PreviewQuestion v-if="state.showPreviewQuestion" :content="state.content" :statementsArray="state.statementsArray" :quizQAnswers='state.quizQAnswers' :gameRules="state.gameRules"
+    :correctAnswer="state.correctAnswer" @return-to="state.showPreviewQuestion = false"></PreviewQuestion>
+  <PreviewFullExplanation v-else-if="state.showFullExplanation" :resultInfo="state.resultInfo" @return-to="state.showFullExplanation = false"></PreviewFullExplanation>
+  <v-sheet v-else>
     <v-row class="d-flex align-center justify-center">
       <h2 v-if="state.quizNumber && state.questionNumber !== ''">Onderhoud quiz-vraag {{ state.questionNumber }} voor quiz {{ state.quizNumber
         }}</h2>
@@ -85,15 +88,41 @@
       </v-row>
       <v-row>
         <v-col cols="12">
-          <p>Toelichting op goed/fout antwoord:</p>
-          <QuillEditor v-model:content="state.resultInfo" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+          <p>Toelichting correcte antwoord</p>
+          <QuillEditor v-model:content="state.correctAnswer" contentType="html" :toolbar="editorToolbar"></QuillEditor>
         </v-col>
         <v-col class="mt-12" cols="12">
           <v-text-field v-model="state.gameRules" label="Spelregels (verplicht)" />
         </v-col>
       </v-row>
+      <v-row no-gutters>
+        <v-list lines="two" density="compact">
+          <v-list-item v-for="(num, index) in state.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)" :style="{ 'background-color': bgColor }"></v-list-item>
+        </v-list>
+      </v-row>
+      <v-row v-if="countGoodAnswers() === 0">
+        <v-col cols="12">
+          <p>Klik op de stellingen in de preview om minstens 1 goed antwoord te selecteren</p>
+        </v-col>
+      </v-row>
+
+      <v-divider class="my-5"></v-divider>
+      <v-btn @click="state.showPreviewQuestion = true">Toon preview-kort</v-btn>
+      <v-divider class="my-5"></v-divider>
+
+      <v-row>
+        <v-col cols="12">
+          <p>Lange toelichting</p>
+          <QuillEditor v-model:content="state.resultInfo" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+        </v-col>
+      </v-row>
+
+      <v-btn @click="state.showFullExplanation = true">Toon preview-lang</v-btn>
+
     </template>
-    <v-divider class="my-5"></v-divider>
+
+    <v-divider class="my-8"></v-divider>
+
     <v-row>
       <v-col>
         <v-btn prepend-icon="mdi-arrow-left" @click="emit('m-done')">
@@ -114,53 +143,6 @@
       </v-col>
     </v-row>
   </v-sheet>
-  <v-row v-if="countGoodAnswers() === 0">
-    <v-col cols="12">
-      <p>Klik op de stellingen in de preview om de goede antwoorden te selecteren.</p>
-    </v-col>
-  </v-row>
-  <v-row justify="space-around">
-    <v-col cols="6" md="4">
-      <p>Preview 414 x 2688 px (3 x schermhoogte)</p>
-      <v-sheet class="pa-2" color="grey-lighten-3" height="2688" width="414">
-        <v-row no-gutters>
-          <div v-html="state.content"></div>
-        </v-row>
-        <v-row no-gutters>
-          <v-list lines="two" density="compact">
-            <v-list-item v-for="(num, index) in state.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)" :style="{ 'background-color': bgColor }"></v-list-item>
-          </v-list>
-        </v-row>
-        <v-row v-if="state.gameRules !== ''" no-gutters>
-          <p class="py-2">{{ state.gameRules }}</p>
-        </v-row>
-        <h4 class="py-3">Toelichting op goed/fout antwoord:</h4>
-        <v-row no-gutters>
-          <div v-html="state.resultInfo"></div>
-        </v-row>
-      </v-sheet>
-    </v-col>
-    <v-col cols="6" md="4">
-      <p>Preview 375 x 2436 px (3 x schermhoogte)</p>
-      <v-sheet class="pa-2" color="grey-lighten-3" height="2436" width="375">
-        <v-row no-gutters>
-          <div v-html="state.content"></div>
-        </v-row>
-        <v-row no-gutters>
-          <v-list lines="two" density="compact">
-            <v-list-item v-for="(num, index) in state.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)" :style="{ 'background-color': bgColor }"></v-list-item>
-          </v-list>
-        </v-row>
-        <v-row v-if="state.gameRules !== ''" no-gutters>
-          <p class="py-2">{{ state.gameRules }}</p>
-        </v-row>
-        <h4 class="py-3">Toelichting op goed/fout antwoord:</h4>
-        <v-row no-gutters>
-          <div v-html="state.resultInfo"></div>
-        </v-row>
-      </v-sheet>
-    </v-col>
-  </v-row>
 
   <v-dialog v-model="state.showQuestionSelect" width="70%">
     <v-card>
@@ -226,6 +208,8 @@
 import { onBeforeMount, computed, reactive, watch } from 'vue'
 import { db, dbRef } from '../../firebase'
 import { ref, child, get, set, remove } from 'firebase/database'
+import PreviewQuestion from './PreviewQuestion.vue'
+import PreviewFullExplanation from './PreviewFullExplanation.vue'
 const emit = defineEmits(['m-done'])
 
 onBeforeMount(() => {
@@ -241,6 +225,9 @@ const editorToolbar = [
 ]
 
 const state = reactive({
+  showPreviewQuestion: false,
+  showFullExplanation: false,
+
   quizzesObject: {},
   indexObject: {},
   allQuizNumbers: [],
@@ -266,6 +253,7 @@ const state = reactive({
   statementsArray: [],
   gameRules: '',
   quizQAnswers: {},
+  correctAnswer: undefined,
   resultInfo: undefined,
   questionNumberRules: [
     value => {
@@ -334,6 +322,7 @@ function clearAll() {
   state.content = undefined
   state.statementsArray = []
   state.quizQAnswers = []
+  state.correctAnswer = undefined
   state.resultInfo = undefined
   state.gameRules = ''
   state.quizNumber = ''
@@ -410,6 +399,7 @@ function doLoadQuestion() {
       state.content = quizObject.body || ''
       state.statementsArray = quizObject.statementsArray
       state.quizQAnswers = quizObject.answers
+      state.correctAnswer = quizObject.correctAnswer || "<p></p>"
       state.resultInfo = quizObject.resultInfo
       state.gameRules = quizObject.gameRules
       state.statementNumber = state.statementsArray.length - 1
@@ -502,6 +492,7 @@ function doSaveQuestion() {
     "body": state.content || '',
     "statementsArray": state.statementsArray,
     "answers": state.quizQAnswers,
+    "correctAnswer": state.correctAnswer,
     "resultInfo": state.resultInfo,
     "gameRules": state.gameRules
   }).then(() => {
