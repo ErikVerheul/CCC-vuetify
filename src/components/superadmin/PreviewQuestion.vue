@@ -3,8 +3,8 @@
     <v-card-title>Preview</v-card-title>
     <v-row justify="space-around">
       <v-col cols="6" md="4">
-        <p>Preview 414 x 1792 px (2 x schermhoogte)</p>
-        <v-sheet class="pa-2" color="grey-lighten-3" height="1792" width="414">
+        <p>Preview 414 pixels breed</p>
+        <v-sheet class="pa-2" color="grey-lighten-3" width="414">
           <v-row no-gutters>
             <div v-html="props.content"></div>
           </v-row>
@@ -23,8 +23,8 @@
         </v-sheet>
       </v-col>
       <v-col cols="6" md="4">
-        <p>Preview 375 x 1624 px (2 x schermhoogte)</p>
-        <v-sheet class="pa-2" color="grey-lighten-3" height="1624" width="375">
+        <p>Preview 375 pixels breed</p>
+        <v-sheet class="pa-2" color="grey-lighten-3" width="375">
           <v-row no-gutters>
             <div v-html="props.content"></div>
           </v-row>
@@ -43,7 +43,7 @@
         </v-sheet>
       </v-col>
     </v-row>
-    <v-divider></v-divider>
+    <v-divider class="my-5"></v-divider>
 
     <v-card-actions>
       <v-row>
