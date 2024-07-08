@@ -129,18 +129,21 @@ function checkIfHistoryAvailable(quizNrsFound) {
   }
 }
 
-/* Store array of quiz numbers with assigned questions, and if found, call checkIfHistoryAvailable */
+/* 
+ * Store array of quiz numbers with assigned questions, and if found, call checkIfHistoryAvailable
+ * Note: Cannot trust to retrieve a valid array with snapshot.val(). See https://firebase.blog/posts/2014/04/best-practices-arrays-in-firebase
+*/
 function getQuizNumersWithAssignedQuestions() {
   state.isHistoryAvailable = false
   get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
-    const quizNrsFound = []
     if (snapshot.exists()) {
-      const questionsIndex = snapshot.val()
-      // skip the dummy quiz (i = 0)
-      for (let i = 1; i < questionsIndex.length; i++) {
-        const quizNr = questionsIndex[i].quizNumber
+      const indexObject = snapshot.val()
+      const indexObjectKeys = Object.keys(indexObject)
+      const quizNrsFound = []
+      indexObjectKeys.forEach((key) => {
+        const quizNr = indexObject[key].quizNumber
         if (!quizNrsFound.includes(quizNr)) quizNrsFound.push(quizNr)
-      }
+      })
       // call now we have the quiz numbers with at least one quiz with assigned question
       checkIfHistoryAvailable(quizNrsFound)
       // sort in ascending order
