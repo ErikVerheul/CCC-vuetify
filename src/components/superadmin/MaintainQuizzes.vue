@@ -231,15 +231,15 @@ function removeQuizRefs(quizNr) {
   get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
     if (snapshot.exists()) {
       const indexObject = snapshot.val()
-      const allQuestionKeys = Object.keys(indexObject)
+      const indexObjectKeys = Object.keys(indexObject)
       state.resetCount = 0
-      for (const key of allQuestionKeys) {
+      indexObjectKeys.forEach((key) => {
         if (indexObject[key].quizNumber == quizNr) {
           // reset to '0' meaning not assigned to a quiz
           indexObject[key].quizNumber = '0'
           state.resetCount++
         }
-      }
+      })
       // save updated index
       set(ref(db, '/quizzes/questions/index/'), indexObject).then(() => {
       }).catch((error) => {

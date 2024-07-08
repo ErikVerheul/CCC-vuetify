@@ -184,14 +184,14 @@ function loadQuestionIds(quizNumber, unfinishedQuizData) {
   get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.indexObject = snapshot.val()
-      const allQuestionKeys = Object.keys(state.indexObject)
-      // get the question ids of the questions assigned to this quiz
+      const indexObjectKeys = Object.keys(state.indexObject)
+      // get the question numbers of the questions assigned to this quiz
       state.questionIds = []
-      for (const key of allQuestionKeys) {
+      indexObjectKeys.forEach((key) => {
         if (Number(state.indexObject[key].quizNumber) === quizNumber) {
           state.questionIds.push(key)
         }
-      }
+      })
 
       /* Process the data from the cookie saved when the quiz was started but unfinished only if picked up by the same user and the quiz id had not changed.
        * E.g. the user signed out and signed in with another alias.
@@ -245,9 +245,11 @@ function loadQuestion() {
       state.currentQuestion = snapshot.val()
       // initialize answers set to false (not selected)
       state.quizQAnswers = []
-      for (let i = 0; i < state.currentQuestion.statementsArray.length; i++) {
+      const statementKeys = Object.keys(state.currentQuestion.statementsArray)
+      statementKeys.forEach(() => {
         state.quizQAnswers.push(false)
-      }
+      })
+      
       if (state.done && state.lastCookieQuestionResult && !state.lastCookieQuestionResult.overdue) {
         // restore answers of last question
         state.quizQAnswers = state.lastCookieQuestionResult.answers

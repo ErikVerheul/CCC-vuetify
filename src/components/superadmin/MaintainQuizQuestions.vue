@@ -231,7 +231,7 @@ const state = reactive({
   quizzesObject: {},
   indexObject: {},
   allQuizNumbers: [],
-  allQuestionNumbers: [],
+  indexObjectKeys: [],
 
   quizNumber: undefined,
   quizTitle: '',
@@ -278,7 +278,7 @@ const state = reactive({
       return 'Mag geen negatief getal zijn.'
     },
     value => {
-      if (!state.allQuestionNumbers.includes(value)) return true
+      if (!state.indexObjectKeys.includes(value)) return true
 
       return 'Dit quiz-vraag nummer bestaat al'
     }
@@ -350,9 +350,9 @@ function createQuizItems(quizzesObject, allQuizNumbers) {
   })
 }
 
-function createQuestionItems(questionObject, allQuestionNumbers) {
+function createQuestionItems(questionObject, indexObjectKeys) {
   state.questionItems = []
-  allQuestionNumbers.forEach(el => {
+  indexObjectKeys.forEach(el => {
     state.questionItems.push({ 'key': el, 'title': `(${el}) ${questionObject[el].title}` })
   })
 }
@@ -369,8 +369,8 @@ function doLoadMetaData() {
       get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
         if (snapshot.exists()) {
           state.indexObject = snapshot.val()
-          state.allQuestionNumbers = Object.keys(state.indexObject)
-          createQuestionItems(state.indexObject, state.allQuestionNumbers)
+          state.indexObjectKeys = Object.keys(state.indexObject)
+          createQuestionItems(state.indexObject, state.indexObjectKeys)
         } else {
           console.log("No quiz-questions available")
         }
@@ -387,7 +387,7 @@ function doLoadMetaData() {
 
 /* Return true if questionNumber is defined, is a number and valid */
 function canLoad() {
-  return !isNaN(state.questionNumber) && state.allQuestionNumbers.includes(state.questionNumber)
+  return !isNaN(state.questionNumber) && state.indexObjectKeys.includes(state.questionNumber)
 }
 
 /* Get the quiz-question data */
