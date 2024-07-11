@@ -1,14 +1,18 @@
 <template>
-  <template v-if="!state.playOldQuiz">
+  <RunQuiz v-if="state.playOldQuiz" @quiz-is-done="showExplanations"></RunQuiz>
+  <QuizRecap v-else-if="state.showRecap" @return-to-base="state.showRecap = false"></QuizRecap>
+  <template v-else>
     <v-container>
-      <v-row>
-        <b>Zondag 13:00 wordt de ranglijst definitief</b>
-      </v-row>
-      <v-row>
-        <v-data-table mobile-breakpoint="0" density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores"
-          item-value="name">
-        </v-data-table>
-      </v-row>
+      <template v-if="!store.isArchivedQuiz">
+        <v-row>
+          <b>Zondag 13:00 wordt de ranglijst definitief</b>
+        </v-row>
+        <v-row>
+          <v-data-table mobile-breakpoint="0" density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores"
+            item-value="name">
+          </v-data-table>
+        </v-row>
+      </template>
       <v-row v-if="state.isHistoryAvailable" class="ml-n6">
         <v-col cols="9">
           Zin om een oude quiz te spelen?<br>Telt niet voor de competitie
@@ -47,7 +51,6 @@
       </template>
     </v-row>
   </template>
-  <RunQuiz v-else :quizNumber="state.oldQuizNumber" :isArchivedQuiz="true" @quiz-continue="stopOldQuiz"></RunQuiz>
 </template>
 
 <script setup>
@@ -56,16 +59,17 @@ import { useAppStore } from '../store/app.js'
 import { dbRef } from '../firebase'
 import { child, get } from 'firebase/database'
 import RunQuiz from './RunQuiz.vue'
+import QuizRecap from './QuizRecap.vue'
 
 const store = useAppStore()
 const emit = defineEmits(['return-to-menu'])
 
 const state = reactive({
+  showRecap: false,
   metaObject: {},
   quizNumersWithAssignedQuestions: [],
   isHistoryAvailable: false,
   playOldQuiz: false,
-  compactResult: [],
   oldQuizNumber: undefined,
   itemsPerPage: 10,
   yearScores: {},
@@ -264,21 +268,22 @@ function createScoresArray(allScores) {
 
 /* Starts a quiz with assigned questions and with a (randomly selected) weeknumber in the past */
 function startOldQuiz() {
-  state.compactResult = []
+  store.isArchivedQuiz = true
+  store.compactResult = []
   const oldWeekQnumbers = state.quizNumersWithAssignedQuestions.filter(qNr => Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr)
-  state.oldQuizNumber = Number(oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))])
+  store.currentQNumber = Number(oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))])
   state.playOldQuiz = true
 }
 
 function countAll() {
-  if (state.compactResult) return state.compactResult.length
+  if (store.compactResult) return store.compactResult.length
   return 0
 }
 
 function countGood() {
-  if (state.compactResult) {
+  if (store.compactResult) {
     let count = 0
-    state.compactResult.forEach(el => {
+    store.compactResult.forEach(el => {
       if (el === true) count++
     })
     return count
@@ -286,9 +291,9 @@ function countGood() {
   return 0
 }
 
-function stopOldQuiz(result) {
-  state.compactResult = result
+function showExplanations() {
   state.playOldQuiz = false
+  state.showRecap = true
 }
 
 function showWinners() {

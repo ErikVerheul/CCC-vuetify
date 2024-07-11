@@ -1,6 +1,6 @@
 <template>
-  <ReportFbError v-if="state.onError" :firebaseError="state.firebaseError" :fbErrorContext="state.fbErrorContext" @return-to="emit('quiz-continue')"></ReportFbError>
-  <ReportWarning v-else-if="state.onWarning" :problemText="state.problemText" :problemCause="state.problemCause" :tipToResolve="state.tipToResolve" @return-to="emit('quiz-continue')"></ReportWarning>
+  <ReportFbError v-if="state.onError" :firebaseError="state.firebaseError" :fbErrorContext="state.fbErrorContext" @return-to="emit('quiz-is-done')"></ReportFbError>
+  <ReportWarning v-else-if="state.onWarning" :problemText="state.problemText" :problemCause="state.problemCause" :tipToResolve="state.tipToResolve" @return-to="emit('quiz-is-done')"></ReportWarning>
   <template v-else>
     <v-sheet class="ma-2" :max-width="store.screenWidth">
       <template v-if="!state.showExplanation">
@@ -17,7 +17,7 @@
       <template v-else>
         <h4 class="py-3">Toelichting</h4>
         <v-row no-gutters>
-          <div v-html="state.currentQuestion.resultInfo"></div>
+          <div v-html="state.currentQuestion.correctAnswer"></div>
         </v-row>
       </template>
     </v-sheet>
@@ -75,24 +75,15 @@ import ReportFbError from "./ReportFbError.vue"
 import ReportWarning from "./ReportWarning.vue"
 import Cookies from 'universal-cookie'
 
-const props = defineProps({
-  quizNumber: {
-    type: Number,
-    required: true
-  },
-  isArchivedQuiz: {
-    type: Boolean,
-    required: true
-  }
-})
 const store = useAppStore()
-const emit = defineEmits(['quiz-continue'])
+const emit = defineEmits(['quiz-is-done'])
 
 // must be non-reactive
 let bgColor = undefined
 
 onBeforeMount(() => {
-  loadQuiz(props.quizNumber)
+  state.compactResult = []
+  loadQuiz(store.currentQNumber)
 })
 
 const cookies = new Cookies()
@@ -119,14 +110,13 @@ const state = reactive({
   wrapupMsg: '',
   showExplanation: false,
   counterHeight: 60,
-  compactResult: [],
   quizResult: {},
   lastCookieQuestionResult: null,
   quizProgress: {}
 })
 
 function getReadyText() {
-  if (props.isArchivedQuiz) return 'Onthul resultaat'
+  if (store.isArchivedQuiz) return 'Onthul resultaat'
   return 'Verzend antwoord'
 }
 
@@ -354,11 +344,11 @@ function finishQuestion() {
   state.quizResult[state.currentQuestionIdx].time = state.seconds
   if (countCorrectAnswers() === numberOfCorrectStatements() && countWrongAnswers() === 0) {
     createRightOrWrongMessage(true)
-    state.compactResult.push(true)
+    store.compactResult.push(true)
     state.quizResult[state.currentQuestionIdx].correctAnswer = true
   } else {
     createRightOrWrongMessage(false)
-    state.compactResult.push(false)
+    store.compactResult.push(false)
     state.quizResult[state.currentQuestionIdx].correctAnswer = false
   }
   saveProgress()
@@ -378,8 +368,8 @@ function nextStep() {
       // the user finished the quiz; remove the cookie containing the progress as it is obsolete now that the user finished the quiz to the end
       cookies.remove('speelMeeProgress', { sameSite: true })
       // save quiz result only if not an archived quiz and it is not admin who is playing
-      if (!props.isArchivedQuiz && store.userData.alias !== 'admin') saveResults()
-      emit('quiz-continue', state.compactResult)
+      if (!store.isArchivedQuiz && store.userData.alias !== 'admin') saveResults()
+      emit('quiz-is-done')
     }
   } else {
     state.showExplanation = true
@@ -396,7 +386,7 @@ watch(() => state.seconds, () => {
     state.wrapupMsg = 'Je antwoord was niet binnen de tijd'
     state.quizResult[state.currentQuestionIdx] = {}
     state.quizResult[state.currentQuestionIdx].overdue = true
-    state.compactResult.push(false)
+    store.compactResult.push(false)
     saveProgress()
   }
 })
@@ -406,8 +396,8 @@ function saveResults() {
   set(ref(db, `/quizzes/results/${store.currentYear}/${store.userData.alias}/${state.quizObject.actionWeek}/`), state.quizResult)
   // save this quiz number as completed to user data
   if (store.userData.completedQuizNumbers) {
-    store.userData.completedQuizNumbers.push(props.quizNumber)
-  } else store.userData.completedQuizNumbers = [props.quizNumber]
+    store.userData.completedQuizNumbers.push(store.currentQNumber)
+  } else store.userData.completedQuizNumbers = [store.currentQNumber]
   set(ref(db, `users/${store.firebaseUser.uid}/completedQuizNumbers`), store.userData.completedQuizNumbers)
 }
 

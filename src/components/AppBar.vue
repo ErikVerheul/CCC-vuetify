@@ -58,7 +58,7 @@
           </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated && store.userData.alias === 'admin'">
-          <v-btn color="green" flat @click="router.push({ path: '/QuizResultsView' })">
+          <v-btn color="green" flat @click="showScores">
             Toon de scores en de winnaars
           </v-btn>
         </v-list-item>
@@ -286,6 +286,7 @@ function removeAccount() {
   for (let n = 0; n < 10; n++) {
     updates[`quizzes/results/${store.currentYear - n}/${store.userData.alias}`] = null
   }
+  console.log('updates= ' + JSON.stringify(updates))
   // remove the users account and cookie
   update(dbRef, updates).then(() => {
     store.firebaseUser.delete().then(() => {
@@ -295,6 +296,7 @@ function removeAccount() {
     }).catch((error) => {
       state.dialog10 = false
       console.log(`Account and/or cookie deletion failed: ${error.message}`)
+      // emit('reset-app')
     })
   }).catch((error) => {
     console.log(`Removal of ${store.userData.alias} data failed: ${error.message}`)
@@ -303,6 +305,11 @@ function removeAccount() {
 
 function aliasIsCelebrity(alias) {
   return store.aliasesObject[alias] && store.aliasesObject[alias].celebrity
+}
+
+function showScores() {
+  store.isArchivedQuiz = false
+  router.push({ path: '/QuizResultsView' })
 }
 
 function logout() {

@@ -21,6 +21,9 @@ export const useAppStore = defineStore('app', {
     userData: {},
     currentYear: new Date().getFullYear(),
     currentWeekNr: getWeekNumber(),
-    maxQuizWinners: 3
+    currentQNumber: undefined,
+    maxQuizWinners: 3,
+    compactResult: [],
+    isArchivedQuiz: false
   }),
 })

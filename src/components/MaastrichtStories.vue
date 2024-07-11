@@ -1,6 +1,8 @@
 <template>
-  <QuizResults v-if="state.showResults" @return-to-menu="state.showResults = false"></QuizResults>
-  <v-sheet v-else-if="!state.doQuiz" class="text-center" :max-width="store.screenWidth">
+  <RunQuiz v-if="state.doQuiz" @quiz-is-done="showExplanations"></RunQuiz>
+  <QuizRecap v-else-if="state.showRecap" @return-to-base="showResultsData"></QuizRecap>
+  <QuizResults v-else-if="state.showResults" @return-to-menu="state.showResults = false"></QuizResults>
+  <v-sheet v-else class="text-center" :max-width="store.screenWidth">
     <v-row>
       <v-col cols="12" class="my-0 py-0">
         <h4>Hallo {{ store.userData.alias }}</h4>
@@ -38,7 +40,6 @@
       </v-col>
     </v-row>
   </v-sheet>
-  <RunQuiz v-else :quizNumber="state.qNumber" :isArchivedQuiz="state.isArchivedQuiz" @quiz-continue="showResultsData"></RunQuiz>
 </template>
 
 <script setup>
@@ -47,6 +48,7 @@ import { useAppStore } from '../store/app.js'
 import { dbRef } from '../firebase'
 import { child, get } from 'firebase/database'
 import RunQuiz from './RunQuiz.vue'
+import QuizRecap from './QuizRecap.vue'
 import QuizResults from './QuizResults.vue'
 
 const store = useAppStore()
@@ -55,9 +57,8 @@ const state = reactive({
   metaObject: {},
   quizNumbers: [],
   doQuiz: false,
-  qNumber: undefined,
-  isArchivedQuiz: false,
   quizWasCompleted: false,
+  showRecap: false,
   showResults: false
 })
 
@@ -65,6 +66,15 @@ onBeforeMount(() => {
   loadMetaData()
 })
 
+function showExplanations() {
+  state.doQuiz = false
+  state.showRecap = true
+}
+
+function showResultsData() {
+  state.showRecap = false
+  state.showResults = true
+}
 function loadMetaData() {
   get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
     if (snapshot.exists()) {
@@ -85,7 +95,7 @@ function quizAvailable() {
       // skip dummy quiz
       if (Number(state.metaObject[qNr].actionWeek) === store.currentWeekNr) {
         // if more quizzes are set to the current week number, pick the first
-        state.qNumber = qNr
+        store.currentQNumber = qNr
         return true
       }
     }
@@ -93,18 +103,13 @@ function quizAvailable() {
 }
 
 function startQuiz() {
-  if (store.userData.alias !== 'admin' && store.userData.completedQuizNumbers && store.userData.completedQuizNumbers.includes(state.qNumber)) {
+  if (store.userData.alias !== 'admin' && store.userData.completedQuizNumbers && store.userData.completedQuizNumbers.includes(store.currentQNumber)) {
     // admin can run a quiz multiple times but not take part in a competition
     state.quizWasCompleted = true
   } else {
     state.quizWasCompleted = false
     state.doQuiz = true
-    state.isArchivedQuiz = false
+    store.isArchivedQuiz = false
   }
-}
-
-function showResultsData() {
-  state.doQuiz = false
-  state.showResults = true
 }
 </script>
