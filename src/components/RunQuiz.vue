@@ -14,13 +14,17 @@
           </v-list>
         </v-row>
       </template>
-      <template v-else>
-        <h4 class="py-3">Toelichting op het goede antwoord</h4>
-        <v-row v-if="isTextAvailable()" no-gutters>
-          <div v-html="state.currentQuestion.correctAnswer"></div>
-        </v-row>
-        <v-row>
-          <h3 class="py-12">Sorry, de toelichting is niet beschikbaar</h3>
+      <template class="text-center" v-else>
+        <p>Je antwoord was {{ getResultText() }}</p>
+        <p v-if="state.correctStatements.length === 1">Het juiste antwoord is:</p>
+        <p v-else>De juiste antwoorden zijn:</p>
+        <v-row no-gutters>
+          <v-list lines="two" density="compact">
+            <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="composeStatement(index)" :style="{ 'background-color': bgColor }"></v-list-item>
+          </v-list>
+          <div v-if="isTextAvailable()" v-html="state.currentQuestion.correctAnswer"></div>
+          <h3 v-else class="py-12">Sorry, de toelichting is niet beschikbaar</h3>
+          <p class="py-2">Meer hierover na afloop van de quiz</p>
         </v-row>
       </template>
     </v-sheet>
@@ -105,6 +109,8 @@ const state = reactive({
   questionIds: [],
   currentQuestionIdx: 0,
   currentQuestion: {},
+  correctStatements: [],
+  answerIsRight: false,
   quizQAnswers: [],
   playerStarted: false,
   seconds: 0,
@@ -122,6 +128,11 @@ const state = reactive({
 function getReadyText() {
   if (store.isArchivedQuiz) return 'Onthul resultaat'
   return 'Verzend antwoord'
+}
+
+function getResultText() {
+  if (state.answerIsRight) return 'goed!'
+  return 'fout!'
 }
 
 function loadQuiz(quizNumber) {
@@ -237,6 +248,15 @@ function loadQuestion() {
   get(child(dbRef, `/quizzes/questions/${Number(questionId)}`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.currentQuestion = snapshot.val()
+      // store the correct statements
+      state.correctStatements = []
+      const answerKeys = Object.keys(state.currentQuestion.answers)
+      answerKeys.forEach((key) => {
+        if (state.currentQuestion.answers[key] === true) {
+          state.correctStatements.push(state.currentQuestion.statementsArray[key])
+        }
+      })
+      console.log('loadQuestion: state.correctStatements = ' + state.correctStatements)
       // initialize answers set to false (not selected)
       state.quizQAnswers = []
       const statementKeys = Object.keys(state.currentQuestion.statementsArray)
@@ -347,10 +367,12 @@ function finishQuestion() {
   state.quizResult[state.currentQuestionIdx].answers = state.quizQAnswers.slice()
   state.quizResult[state.currentQuestionIdx].time = state.seconds
   if (countCorrectAnswers() === numberOfCorrectStatements() && countWrongAnswers() === 0) {
+    state.answerIsRight = true
     createRightOrWrongMessage(true)
     store.compactResult.push(true)
     state.quizResult[state.currentQuestionIdx].correctAnswer = true
   } else {
+    state.answerIsRight = false
     createRightOrWrongMessage(false)
     store.compactResult.push(false)
     state.quizResult[state.currentQuestionIdx].correctAnswer = false
