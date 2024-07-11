@@ -15,12 +15,16 @@
         </v-row>
       </template>
       <template v-else>
-        <h4 class="py-3">Toelichting</h4>
-        <v-row no-gutters>
+        <h4 class="py-3">Toelichting op het goede antwoord</h4>
+        <v-row v-if="isTextAvailable()" no-gutters>
           <div v-html="state.currentQuestion.correctAnswer"></div>
+        </v-row>
+        <v-row>
+          <h3 class="py-12">Sorry, de toelichting is niet beschikbaar</h3>
         </v-row>
       </template>
     </v-sheet>
+
     <v-sheet v-if="!state.showExplanation" class="pa-2" :height="state.counterHeight" :max-width="store.screenWidth">
       <v-row v-if="!state.done">
         <v-col v-if="state.playerStarted" cols="7">
@@ -239,7 +243,7 @@ function loadQuestion() {
       statementKeys.forEach(() => {
         state.quizQAnswers.push(false)
       })
-      
+
       if (state.done && state.lastCookieQuestionResult && !state.lastCookieQuestionResult.overdue) {
         // restore answers of last question
         state.quizQAnswers = state.lastCookieQuestionResult.answers
@@ -376,6 +380,10 @@ function nextStep() {
     state.quizProgress.showExplanation = true
     saveProgress()
   }
+}
+
+function isTextAvailable() {
+  return (state.currentQuestion.correctAnswer && state.currentQuestion.correctAnswer.length > 7) || false
 }
 
 watch(() => state.seconds, () => {
