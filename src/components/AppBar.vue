@@ -286,7 +286,6 @@ function removeAccount() {
   for (let n = 0; n < 10; n++) {
     updates[`quizzes/results/${store.currentYear - n}/${store.userData.alias}`] = null
   }
-  console.log('updates= ' + JSON.stringify(updates))
   // remove the users account and cookie
   update(dbRef, updates).then(() => {
     store.firebaseUser.delete().then(() => {
