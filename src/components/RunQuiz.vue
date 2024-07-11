@@ -31,7 +31,7 @@
 
     <v-sheet v-if="!state.showExplanation" class="pa-2" :height="state.counterHeight" :max-width="store.screenWidth">
       <v-row v-if="!state.done">
-        <v-col v-if="state.playerStarted" cols="7">
+        <v-col v-if="state.timerStarted" cols="7">
           <v-btn @click="finishQuestion()">{{ getReadyText() }}</v-btn>
         </v-col>
         <v-col v-else cols="7">
@@ -90,7 +90,6 @@ const emit = defineEmits(['quiz-is-done'])
 let bgColor = undefined
 
 onBeforeMount(() => {
-  state.compactResult = []
   loadQuiz(store.currentQNumber)
 })
 
@@ -111,8 +110,8 @@ const state = reactive({
   currentQuestion: {},
   correctStatements: [],
   answerIsRight: false,
-  quizQAnswers: [],
-  playerStarted: false,
+  userAnswers: [],
+  timerStarted: false,
   seconds: 0,
   timerId: undefined,
   timeout: 60,
@@ -136,6 +135,7 @@ function getResultText() {
 }
 
 function loadQuiz(quizNumber) {
+  store.compactResult = []
   // start with registering progress
   state.quizProgress.alias = store.userData.alias
   state.quizProgress.quizNumber = quizNumber
@@ -256,17 +256,16 @@ function loadQuestion() {
           state.correctStatements.push(state.currentQuestion.statementsArray[key])
         }
       })
-      console.log('loadQuestion: state.correctStatements = ' + state.correctStatements)
-      // initialize answers set to false (not selected)
-      state.quizQAnswers = []
+      // initialize user answers to false (not selected)
+      state.userAnswers = []
       const statementKeys = Object.keys(state.currentQuestion.statementsArray)
       statementKeys.forEach(() => {
-        state.quizQAnswers.push(false)
+        state.userAnswers.push(false)
       })
 
       if (state.done && state.lastCookieQuestionResult && !state.lastCookieQuestionResult.overdue) {
         // restore answers of last question
-        state.quizQAnswers = state.lastCookieQuestionResult.answers
+        state.userAnswers = state.lastCookieQuestionResult.answers
       }
       if (!state.done) startTimer()
     } else {
@@ -286,7 +285,7 @@ function composeStatement(idx) {
   if (idx > 12) return "Fout: Meer dan 12 vragen?"
   const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
   bgColor = 'white'
-  if (state.quizQAnswers[idx]) {
+  if (state.userAnswers[idx]) {
     bgColor = 'aqua'
   }
   return `${letters[idx]}. ` + state.currentQuestion.statementsArray[idx]
@@ -294,16 +293,11 @@ function composeStatement(idx) {
 
 function qAnswer(idx) {
   if (state.done) return
-
-  state.playerStarted = true
-  if (state.quizQAnswers[idx]) {
-    state.quizQAnswers[idx] = false
-  } else {
-    state.quizQAnswers[idx] = true
-  }
+  state.userAnswers[idx] = !state.userAnswers[idx]
+  state.timerStarted = true
 }
 
-function numberOfCorrectStatements() {
+function numberOfCorrectAnswers() {
   if (state.currentQuestion.answers === undefined) return 0
   const keys = Object.keys(state.currentQuestion.answers)
   let count = 0
@@ -313,21 +307,21 @@ function numberOfCorrectStatements() {
   return count
 }
 
-function countCorrectAnswers() {
+function countUserSelectedCorrectAnswers() {
   if (state.currentQuestion.answers === undefined) return 0
   const keys = Object.keys(state.currentQuestion.answers)
   let count = 0
   keys.forEach(k => {
-    if (state.currentQuestion.answers[k] === true && state.quizQAnswers[k] === true) count++
+    if (state.currentQuestion.answers[k] === true && state.userAnswers[k] === true) count++
   })
   return count
 }
 
-function countWrongAnswers() {
+function countUserSelectedWrongAnswers() {
   let count = 0
-  for (let ind = 0; ind < state.quizQAnswers.length; ind++) {
-    if (state.quizQAnswers[ind] === true && state.currentQuestion.answers[ind] !== true) count++
-  }
+  state.userAnswers.forEach(ind => {
+    if (state.userAnswers[ind] === true && state.currentQuestion.answers[ind] !== true) count++
+  })
   return count
 }
 
@@ -364,9 +358,9 @@ function finishQuestion() {
   // stop the timer
   clearInterval(state.timerId)
   state.quizResult[state.currentQuestionIdx] = {}
-  state.quizResult[state.currentQuestionIdx].answers = state.quizQAnswers.slice()
+  state.quizResult[state.currentQuestionIdx].answers = state.userAnswers.slice()
   state.quizResult[state.currentQuestionIdx].time = state.seconds
-  if (countCorrectAnswers() === numberOfCorrectStatements() && countWrongAnswers() === 0) {
+  if (countUserSelectedCorrectAnswers() === numberOfCorrectAnswers() && countUserSelectedWrongAnswers() === 0) {
     state.answerIsRight = true
     createRightOrWrongMessage(true)
     store.compactResult.push(true)
@@ -388,7 +382,7 @@ function nextStep() {
       state.currentQuestionIdx++
       state.done = false
       state.clockValue = `1:00`
-      state.playerStarted = false
+      state.timerStarted = false
       loadQuestion()
     } else {
       // the user finished the quiz; remove the cookie containing the progress as it is obsolete now that the user finished the quiz to the end
