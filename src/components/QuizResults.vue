@@ -22,7 +22,7 @@
         </v-col>
       </v-row>
       <v-row v-if="countAll() > 0" cols="12">
-        <b>U heeft {{ countGood() }} van de {{ countAll() }} antwoorden goed</b>
+        <b>Je had {{ countGood() }} van de {{ countAll() }} antwoorden goed</b>
       </v-row>
       <v-row v-if="state.showWinners">
         Bij gelijke scrore wint de speler die de minste tijd nodig had

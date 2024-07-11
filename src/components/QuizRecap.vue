@@ -3,7 +3,7 @@
   <v-card v-else width="store.screenWidth">
     <v-card-title>Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title>
     <v-card-text>
-      <p>Je had {{ countGood() }} van de {{ countAll() }} vragen goed!<br></p>
+      <p>Je had {{ countGood() }} van de {{ countAll() }} antwoorden goed<br></p>
       <p>Bekijk nu de verhalen achter de vragen. Of ga verder met de ranglijst.</p>
     </v-card-text>
     <v-row>
