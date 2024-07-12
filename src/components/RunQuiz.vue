@@ -14,18 +14,16 @@
           </v-list>
         </v-row>
       </template>
-      <template class="text-center" v-else>
-        <p>Je antwoord was {{ getResultText() }}</p>
+      <template v-else>
+        <p>Je antwoord was <b>{{ getResultText() }}</b></p>
         <p v-if="state.correctStatements.length === 1">Het juiste antwoord is:</p>
         <p v-else>De juiste antwoorden zijn:</p>
-        <v-row no-gutters>
-          <v-list lines="two" density="compact">
-            <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="composeStatement(index)" :style="{ 'background-color': '#DCEDC8' }"></v-list-item>
-          </v-list>
-          <div v-if="isTextAvailable()" v-html="state.currentQuestion.correctAnswer"></div>
-          <h3 v-else class="py-12">Sorry, de toelichting is niet beschikbaar</h3>
-          <p class="py-2">Meer hierover na afloop van de quiz</p>
-        </v-row>
+        <v-list lines="two" density="compact">
+          <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="composeCorrectAnswers(index)" :style="{ 'background-color': '#DCEDC8' }"></v-list-item>
+        </v-list>
+        <p v-if="isTextAvailable()" v-html="state.currentQuestion.correctAnswer"></p>
+        <h3 v-if="!isTextAvailable()" class="py-12">Sorry, de toelichting is niet beschikbaar</h3>
+        <p class="py-2">Meer hierover na afloop van de quiz</p>
       </template>
     </v-sheet>
 
@@ -170,7 +168,7 @@ function loadQuiz(quizNumber) {
   // get the quiz
   get(child(dbRef, `/quizzes/metaData/${quizNumber}`)).then((snapshot) => {
     if (snapshot.exists()) {
-      state.quizObject = snapshot.val()
+      store.quizObject = snapshot.val()
       loadQuestionIds(quizNumber, retrievedCookie)
     } else {
       state.onWarning = true
@@ -268,6 +266,8 @@ function loadQuestion() {
         state.userAnswers = state.lastCookieQuestionResult.answers
       }
       if (!state.done) startTimer()
+      // show data when loaded
+      state.showExplanation = false
     } else {
       state.onWarning = true
       state.problemText = `Kan de quiz vraag niet vinden`
@@ -289,6 +289,12 @@ function composeStatement(idx) {
     bgColor = 'aqua'
   }
   return `${letters[idx]}. ` + state.currentQuestion.statementsArray[idx]
+}
+
+function composeCorrectAnswers(idx) {
+  if (idx > 12) return "Fout: Meer dan 12 vragen?"
+  const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
+  return `${letters[idx]}. ` + state.correctStatements[idx]
 }
 
 function qAnswer(idx) {
@@ -377,7 +383,6 @@ function finishQuestion() {
 function nextStep() {
   if (state.showExplanation) {
     if (state.currentQuestionIdx < state.questionIds.length - 1) {
-      state.showExplanation = false
       state.quizProgress.showExplanation = false
       state.currentQuestionIdx++
       state.done = false
@@ -417,7 +422,7 @@ watch(() => state.seconds, () => {
 
 function saveResults() {
   // save the results of this quiz for presentation purposes
-  set(ref(db, `/quizzes/results/${store.currentYear}/${store.userData.alias}/${state.quizObject.actionWeek}/`), state.quizResult)
+  set(ref(db, `/quizzes/results/${store.currentYear}/${store.userData.alias}/${store.quizObject.actionWeek}/`), state.quizResult)
   // save this quiz number as completed to user data
   if (store.userData.completedQuizNumbers) {
     store.userData.completedQuizNumbers.push(store.currentQNumber)
