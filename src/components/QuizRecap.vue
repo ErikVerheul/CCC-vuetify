@@ -1,7 +1,8 @@
 <template>
   <ViewQExplanation v-if="state.showExpl" :questionObject="state.questionObject" @view-over="state.showExpl=false"></ViewQExplanation>
   <v-card v-else width="store.screenWidth">
-    <v-card-title>Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title>
+    <v-card-title v-if="!store.isArchivedQuiz">Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title>
+    <v-card-title v-else>Je hebt de quiz van het jaar {{ store.quizObject.actionYear }} en week {{ store.quizObject.actionWeek }} voltooid</v-card-title>
     <v-card-text>
       <p>Je had {{ countGood() }} van de {{ countAll() }} antwoorden goed<br></p>
       <p>Bekijk nu de verhalen achter de vragen. Of ga verder met de ranglijst.</p>
@@ -9,7 +10,7 @@
     <v-row>
       <v-col cols="12">
         <v-list lines="one">
-          <v-list-item v-for="item in state.questionIndexData" :title="composeLine(item)" @click="showExplanation(item)"></v-list-item>
+          <v-list-item v-for="item in state.questionIndexData" :title="item.title" @click="showExplanation(item)"></v-list-item>
         </v-list>
       </v-col>
     </v-row>
@@ -80,6 +81,7 @@ function loadQuizQuestions() {
       indexObjectKeys.forEach((key) => {
         // get the question with currentQNumber
         if (Number(state.indexObject[key].quizNumber) === store.currentQNumber) {
+          // add this data to these objects
           state.indexObject[key].qNumber = key
           state.questionIndexData.push(state.indexObject[key])
         }
@@ -90,9 +92,6 @@ function loadQuizQuestions() {
   }).catch((error) => {
     console.error('Error while reading all available quizzes from database: ' + error.message)
   })
-}
-function composeLine(item) {
-  return `${item.title}`
 }
 
 function showExplanation(item) {
