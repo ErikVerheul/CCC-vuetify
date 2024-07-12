@@ -22,7 +22,7 @@
           <v-col cols="6">
             <v-radio-group inline v-model="state.action">
               <v-radio @change="changeMode" label="Veranderen" value="2"></v-radio>
-              <v-radio @change="changeMode" label="Verwijderen" value="3"></v-radio>
+              <v-radio @change="changeMode" label="Maak quiz leeg" value="3"></v-radio>
             </v-radio-group>
           </v-col>
           <v-col cols="3"></v-col>
@@ -30,7 +30,7 @@
           <v-col cols="3"></v-col>
           <v-col cols="6">
             <v-text-field v-if="state.action === '2'" v-model.trim="state.quizTitle" label="Verander quiz naam" :rules="state.newNameRules" />
-            <p v-if="state.action === '3'">Te verwijderen quiz naam: {{ state.quizTitle }}</p>
+            <p v-if="state.action === '3'">Leeg te maken quiz naam: {{ state.quizTitle }}</p>
           </v-col>
           <v-col cols="3"></v-col>
           <template v-if="state.action === '2'">
@@ -84,7 +84,7 @@
         "{{ saveButtonText }}" is mislukt
       </v-col>
       <v-col class="text-right">
-        <v-btn :disabled="!allowSave" :color="saveButtonColor" append-icon="mdi-arrow-right" @click="doSaveRemove">
+        <v-btn :disabled="!allowSave" :color="saveButtonColor" append-icon="mdi-arrow-right" @click="doAction">
           {{ saveButtonText }}
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
@@ -289,7 +289,7 @@ const saveButtonColor = computed(() => {
 const saveButtonText = computed(() => {
   if (state.action === '1') return 'Voeg toe'
   if (state.action === '2') return 'Sla op'
-  if (state.action === '3') return 'Verwijder'
+  if (state.action === '3') return 'Maak leeg'
   return ''
 })
 
@@ -309,7 +309,7 @@ function composeLine(item) {
   return `${nr}) ${item[nr].title}`
 }
 
-function doSaveRemove() {
+function doAction() {
   if (state.action === '1') {
     // note: Using set() overwrites data at the specified location, including any child nodes.
     set(ref(db, '/quizzes/metaData/' + state.quizNumberInput), {
@@ -345,16 +345,11 @@ function doSaveRemove() {
     })
   }
   if (state.action === '3') {
-    remove(child(dbRef, '/quizzes/metaData/' + state.quizNumberInput)).then(() => {
-      // remove references to the removed quiz
-      removeQuizRefs(state.quizNumberInput)
-      // refresh overall quiz data
-      loadQuizes()
-      state.saveSuccess = 1
-    }).catch((error) => {
-      state.saveSuccess = 2
-      console.error('The remove failed, error message = ' + error.message)
-    })
+    // remove references to the removed quiz
+    removeQuizRefs(state.quizNumberInput)
+    // refresh overall quiz data
+    loadQuizes()
+    state.saveSuccess = 1
   }
 }
 
