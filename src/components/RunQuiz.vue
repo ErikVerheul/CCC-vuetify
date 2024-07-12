@@ -20,7 +20,7 @@
         <p v-else>De juiste antwoorden zijn:</p>
         <v-row no-gutters>
           <v-list lines="two" density="compact">
-            <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="composeStatement(index)" :style="{ 'background-color': bgColor }"></v-list-item>
+            <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="composeStatement(index)" :style="{ 'background-color': '#DCEDC8' }"></v-list-item>
           </v-list>
           <div v-if="isTextAvailable()" v-html="state.currentQuestion.correctAnswer"></div>
           <h3 v-else class="py-12">Sorry, de toelichting is niet beschikbaar</h3>
