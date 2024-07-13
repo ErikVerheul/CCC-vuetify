@@ -206,10 +206,13 @@
 
 <script setup>
 import { onBeforeMount, computed, reactive, watch } from 'vue'
+import { useAppStore } from '../../store/app.js'
 import { db, dbRef } from '../../firebase'
 import { ref, child, get, set, remove } from 'firebase/database'
 import PreviewQuestion from './PreviewQuestion.vue'
 import PreviewFullExplanation from './PreviewFullExplanation.vue'
+
+const store = useAppStore()
 const emit = defineEmits(['m-done'])
 
 onBeforeMount(() => {
