@@ -24,7 +24,7 @@
       <v-row v-if="countAll() > 0" cols="12">
         <b>Je had {{ countGood() }} van de {{ countAll() }} antwoorden goed</b>
       </v-row>
-      <v-row v-if="state.showWinners">
+      <v-row v-if="!store.isArchivedQuiz && state.showWinners">
         Bij gelijke scrore wint de speler die de minste tijd nodig had
       </v-row>
     </v-container>
@@ -38,10 +38,10 @@
           Terug
         </v-btn>
       </v-col>
-      <template v-if="state.showWinners === false">
+      <template v-if="!store.isArchivedQuiz && !state.showWinners">
         <v-spacer></v-spacer>
         <v-col>
-          <v-btn flat append-icon="mdi-arrow-right" @click="showWinners">
+          <v-btn flat append-icon="mdi-arrow-right" @click="state.showWinners = true">
             Toon winnaars
             <template v-slot:append>
               <v-icon size="x-large" color="purple"></v-icon>
@@ -66,7 +66,6 @@ const emit = defineEmits(['return-to-menu'])
 
 const state = reactive({
   showRecap: false,
-  metaObject: {},
   quizNumersWithAssignedQuestions: [],
   isHistoryAvailable: false,
   playOldQuiz: false,
@@ -79,8 +78,8 @@ const state = reactive({
 })
 
 onBeforeMount(() => {
+  getQuizNumersWithAssignedQuestions()
   loadResultsData()
-  loadMetaData()
 })
 
 function loadResultsData() {
@@ -126,7 +125,7 @@ function loadResultsData() {
 function checkIfHistoryAvailable(quizNrsFound) {
   const currentYear = new Date().getFullYear()
   for (const qNr of quizNrsFound) {
-    if (Number(state.metaObject[qNr].actionYear) < currentYear || Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr) {
+    if (Number(store.metaObject[qNr].actionYear) < currentYear || Number(store.metaObject[qNr].actionWeek) < store.currentWeekNr) {
       state.isHistoryAvailable = true
       break
     }
@@ -157,19 +156,6 @@ function getQuizNumersWithAssignedQuestions() {
     }
   }).catch((error) => {
     console.error(`Error while reading questions index data from database: ` + error.message)
-  })
-}
-
-function loadMetaData() {
-  get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      state.metaObject = snapshot.val()
-      getQuizNumersWithAssignedQuestions()
-    } else {
-      console.log("Quiz meta data not found")
-    }
-  }).catch((error) => {
-    console.error(`Error while reading quiz meta data from database: ` + error.message)
   })
 }
 
@@ -270,7 +256,7 @@ function createScoresArray(allScores) {
 function startOldQuiz() {
   store.isArchivedQuiz = true
   store.compactResult = []
-  const oldWeekQnumbers = state.quizNumersWithAssignedQuestions.filter(qNr => Number(state.metaObject[qNr].actionWeek) < store.currentWeekNr)
+  const oldWeekQnumbers = state.quizNumersWithAssignedQuestions.filter(qNr => Number(store.metaObject[qNr].actionWeek) < store.currentWeekNr)
   store.currentQNumber = Number(oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))])
   state.playOldQuiz = true
 }
@@ -294,9 +280,5 @@ function countGood() {
 function showExplanations() {
   state.playOldQuiz = false
   state.showRecap = true
-}
-
-function showWinners() {
-  state.showWinners = true
 }
 </script>

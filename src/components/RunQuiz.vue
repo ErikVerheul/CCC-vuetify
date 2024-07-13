@@ -166,21 +166,16 @@ function loadQuiz(quizNumber) {
     }
   }
   // get the quiz
-  get(child(dbRef, `/quizzes/metaData/${quizNumber}`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      store.quizObject = snapshot.val()
-      loadQuestionIds(quizNumber, retrievedCookie)
-    } else {
-      state.onWarning = true
-      state.problemText = `Kan quiz niet vinden`
-      state.problemCause = `De quiz met nummer ${quizNumber} bestaat niet in de database. Als het quiz nummer 'undefined' is, is er geen quiz voor deze week of geen enkele quiz om te oefenen.`
-      state.tipToResolve = `Vraag de redacteur om een quiz voor deze week aan te maken of een oefen quiz toe te voegen.`
-    }
-  }).catch((error) => {
-    state.onError = true
-    state.firebaseError = error
-    state.fbErrorContext = `De fout is opgetreden bij het lezen van quiz nummer ${quizNumber}`
-  })
+  const quizDataObject = store.metaObject[quizNumber]
+  if (quizDataObject) {
+    store.quizObject = quizDataObject
+    loadQuestionIds(quizNumber, retrievedCookie)
+  } else {
+    state.onWarning = true
+    state.problemText = `Kan quiz niet vinden`
+    state.problemCause = `De quiz met nummer ${quizNumber} bestaat niet in de database. Als het quiz nummer 'undefined' is, is er geen quiz voor deze week of geen enkele quiz om te oefenen.`
+    state.tipToResolve = `Vraag de redacteur om een quiz voor deze week aan te maken of een oefen quiz toe te voegen.`
+  }
 }
 
 function loadQuestionIds(quizNumber, unfinishedQuizData) {

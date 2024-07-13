@@ -228,7 +228,6 @@ const state = reactive({
   showPreviewQuestion: false,
   showFullExplanation: false,
 
-  quizzesObject: {},
   indexObject: {},
   allQuizNumbers: [],
   indexObjectKeys: [],
@@ -360,28 +359,19 @@ function createQuestionItems(questionObject, indexObjectKeys) {
 /* Get quiz and questions meta data */
 function doLoadMetaData() {
   clearAll()
-  get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
+  state.allQuizNumbers = Object.keys(store.metaObject)
+  createQuizItems(store.metaObject, state.allQuizNumbers)
+  // get all available question numbers and titles
+  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
     if (snapshot.exists()) {
-      state.quizzesObject = snapshot.val()
-      state.allQuizNumbers = Object.keys(state.quizzesObject)
-      createQuizItems(state.quizzesObject, state.allQuizNumbers)
-      // get all available question numbers and titles
-      get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
-        if (snapshot.exists()) {
-          state.indexObject = snapshot.val()
-          state.indexObjectKeys = Object.keys(state.indexObject)
-          createQuestionItems(state.indexObject, state.indexObjectKeys)
-        } else {
-          console.log("No quiz-questions available")
-        }
-      }).catch((error) => {
-        console.error('Error while reading all available quiz-questions from database: ' + error.message)
-      })
+      state.indexObject = snapshot.val()
+      state.indexObjectKeys = Object.keys(state.indexObject)
+      createQuestionItems(state.indexObject, state.indexObjectKeys)
     } else {
-      console.log("No quizzes available")
+      console.log("No quiz-questions available")
     }
   }).catch((error) => {
-    console.error('Error while reading all available quizzes from database: ' + error.message)
+    console.error('Error while reading all available quiz-questions from database: ' + error.message)
   })
 }
 
@@ -533,7 +523,7 @@ watch(
     if (state.selectedQuizItem.key) {
       // suppress events not coming from v-select
       state.quizNumber = state.selectedQuizItem.key
-      state.quizTitle = state.quizzesObject[state.quizNumber].title
+      state.quizTitle = store.metaObject[state.quizNumber].title
     }
   }
 )

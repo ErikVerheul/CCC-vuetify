@@ -54,7 +54,6 @@ import QuizResults from './QuizResults.vue'
 const store = useAppStore()
 
 const state = reactive({
-  metaObject: {},
   quizNumbers: [],
   doQuiz: false,
   quizWasCompleted: false,
@@ -78,14 +77,14 @@ function showResultsData() {
 function loadMetaData() {
   get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
     if (snapshot.exists()) {
-      state.metaObject = snapshot.val()
-      const quizStrNumbers = Object.keys(state.metaObject)
+      store.metaObject = snapshot.val()
+      const quizStrNumbers = Object.keys(store.metaObject)
       state.quizNumbers = quizStrNumbers.map((strNr) => Number(strNr))
     } else {
       console.log("Quiz meta data not found")
     }
   }).catch((error) => {
-    console.error(`Error while reading quiz meta data from database: ` + error.message)
+    console.error('Error while reading all available quizzes from database: ' + error.message)
   })
 }
 
@@ -93,7 +92,7 @@ function quizAvailable() {
   for (const qNr of state.quizNumbers)
     if (qNr !== 0) {
       // skip dummy quiz
-      if (Number(state.metaObject[qNr].actionWeek) === store.currentWeekNr) {
+      if (Number(store.metaObject[qNr].actionWeek) === store.currentWeekNr) {
         // if more quizzes are set to the current week number, pick the first
         store.currentQNumber = qNr
         return true
