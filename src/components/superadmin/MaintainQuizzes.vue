@@ -214,6 +214,7 @@ function loadQuizes() {
   get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
     if (snapshot.exists()) {
       state.metaObject = snapshot.val()
+      // note: allQuizNumbers are strings
       state.allQuizNumbers = Object.keys(state.metaObject)
       state.allQuizItems = []
       for (const nr of state.allQuizNumbers) {
