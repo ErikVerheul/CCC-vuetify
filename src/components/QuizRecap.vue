@@ -48,7 +48,7 @@ const state = reactive({
 })
 
 onBeforeMount(() => {
-  loadQuizQuestions()
+  loadQuizQuestionsIndex()
 })
 
 const emit = defineEmits(['return-to-base'])
@@ -70,7 +70,7 @@ function countGood() {
   return 0
 }
 
-function loadQuizQuestions() {
+function loadQuizQuestionsIndex() {
   // get all question index data for the current quiz
   get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
     if (snapshot.exists()) {
@@ -79,8 +79,8 @@ function loadQuizQuestions() {
       // get the question numbers of the questions assigned to this quiz
       state.questionIndexData = []
       indexObjectKeys.forEach((key) => {
-        // get the question with currentQNumber
-        if (Number(state.indexObject[key].quizNumber) === store.currentQNumber) {
+        // get the question with currentQuizNumber
+        if (Number(state.indexObject[key].quizNumber) === store.currentQuizNumber) {
           // add this data to these objects
           state.indexObject[key].qNumber = key
           state.questionIndexData.push(state.indexObject[key])
