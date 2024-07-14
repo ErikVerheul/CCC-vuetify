@@ -19,7 +19,7 @@
         <p v-if="state.correctStatements.length === 1">Het juiste antwoord is:</p>
         <p v-else>De juiste antwoorden zijn:</p>
         <v-list lines="two" density="compact">
-          <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="composeCorrectAnswers(index)" :style="{ 'background-color': '#DCEDC8' }"></v-list-item>
+          <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="state.correctStatements[index]" :style="{ 'background-color': '#DCEDC8' }"></v-list-item>
         </v-list>
         <p v-if="isTextAvailable()" v-html="state.currentQuestion.correctAnswer"></p>
         <h3 v-if="!isTextAvailable()" class="py-12">Sorry, de toelichting is niet beschikbaar</h3>
@@ -138,8 +138,8 @@ function loadQuiz(quizNumber) {
   state.quizProgress.alias = store.userData.alias
   state.quizProgress.quizNumber = quizNumber
   // get the unfinished quiz data if available
-  const retrievedCookie = cookies.get('speelMeeProgress')
-  if (retrievedCookie) {
+  const retrievedCookie = cookies.get(`speelMee${store.userData.alias}`)
+  if (retrievedCookie && retrievedCookie.alias === store.userData.alias) {
     state.showExplanation = retrievedCookie.showExplanation
     const cookieQuizResults = retrievedCookie.quizResult
     if (cookieQuizResults) {
@@ -162,7 +162,7 @@ function loadQuiz(quizNumber) {
       state.problemText = `De cookie met de gegevens van de afgebroken sessie is niet compleet`
       state.problemCause = `De voorlopige resultaten zijn niet beschikbaar`
       state.tipToResolve = `De cookie wordt nu verwijderd. Start de app opnieuw`
-      cookies.remove('speelMeeProgress', { sameSite: true })
+      cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
     }
   }
   // get the quiz
@@ -236,6 +236,7 @@ function loadQuestionIds(quizNumber, unfinishedQuizData) {
 
 function loadQuestion() {
   const questionId = state.questionIds[state.currentQuestionIdx]
+  const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
   state.quizProgress.questionId = questionId
   saveProgress()
   get(child(dbRef, `/quizzes/questions/${Number(questionId)}`)).then((snapshot) => {
@@ -246,7 +247,8 @@ function loadQuestion() {
       const answerKeys = Object.keys(state.currentQuestion.answers)
       answerKeys.forEach((key) => {
         if (state.currentQuestion.answers[key] === true) {
-          state.correctStatements.push(state.currentQuestion.statementsArray[key])
+          const line = `${letters[key]}. ` + state.currentQuestion.statementsArray[key]
+          state.correctStatements.push(line)
         }
       })
       // initialize user answers to false (not selected)
@@ -277,19 +279,13 @@ function loadQuestion() {
 }
 
 function composeStatement(idx) {
-  if (idx > 12) return "Fout: Meer dan 12 vragen?"
+  if (idx > 12) return "Fout: Meer dan 12 statements?"
   const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
   bgColor = 'white'
   if (state.userAnswers[idx]) {
     bgColor = 'aqua'
   }
   return `${letters[idx]}. ` + state.currentQuestion.statementsArray[idx]
-}
-
-function composeCorrectAnswers(idx) {
-  if (idx > 12) return "Fout: Meer dan 12 vragen?"
-  const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
-  return `${letters[idx]}. ` + state.correctStatements[idx]
 }
 
 function qAnswer(idx) {
@@ -351,7 +347,7 @@ function createRightOrWrongMessage(val) {
 function saveProgress() {
   // save the collected progress and the answers of all answered questions so far
   state.quizProgress.quizResult = state.quizResult
-  cookies.set('speelMeeProgress', state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
+  cookies.set(`speelMee${store.userData.alias}`, state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
 }
 
 function finishQuestion() {
@@ -386,7 +382,7 @@ function nextStep() {
       loadQuestion()
     } else {
       // the user finished the quiz; remove the cookie containing the progress as it is obsolete now that the user finished the quiz to the end
-      cookies.remove('speelMeeProgress', { sameSite: true })
+      cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
       // save quiz result only if not an archived quiz and it is not admin who is playing
       if (!store.isArchivedQuiz && store.userData.alias !== 'admin') saveResults()
       emit('quiz-is-done')
