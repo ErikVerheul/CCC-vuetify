@@ -87,13 +87,38 @@ function loadMetaData() {
   get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
     if (snapshot.exists()) {
       store.metaObject = snapshot.val()
-      const quizStrNumbers = Object.keys(store.metaObject)
-      state.quizNumbers = quizStrNumbers.map((strNr) => Number(strNr))
     } else {
       console.log("Quiz meta data not found")
     }
   }).catch((error) => {
     console.error('Error while reading all available quizzes from database: ' + error.message)
+  })
+}
+
+/* 
+ * Store array of quiz numbers with assigned questions, and if found, call checkIfHistoryAvailable
+ * Note: Cannot trust to retrieve a valid array with snapshot.val(). See https://firebase.blog/posts/2014/04/best-practices-arrays-in-firebase
+*/
+function getQuizNumersWithAssignedQuestions() {
+  state.isHistoryAvailable = false
+  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      const indexObject = snapshot.val()
+      const indexObjectKeys = Object.keys(indexObject)
+      const quizNrsFound = []
+      indexObjectKeys.forEach((key) => {
+        const quizNr = indexObject[key].quizNumber
+        if (!quizNrsFound.includes(quizNr)) quizNrsFound.push(quizNr)
+      })
+      // call now we have the quiz numbers with at least one quiz with assigned question
+      state.isHistoryAvailable = checkIfHistoryAvailable(quizNrsFound)
+      // sort in ascending order
+      state.quizNumersWithAssignedQuestions = quizNrsFound.sort((a, b) => a - b)
+    } else {
+      console.log("Quiz assigned questions data not found")
+    }
+  }).catch((error) => {
+    console.error(`Error while reading questions index data from database: ` + error.message)
   })
 }
 
@@ -145,33 +170,6 @@ function checkIfHistoryAvailable(quizNrsFound) {
     }
   }
   return false
-}
-
-/* 
- * Store array of quiz numbers with assigned questions, and if found, call checkIfHistoryAvailable
- * Note: Cannot trust to retrieve a valid array with snapshot.val(). See https://firebase.blog/posts/2014/04/best-practices-arrays-in-firebase
-*/
-function getQuizNumersWithAssignedQuestions() {
-  state.isHistoryAvailable = false
-  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      const indexObject = snapshot.val()
-      const indexObjectKeys = Object.keys(indexObject)
-      const quizNrsFound = []
-      indexObjectKeys.forEach((key) => {
-        const quizNr = indexObject[key].quizNumber
-        if (!quizNrsFound.includes(quizNr)) quizNrsFound.push(quizNr)
-      })
-      // call now we have the quiz numbers with at least one quiz with assigned question
-      state.isHistoryAvailable = checkIfHistoryAvailable(quizNrsFound)
-      // sort in ascending order
-      state.quizNumersWithAssignedQuestions = quizNrsFound.sort((a, b) => a - b)
-    } else {
-      console.log("Quiz assigned questions data not found")
-    }
-  }).catch((error) => {
-    console.error(`Error while reading questions index data from database: ` + error.message)
-  })
 }
 
 function getHeaders() {
@@ -272,7 +270,7 @@ function startOldQuiz() {
   store.isArchivedQuiz = true
   store.compactResult = []
   const oldWeekQnumbers = state.quizNumersWithAssignedQuestions.filter(qNr => Number(store.metaObject[qNr].actionWeek) < store.currentWeekNr)
-  store.currentQNumber = Number(oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))])
+  store.currentQuizNumber = Number(oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))])
   state.playOldQuiz = true
 }
 
