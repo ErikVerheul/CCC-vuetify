@@ -90,7 +90,7 @@
           <li>Uw schuilnaam: {{ store.userData.alias }}</li>
           <li>Uw pin code: {{ store.userData.PIN }}</li>
         </ul>
-        <v-btn class="mt-8" @click="removeCookie">Stop automatisch inloggen</v-btn>
+        <v-btn class="mt-8" @click="removeCookies">Stop automatisch inloggen</v-btn>
         <h3 class="mt-4" v-if="state.cookieIsRemoved">Automatisch inloggen is uitgezet</h3>
       </v-card-text>
       <v-card-actions>
@@ -243,6 +243,7 @@ import router from '../router'
 import QuizResults from './QuizResults.vue'
 
 const store = useAppStore()
+const cookies = new Cookies()
 
 const props = defineProps({
   isAuthenticated: {
@@ -269,16 +270,16 @@ const state = reactive({
   cookieIsRemoved: false
 })
 
-function removeCookie() {
-  const cookies = new Cookies()
+function removeCookies() {
   cookies.remove('speelMee', { sameSite: true })
+  cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
   state.cookieIsRemoved = true
 }
 
 /* Remove users data, cookie and account */
 function removeAccount() {
   const updates = {}
-  // remove the user data
+  // remove the user account
   updates[`users/${store.firebaseUser.uid}`] = null
   // update alias in use value for future use
   updates[`aliases/${store.userData.alias}/inUse`] = false
@@ -286,10 +287,10 @@ function removeAccount() {
   for (let n = 0; n < 10; n++) {
     updates[`quizzes/results/${store.currentYear - n}/${store.userData.alias}`] = null
   }
-  // remove the users account and cookie
+  // remove the users account, data and cookie
   update(dbRef, updates).then(() => {
     store.firebaseUser.delete().then(() => {
-      removeCookie()
+      removeCookies()
       state.dialog10 = false
       emit('reset-app')
     }).catch((error) => {
@@ -298,6 +299,7 @@ function removeAccount() {
       // emit('reset-app')
     })
   }).catch((error) => {
+    removeCookies()
     console.log(`Removal of ${store.userData.alias} data failed: ${error.message}`)
   })
 }
@@ -312,7 +314,7 @@ function showScores() {
 }
 
 function logout() {
-  removeCookie()
+  removeCookies()
   state.dialog9 = false
   emit('logout-app')
 }
