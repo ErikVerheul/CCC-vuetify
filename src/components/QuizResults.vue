@@ -78,9 +78,24 @@ const state = reactive({
 })
 
 onBeforeMount(() => {
+  loadMetaData()
   getQuizNumersWithAssignedQuestions()
   loadResultsData()
 })
+
+function loadMetaData() {
+  get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      store.metaObject = snapshot.val()
+      const quizStrNumbers = Object.keys(store.metaObject)
+      state.quizNumbers = quizStrNumbers.map((strNr) => Number(strNr))
+    } else {
+      console.log("Quiz meta data not found")
+    }
+  }).catch((error) => {
+    console.error('Error while reading all available quizzes from database: ' + error.message)
+  })
+}
 
 function loadResultsData() {
   get(child(dbRef, `/quizzes/results`)).then((snapshot) => {
@@ -121,15 +136,15 @@ function loadResultsData() {
   })
 }
 
-/* Set state.isHistoryAvailable to true if at least one old quiz (assigned to a weeknumber in the past) was found */
+/* Check if at least one old quiz (assigned to a weeknumber in the past) was found */
 function checkIfHistoryAvailable(quizNrsFound) {
   const currentYear = new Date().getFullYear()
   for (const qNr of quizNrsFound) {
     if (Number(store.metaObject[qNr].actionYear) < currentYear || Number(store.metaObject[qNr].actionWeek) < store.currentWeekNr) {
-      state.isHistoryAvailable = true
-      break
+      return true
     }
   }
+  return false
 }
 
 /* 
@@ -148,7 +163,7 @@ function getQuizNumersWithAssignedQuestions() {
         if (!quizNrsFound.includes(quizNr)) quizNrsFound.push(quizNr)
       })
       // call now we have the quiz numbers with at least one quiz with assigned question
-      checkIfHistoryAvailable(quizNrsFound)
+      state.isHistoryAvailable = checkIfHistoryAvailable(quizNrsFound)
       // sort in ascending order
       state.quizNumersWithAssignedQuestions = quizNrsFound.sort((a, b) => a - b)
     } else {
