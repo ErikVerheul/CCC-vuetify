@@ -1,5 +1,7 @@
 <template>
-  <ViewQExplanation v-if="state.doActivate === 'showExpl'" :questionObject="state.questionObject" @view-over="state.doActivate = undefined"></ViewQExplanation>
+  <ReportFbError v-if="store.rqActive === 'onError'" @exit-now="quitApp()" />
+  <ReportWarning v-else-if="store.rqActive === 'onWarning'" @exit-now="quitApp()" />
+  <ViewQExplanation v-else-if="state.doActivate === 'showExpl'" :questionObject="state.questionObject" @view-over="state.doActivate = undefined"></ViewQExplanation>
   <v-card v-else width="store.screenWidth">
     <v-card-title v-if="!store.isArchivedQuiz">Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title>
     <v-card-title v-else>Je hebt de quiz van het jaar {{ store.quizObject.actionYear }} en week {{ store.quizObject.actionWeek }} voltooid</v-card-title>
@@ -40,6 +42,8 @@ import { child, get } from 'firebase/database'
 import { onBeforeMount, reactive } from 'vue'
 import { useAppStore } from '../store/app.js'
 import ViewQExplanation from './ViewQExplanation.vue'
+import ReportFbError from "./ReportFbError.vue"
+import ReportWarning from "./ReportWarning.vue"
 
 const state = reactive({
   doActivate: undefined,
@@ -87,10 +91,15 @@ function loadQuizQuestionsIndex() {
         }
       })
     } else {
-      console.log("No quizzes available")
+      store.problemText = `Kan de index van alle quiz vragen vinden`
+      store.problemCause = `De index is leeg`
+      store.tipToResolve = `Vraag de redacteur om een of meerdere quiz vragen aan te maken`
+      store.rqActive = 'onWarning'
     }
   }).catch((error) => {
-    console.error('Error while reading all available quizzes from database: ' + error.message)
+    store.firebaseError = error
+    store.fbErrorContext = `De fout is opgetreden bij het lezen van de index van alle quiz vragen`
+    store.rqActive = 'onError'
   })
 }
 
@@ -101,11 +110,22 @@ function showExplanation(item) {
       state.questionObject.qTitle = item.title
       state.doActivate = 'showExpl'
     } else {
-      console.log("No quiz-question data available")
+      store.problemText = `Kan de quiz vraag niet vinden`
+      store.problemCause = `De quiz vraag met nummer ${item.qNumber} bestaat niet.`
+      store.tipToResolve = `Vraag de redacteur om deze quiz vraag aan te maken`
+      store.rqActive = 'onWarning'
     }
   }).catch((error) => {
-    console.error('While reading the quiz-question data from database: error message = ' + error.message)
+    store.rqActive = 'onError'
+    store.firebaseError = error
+    store.fbErrorContext = `De fout is opgetreden bij het lezen van quiz vraag met nummer ${item.qNumber}`
   })
+}
+
+function quitApp() {
+  cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
+  // reset the app
+  location.reload(true)
 }
 
 </script>

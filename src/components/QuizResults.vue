@@ -1,5 +1,7 @@
 <template>
-  <RunQuiz v-if="state.doActivate === 'playOldQuiz'" @quiz-is-done="state.doActivate = 'showRecap'"></RunQuiz>
+  <ReportFbError v-if="store.rqActive === 'onError'" @exit-now="quitApp()" />
+  <ReportWarning v-else-if="store.rqActive === 'onWarning'" @exit-now="quitApp()" />
+  <RunQuiz v-else-if="state.doActivate === 'playOldQuiz'" @quiz-is-done="state.doActivate = 'showRecap'"></RunQuiz>
   <QuizRecap v-else-if="state.doActivate === 'showRecap'" @return-to-base="state.doActivate = undefined"></QuizRecap>
   <template v-else>
     <v-container>
@@ -60,6 +62,8 @@ import { dbRef } from '../firebase'
 import { child, get } from 'firebase/database'
 import RunQuiz from './RunQuiz.vue'
 import QuizRecap from './QuizRecap.vue'
+import ReportFbError from "./ReportFbError.vue"
+import ReportWarning from "./ReportWarning.vue"
 
 const store = useAppStore()
 const emit = defineEmits(['return-to-menu'])
@@ -114,10 +118,15 @@ function getQuizNumersWithAssignedQuestions() {
       // sort in ascending order
       state.quizNumersWithAssignedQuestions = quizNrsFound.sort((a, b) => a - b)
     } else {
-      console.log("Quiz assigned questions data not found")
+      store.problemText = `Kan de index van alle quiz vragen vinden`
+      store.problemCause = `De index is leeg`
+      store.tipToResolve = `Vraag de redacteur om een of meerdere quiz vragen aan te maken`
+      store.rqActive = 'onWarning'
     }
   }).catch((error) => {
-    console.error(`Error while reading questions index data from database: ` + error.message)
+    store.firebaseError = error
+    store.fbErrorContext = `De fout is opgetreden bij het lezen van de index van alle quiz vragen`
+    store.rqActive = 'onError'
   })
 }
 
@@ -287,5 +296,11 @@ function countGood() {
     return count
   }
   return 0
+}
+
+function quitApp() {
+  cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
+  // reset the app
+  location.reload(true)
 }
 </script>

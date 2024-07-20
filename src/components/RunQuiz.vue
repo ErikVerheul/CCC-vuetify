@@ -147,9 +147,9 @@ function loadQuestionNumbers() {
         store.rqActive = 'onWarning'
       }
     } else {     
-      store.problemText = `Kan de quiz vraag niet vinden`
-      store.problemCause = `De quiz vraag met nummer ${questId} bestaat niet.`
-      store.tipToResolve = `Vraag de redacteur om deze quiz vraag aan te maken`
+      store.problemText = `Kan de index van alle quiz vragen vinden`
+      store.problemCause = `De index is leeg`
+      store.tipToResolve = `Vraag de redacteur om een of meerdere quiz vragen aan te maken`
       store.rqActive = 'onWarning'
     }
   }).catch((error) => {   
