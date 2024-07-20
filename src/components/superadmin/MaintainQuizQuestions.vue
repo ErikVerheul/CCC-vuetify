@@ -507,8 +507,8 @@ function canRemove() {
 }
 
 function doRemoveQuestion() {
-  remove(child(dbRef, `/quizzes/questions/index/` + state.questionNumber)).then(() => {
-    remove(child(dbRef, '/quizzes/questions/' + state.questionNumber)).then(() => {
+  remove(child(dbRef, `/quizzes/questions/index/${state.questionNumber}`)).then(() => {
+    remove(child(dbRef, `/quizzes/questions/${state.questionNumber})`)).then(() => {
       state.showQuestionRemove = false
       doLoadMetaData()
     }).catch((error) => {
