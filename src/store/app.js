@@ -16,6 +16,8 @@ export const useAppStore = defineStore('app', {
   state: () => ({
     largeScreenDetected: window.screen.availWidth >= 1280,
     screenWidth: window.screen.availWidth > 600 ? 600 : window.screen.availWidth,
+    msActive: undefined,
+    rqActive: undefined,
     metaObject: {},
     quizObject: {},
     aliasesObject: {},
@@ -23,9 +25,14 @@ export const useAppStore = defineStore('app', {
     userData: {},
     currentYear: new Date().getFullYear(),
     currentWeekNr: getWeekNumber(),
-    currentQNumber: undefined,
+    currentQuizNumber: undefined,
     maxQuizWinners: 3,
     compactResult: [],
-    isArchivedQuiz: false
+    isArchivedQuiz: false,
+    problemText: '',
+    problemCause: '',
+    tipToResolve: '',
+    firebaseError: '',
+    fbErrorContext: ''
   }),
 })
