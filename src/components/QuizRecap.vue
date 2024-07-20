@@ -1,5 +1,5 @@
 <template>
-  <ViewQExplanation v-if="state.showExpl" :questionObject="state.questionObject" @view-over="state.showExpl=false"></ViewQExplanation>
+  <ViewQExplanation v-if="state.doActivate === 'showExpl'" :questionObject="state.questionObject" @view-over="state.doActivate = undefined"></ViewQExplanation>
   <v-card v-else width="store.screenWidth">
     <v-card-title v-if="!store.isArchivedQuiz">Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title>
     <v-card-title v-else>Je hebt de quiz van het jaar {{ store.quizObject.actionYear }} en week {{ store.quizObject.actionWeek }} voltooid</v-card-title>
@@ -42,7 +42,7 @@ import { useAppStore } from '../store/app.js'
 import ViewQExplanation from './ViewQExplanation.vue'
 
 const state = reactive({
-  showExpl: false,
+  doActivate: undefined,
   questionIndexData: [],
   questionObject: {}
 })
@@ -99,7 +99,7 @@ function showExplanation(item) {
     if (snapshot.exists()) {
       state.questionObject = snapshot.val()
       state.questionObject.qTitle = item.title
-      state.showExpl = true
+      state.doActivate = 'showExpl'
     } else {
       console.log("No quiz-question data available")
     }

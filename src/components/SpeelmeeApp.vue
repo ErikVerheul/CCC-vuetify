@@ -12,7 +12,7 @@
           <template v-if="!nowPlaying && state.showAliasInfoActive">
             <ShowCelebrity @return-to="state.showAliasInfoActive = false" />
           </template>
-          <MaastrichtStories v-else-if="state.isAuthenticated" />
+          <MaastrichtStories v-else-if="state.isAuthenticated" @logout-app="returnToLogin" />
           <template v-else>
             <NewUser v-if="state.userEntryMode === 'login'" :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" @change-to-signin="switchToSignin" @change-to-signup="switchToSignup"
               @exit-signin="resetApp" />
@@ -226,8 +226,8 @@ function doCreateUser(alias) {
     })
     .catch((error) => {
       state.onError = true
-      state.firebaseError = error
-      state.fbErrorContext = `Mogelijk heeft een andere speler deze schuilnaam net gekozen. Kies een andere schuilnaam`
+      store.firebaseError = error
+      store.fbErrorContext = `Mogelijk heeft een andere speler deze schuilnaam net gekozen. Kies een andere schuilnaam`
       console.log('doCreateUser: error = ' + error)
     })
 }

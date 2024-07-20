@@ -1,6 +1,6 @@
 <template>
-  <RunQuiz v-if="state.playOldQuiz" @quiz-is-done="showExplanations"></RunQuiz>
-  <QuizRecap v-else-if="state.showRecap" @return-to-base="state.showRecap = false"></QuizRecap>
+  <RunQuiz v-if="state.doActivate === 'playOldQuiz'" @quiz-is-done="state.doActivate = 'showRecap'"></RunQuiz>
+  <QuizRecap v-else-if="state.doActivate === 'showRecap'" @return-to-base="state.doActivate = undefined"></QuizRecap>
   <template v-else>
     <v-container>
       <template v-if="!store.isArchivedQuiz">
@@ -65,10 +65,9 @@ const store = useAppStore()
 const emit = defineEmits(['return-to-menu'])
 
 const state = reactive({
-  showRecap: false,
+  doActivate: undefined,
   quizNumersWithAssignedQuestions: [],
   isHistoryAvailable: false,
-  playOldQuiz: false,
   oldQuizNumber: undefined,
   itemsPerPage: 10,
   yearScores: {},
@@ -271,7 +270,7 @@ function startOldQuiz() {
   store.compactResult = []
   const oldWeekQnumbers = state.quizNumersWithAssignedQuestions.filter(qNr => Number(store.metaObject[qNr].actionWeek) < store.currentWeekNr)
   store.currentQuizNumber = Number(oldWeekQnumbers[Math.round(Math.random() * (oldWeekQnumbers.length - 1))])
-  state.playOldQuiz = true
+  state.doActivate = 'playOldQuiz'
 }
 
 function countAll() {
@@ -288,10 +287,5 @@ function countGood() {
     return count
   }
   return 0
-}
-
-function showExplanations() {
-  state.playOldQuiz = false
-  state.showRecap = true
 }
 </script>
