@@ -109,9 +109,11 @@
 
 <script setup>
 import { onBeforeMount, computed, reactive, watch } from 'vue'
+import { useAppStore } from '../../store/app.js'
 import { db, dbRef } from '../../firebase'
 import { ref, child, get, set, remove, update } from 'firebase/database'
 
+const store = useAppStore()
 const emit = defineEmits(['m-done'])
 
 onBeforeMount(() => {
@@ -119,7 +121,6 @@ onBeforeMount(() => {
 })
 
 const state = reactive({
-  metaObject: {},
   allQuizNumbers: [],
   allQuizItems: [],
 
@@ -213,12 +214,12 @@ function loadQuizes() {
   // get all available quizzes
   get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
     if (snapshot.exists()) {
-      state.metaObject = snapshot.val()
+      store.metaObject = snapshot.val()
       // note: allQuizNumbers are strings
-      state.allQuizNumbers = Object.keys(state.metaObject)
+      state.allQuizNumbers = Object.keys(store.metaObject)
       state.allQuizItems = []
       for (const nr of state.allQuizNumbers) {
-        state.allQuizItems.push({ [nr]: state.metaObject[nr] })
+        state.allQuizItems.push({ [nr]: store.metaObject[nr] })
       }
     } else {
       console.log("No quizzes available")
@@ -267,10 +268,10 @@ function QNumberExists() {
 }
 
 function changeMode() {
-  state.quizTitle = state.metaObject[state.quizNumberInput].title
-  state.actionYear = state.metaObject[state.quizNumberInput].actionYear
-  state.actionWeek = state.metaObject[state.quizNumberInput].actionWeek
-  state.creationDate = state.metaObject[state.quizNumberInput].creationDate
+  state.quizTitle = store.metaObject[state.quizNumberInput].title
+  state.actionYear = store.metaObject[state.quizNumberInput].actionYear
+  state.actionWeek = store.metaObject[state.quizNumberInput].actionWeek
+  state.creationDate = store.metaObject[state.quizNumberInput].creationDate
   state.saveSuccess = 0
   state.resetCount = 0
 }
@@ -295,9 +296,9 @@ const saveButtonText = computed(() => {
 })
 
 const actionWeekInUse = computed(() => {
-  for (let i = 1; i < state.metaObject.length; i++) {
+  for (let i = 1; i < store.metaObject.length; i++) {
     // skip i === 0 (Dummy quiz for unassigned questions)
-    const q = state.metaObject[i]
+    const q = store.metaObject[i]
     if (!q) continue // skip unused index numbers
     // skip values from loaded quiz; note that state.quizNumberInput is of type string
     if (i != state.quizNumberInput && q.actionYear === state.actionYear && q.actionWeek === state.actionWeek) return true
