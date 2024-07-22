@@ -11,7 +11,7 @@
     <v-row>
       <v-col cols="12">
         <v-list lines="one">
-          <v-list-item v-for="item in state.questionIndexData" :title="item.title" @click="showExplanation(item)"></v-list-item>
+          <v-list-item v-for="item in state.questionIndexData" :title="getText(item)" @click="showExplanation(item)"></v-list-item>
         </v-list>
       </v-col>
     </v-row>
@@ -108,6 +108,11 @@ function loadQuizQuestionsIndex() {
     store.fbErrorContext = `De fout is opgetreden bij het lezen van de index van alle quiz vragen`
     store.rqActive = 'onError'
   })
+}
+
+function getText(item) {
+  if (item.ankeiler && item.ankeiler.length > 2) return item.ankeiler
+  return item.title
 }
 
 function showExplanation(item) {

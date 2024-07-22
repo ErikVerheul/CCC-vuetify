@@ -36,6 +36,9 @@
         </v-col>
       </v-row>
       <v-row>
+        <v-col cols="12">
+          <v-text-field v-model="state.ankeiler" label="Ankeiler tekst" />
+        </v-col>
       </v-row>
       <v-row>
         <v-col cols="12">
@@ -237,6 +240,7 @@ const state = reactive({
 
   quizNumber: undefined,
   quizTitle: '',
+  ankeiler: '',
   quizItems: [],
   selectedQuizItem: { "key": 0, "title": "" },
 
@@ -319,6 +323,7 @@ function clearAll() {
   state.selectedQuestionItem = { "key": undefined, "title": "Kies een quiz-vraag" }
   state.questionNumber = ''
   state.questionTitle = ''
+  state.ankeiler = '',
   state.statementNumber = 0
   state.quizStatement = ''
   state.content = undefined
@@ -489,7 +494,7 @@ function doSaveQuestion() {
     "resultInfo": state.resultInfo,
     "gameRules": state.gameRules
   }).then(() => {
-    const newIndexObject = { 'quizNumber': state.quizNumber, 'title': state.questionTitle, 'creationDate': Number(new Date()) }
+    const newIndexObject = { 'quizNumber': state.quizNumber, 'title': state.questionTitle, 'ankeiler': state.ankeiler, 'creationDate': Number(new Date()) }
     set(ref(db, '/quizzes/questions/index/' + state.questionNumber.toString()), newIndexObject).then(() => {
       // reset current activity and refresh the meta data
       loadMetaData()
@@ -539,6 +544,7 @@ watch(
       // suppress events not coming from v-select
       state.questionNumber = state.selectedQuestionItem.key
       state.questionTitle = state.indexObject[state.questionNumber].title
+      state.ankeiler = state.indexObject[state.questionNumber].ankeiler
     }
   }
 )
