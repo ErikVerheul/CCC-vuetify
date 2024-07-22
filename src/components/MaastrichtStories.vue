@@ -19,14 +19,12 @@
       </v-col>
     </v-row>
     <v-row v-if="!state.userCompletedQuizBefore">
-      <v-col cols="1"></v-col>
-      <v-col cols="8" class="my-0 py-0 text-left">
+      <v-col cols="12">
         <h4>Elke vier weken met nieuwe opdruk. Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</h4>
       </v-col>
-      <v-col cols="2">
+      <v-col cols="12">
         <v-btn :disabled="!state.quizAvailable" color="purple" @click="startQuiz">Start</v-btn>
       </v-col>
-      <v-col cols="1"></v-col>
       <v-col cols="12" class="ml-2 text-left">
         <p>*) Voor 12.50 ook verkrijgbaar bij CoffeeLovers</p>
       </v-col>
