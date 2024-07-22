@@ -1,4 +1,10 @@
 <template>
+  <p>state.actionYear = {{ state.actionYear }}</p>
+  <p>state.actionWeek = {{ state.actionWeek }}</p>
+  <p>state.quizNumberInput = {{ state.quizNumberInput }}</p>
+  <p>actionWeekInUse = {{ actionWeekInUse }}</p>
+  <p>checkForQuizzesAssignedAlready = {{ quizzesAssignedAlready }}</p>
+  <p>state.quizNumberInput = {{ state.quizNumberInput }}</p>
   <v-card>
     <v-card-title>Quiz meta data onderhouden</v-card-title>
     <v-row>
@@ -45,11 +51,15 @@
               <v-text-field v-model="state.actionWeek" label="Actie week" :rules="state.weekRules" />
             </v-col>
             <v-col cols="3"></v-col>
-            <v-col cols="3"></v-col>
-            <v-col cols="6" v-if="actionWeekInUse">
-              <p class="color-red">Er is al een quiz aan dit actie jaar en week gekoppeld</p>
-            </v-col>
-            <v-col cols="3"></v-col>
+            <template v-if="actionWeekInUse">
+              <v-col cols="3"></v-col>
+              <v-col cols="6">
+                <p class="color-red">Er is al een quiz aan dit actie jaar en deze week gekoppeld</p>
+              </v-col>
+              <v-col cols="3">
+                <v-btn @click="state.checkMultipleAssignments = true">Welke quiz?</v-btn>
+              </v-col>
+            </template>
           </template>
         </v-row>
       </template>
@@ -105,6 +115,32 @@
       </v-col>
     </v-row>
   </v-card>
+
+  <v-dialog v-model="state.checkMultipleAssignments" width="70%">
+    <v-card>
+      <v-card-title>Er is al een quiz aan deze actie week gekoppeld</v-card-title>
+      <v-divider></v-divider>
+      <v-card-title>Quiz(zen) die al is(zijn) toegewezen aan deze actie week:</v-card-title>
+      <v-row>
+        <v-col cols="12">
+          <v-list lines="one">
+            <v-list-item v-for="item in quizzesAssignedAlready" :title="composeLine(item)"></v-list-item>
+          </v-list>
+        </v-col>
+      </v-row>
+      <v-card-subtitle>Verbind deze quiz(zen) aan week 0 of een andere week</v-card-subtitle>
+      <v-row class="mt-2">
+        <v-col>
+          <v-btn prepend-icon="mdi-arrow-left" @click="state.checkMultipleAssignments = false">
+            <template v-slot:prepend>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+            Terug
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
@@ -195,19 +231,20 @@ const state = reactive({
       return 'Vul alleen cijfers in.'
     },
     value => {
-      if (value > 0 && value <= 53) return true
+      if (value >= 0 && value <= 53) return true
 
-      return 'Weeknummer moet tussen 1 en 53 liggen.'
+      return 'Weeknummer moet tussen 0 (geen actie week) en 53 liggen.'
     }
   ],
   saveSuccess: 0,
-  resetCount: 0
+  resetCount: 0,
+  checkMultipleAssignments: false
 })
 
 function actionSettingsOk() {
   return state.actionYear === '' && state.actionWeek === '' ||
     (!isNaN(state.actionYear) && !isNaN(state.actionWeek) &&
-      state.actionYear >= 2023 && state.actionYear < 2100 && state.actionWeek > 0 && state.actionWeek <= 53)
+      state.actionYear >= 2023 && state.actionYear < 2100 && state.actionWeek >= 0 && state.actionWeek <= 53)
 }
 
 function loadQuizes() {
@@ -296,14 +333,18 @@ const saveButtonText = computed(() => {
 })
 
 const actionWeekInUse = computed(() => {
-  for (let i = 1; i < store.metaObject.length; i++) {
-    // skip i === 0 (Dummy quiz for unassigned questions)
-    const q = store.metaObject[i]
-    if (!q) continue // skip unused index numbers
-    // skip values from loaded quiz; note that state.quizNumberInput is of type string
-    if (i != state.quizNumberInput && q.actionYear === state.actionYear && q.actionWeek === state.actionWeek) return true
-  }
-  return false
+  return quizzesAssignedAlready.value.length > 0
+})
+
+const quizzesAssignedAlready = computed(() => {
+  const sameActionWeekItems = []
+  state.allQuizNumbers.forEach(nr => {
+    if (nr !== 0 && state.actionWeek != 0 && nr != state.quizNumberInput &&
+      store.metaObject[nr].actionYear === state.actionYear && store.metaObject[nr].actionWeek === state.actionWeek) {
+      sameActionWeekItems.push({ [nr]: store.metaObject[nr] })
+    }
+  })
+  return sameActionWeekItems
 })
 
 function composeLine(item) {
@@ -347,11 +388,25 @@ function doAction() {
     })
   }
   if (state.action === '3') {
-    // remove references to the removed quiz
-    removeQuizRefs(state.quizNumberInput)
-    // refresh overall quiz data
-    loadQuizes()
-    state.saveSuccess = 1
+    // set the action week to 0 (not assigned to an action week)
+    const newQuizObject = {
+      "title": state.quizTitle,
+      "actionYear": state.actionYear,
+      "actionWeek": '0',
+      "creationDate": state.creationDate
+    }
+    const updates = {}
+    updates[`quizzes/metaData/${state.quizNumberInput}`] = newQuizObject
+    update(dbRef, updates).then(() => {
+      // remove references to the removed quiz
+      removeQuizRefs(state.quizNumberInput)
+      // refresh overall quiz data
+      loadQuizes()
+      state.saveSuccess = 1
+    }).catch((error) => {
+      state.saveSuccess = 2
+      console.error('The title update failed, error message = ' + error.message)
+    })
   }
 }
 
