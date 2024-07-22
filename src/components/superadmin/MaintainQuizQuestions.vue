@@ -216,7 +216,7 @@ const store = useAppStore()
 const emit = defineEmits(['m-done'])
 
 onBeforeMount(() => {
-  doLoadMetaData()
+  loadMetaData()
 })
 
 const editorToolbar = [
@@ -360,7 +360,7 @@ function createQuestionItems(questionObject, indexObjectKeys) {
 }
 
 /* Get quiz and questions meta data */
-function doLoadMetaData() {
+function loadMetaData() {
   clearAll()
   state.allQuizNumbers = Object.keys(store.metaObject)
   createQuizItems(store.metaObject, state.allQuizNumbers)
@@ -492,7 +492,7 @@ function doSaveQuestion() {
     const newIndexObject = { 'quizNumber': state.quizNumber, 'title': state.questionTitle, 'creationDate': Number(new Date()) }
     set(ref(db, '/quizzes/questions/index/' + state.questionNumber.toString()), newIndexObject).then(() => {
       // reset current activity and refresh the meta data
-      doLoadMetaData()
+      loadMetaData()
     }).catch((error) => {
       console.error('The write of the index data failed: ' + error.message)
     })
@@ -510,7 +510,7 @@ function doRemoveQuestion() {
   remove(child(dbRef, `/quizzes/questions/index/${state.questionNumber}`)).then(() => {
     remove(child(dbRef, `/quizzes/questions/${state.questionNumber})`)).then(() => {
       state.showQuestionRemove = false
-      doLoadMetaData()
+      loadMetaData()
     }).catch((error) => {
       console.error('The removal of the quiz-question failed: ' + error.message)
     })
