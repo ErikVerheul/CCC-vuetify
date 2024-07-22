@@ -9,7 +9,7 @@
     <v-card-actions>
       <v-row>
         <v-col>
-          <v-btn prepend-icon="mdi-arrow-left" @click="emit('exit-now')">
+          <v-btn prepend-icon="mdi-arrow-left" @click="quitApp">
             <template v-slot:prepend>
               <v-icon size="x-large" color="purple"></v-icon>
             </template>
@@ -23,8 +23,16 @@
 
 <script setup>
 import { useAppStore } from '../store/app.js'
+import Cookies from 'universal-cookie'
 
 const store = useAppStore()
-const emit = defineEmits(['exit-now'])
+const cookies = new Cookies()
+
+/* An emergency exit without attempt to signout */
+function quitApp() {
+  cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
+  // reset the app
+  location.reload(true)
+}
 
 </script>

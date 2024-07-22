@@ -1,8 +1,8 @@
 <template>
-  <ReportFbError v-if="store.rqActive === 'onError'" @exit-now="quitApp()" />
-  <ReportWarning v-else-if="store.rqActive === 'onWarning'" @exit-now="quitApp()" />
-  <RunQuiz v-else-if="state.doActivate === 'playOldQuiz'" @quiz-is-done="state.doActivate = 'showRecap'"></RunQuiz>
-  <QuizRecap v-else-if="state.doActivate === 'showRecap'" @return-to-base="state.doActivate = undefined"></QuizRecap>
+  <ReportFbError v-if="store.rqActive==='onError'" />
+  <ReportWarning v-else-if="store.rqActive==='onWarning'" />
+  <RunQuiz v-else-if="state.doActivate==='playOldQuiz'" @quiz-is-done="state.doActivate='showRecap'"></RunQuiz>
+  <QuizRecap v-else-if="state.doActivate==='showRecap'" @return-to-base="state.doActivate=undefined"></QuizRecap>
   <template v-else>
     <v-container>
       <template v-if="!store.isArchivedQuiz">
@@ -82,14 +82,13 @@ const state = reactive({
 
 onBeforeMount(() => {
   loadMetaData()
-  getQuizNumersWithAssignedQuestions()
-  loadResultsData()
 })
 
 function loadMetaData() {
   get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
     if (snapshot.exists()) {
       store.metaObject = snapshot.val()
+      getQuizNumersWithAssignedQuestions()
     } else {
       console.log("Quiz meta data not found")
     }
@@ -117,6 +116,7 @@ function getQuizNumersWithAssignedQuestions() {
       state.isHistoryAvailable = checkIfHistoryAvailable(quizNrsFound)
       // sort in ascending order
       state.quizNumersWithAssignedQuestions = quizNrsFound.sort((a, b) => a - b)
+      loadResultsData()
     } else {
       store.problemText = `Kan de index van alle quiz vragen vinden`
       store.problemCause = `De index is leeg`
@@ -298,9 +298,4 @@ function countGood() {
   return 0
 }
 
-function quitApp() {
-  cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
-  // reset the app
-  location.reload(true)
-}
 </script>

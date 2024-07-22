@@ -4,8 +4,8 @@
   <p>store.rqActive = {{ store.rqActive }}</p>
   <p>state.showExplanation = {{ state.showExplanation }}</p>
   <p>store.isArchivedQuiz = {{ store.isArchivedQuiz }}</p> -->
-  <ReportFbError v-if="store.rqActive === 'onError'" @exit-now="quitApp()" />
-  <ReportWarning v-else-if="store.rqActive === 'onWarning'" @exit-now="quitApp()" />
+  <ReportFbError v-if="store.rqActive === 'onError'" />
+  <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
   <template v-else>
     <v-sheet v-if="state.showExplanation" class="ma-2" :max-width="store.screenWidth">
       <p>Je antwoord was <b>{{ getResultText() }}</b></p>
@@ -46,11 +46,8 @@
           </v-col>
         </v-row>
         <v-row v-else>
-          <v-col cols="7">
+          <v-col cols="12">
             {{ state.wrapupMsg }}
-          </v-col>
-          <v-col cols="5">
-            <p class="text-right">Resterende tijd<br>{{ state.clockValue }}</p>
           </v-col>
         </v-row>
       </v-sheet>
@@ -89,7 +86,7 @@ import Cookies from 'universal-cookie'
 
 const store = useAppStore()
 const props = defineProps(['recoveryMode'])
-const emit = defineEmits(['quiz-is-done', 'logout-app'])
+const emit = defineEmits(['quiz-is-done'])
 
 // must be non-reactive
 let bgColor = undefined
@@ -117,6 +114,7 @@ const state = reactive({
   seconds: 0,
   timerId: undefined,
   timeout: 60,
+  isLastAnswerOverdue: false,
   questionDone: false,
   wrapupMsg: '',
   showExplanation: false,
@@ -146,13 +144,13 @@ function loadQuestionNumbers() {
         store.tipToResolve = `Vraag de redacteur om voor deze quiz vragen aan te maken`
         store.rqActive = 'onWarning'
       }
-    } else {     
+    } else {
       store.problemText = `Kan de index van alle quiz vragen vinden`
       store.problemCause = `De index is leeg`
       store.tipToResolve = `Vraag de redacteur om een of meerdere quiz vragen aan te maken`
       store.rqActive = 'onWarning'
     }
-  }).catch((error) => {   
+  }).catch((error) => {
     store.firebaseError = error
     store.fbErrorContext = `De fout is opgetreden bij het lezen van de index van alle quiz vragen`
     store.rqActive = 'onError'
@@ -191,7 +189,7 @@ function checkForRecovery() {
           state.questionDone = true
           loadQuestion(!unfinishedCookieData.showExplanation)
         }
-      } else {       
+      } else {
         store.problemText = `De cookie met de gegevens van de afgebroken sessie is niet compleet`
         store.problemCause = `De voorlopige resultaten zijn niet beschikbaar`
         store.tipToResolve = `De cookie wordt nu verwijderd. Start de app opnieuw`
@@ -209,7 +207,7 @@ function startNewQuiz() {
     // load the first question
     state.currentQuestionIdx = 0
     loadQuestion(true)
-  } else {   
+  } else {
     store.problemText = `Kan geen vragen vinden voor deze quiz`
     store.problemCause = `De quiz met nummer ${store.currentQuizNumber} bestaat maar er zijn geen vragen voor gemaakt.`
     store.tipToResolve = `Vraag de redacteur om voor deze quiz vragen aan te maken`
@@ -251,7 +249,7 @@ function loadQuestion(resetShowExplanation) {
       const answerKeys = Object.keys(state.currentQuestion.answers)
       answerKeys.forEach((key) => {
         if (state.currentQuestion.answers[key] === true) {
-          const line = `${letters[key]}. ` + state.currentQuestion.statementsArray[key]
+          const line = `${letters[key]}. ${state.currentQuestion.statementsArray[key]}`
           state.correctStatements.push(line)
         }
       })
@@ -262,14 +260,16 @@ function loadQuestion(resetShowExplanation) {
         state.userAnswers.push(false)
       })
 
-      if (state.questionDone && state.lastCookieQuestionResult && !state.lastCookieQuestionResult.overdue) {
-        // restore answers of last question
-        state.userAnswers = state.lastCookieQuestionResult.answers
+      if (props.recoveryMode) {
+        if (state.questionDone && state.lastCookieQuestionResult && !state.lastCookieQuestionResult.overdue) {
+          // restore answers of last question
+          state.userAnswers = state.lastCookieQuestionResult.answers
+        }
       }
       if (!state.questionDone) startTimer()
       // show data when loaded
       if (resetShowExplanation) state.showExplanation = false
-    } else {     
+    } else {
       store.problemText = `Kan de quiz vraag niet vinden`
       store.problemCause = `De quiz vraag met nummer ${questId} bestaat niet.`
       store.tipToResolve = `Vraag de redacteur om deze quiz vraag aan te maken`
@@ -288,6 +288,7 @@ function getReadyText() {
 }
 
 function getResultText() {
+  if (state.isLastAnswerOverdue) return 'te laat'
   if (state.answerIsRight) return 'goed!'
   return 'fout!'
 }
@@ -349,7 +350,7 @@ function startTimer() {
   }, 1000)
 }
 
-function finishQuestion() {  
+function finishQuestion() {
   state.questionDone = true
   // stop the timer
   clearInterval(state.timerId)
@@ -374,6 +375,7 @@ function finishQuestion() {
 
 function nextStep() {
   if (state.showExplanation) {
+    state.isLastAnswerOverdue = false
     state.currentQuestionIdx++
     if (state.currentQuestionIdx < state.questionNumbers.length) {
       state.quizProgress.showExplanation = false
@@ -405,6 +407,7 @@ watch(() => state.seconds, () => {
     state.wrapupMsg = 'Je antwoord was niet binnen de tijd'
     state.quizResult[state.currentQuestionIdx] = {}
     state.quizResult[state.currentQuestionIdx].overdue = true
+    state.isLastAnswerOverdue = true
     store.compactResult.push(false)
     if (!store.isArchivedQuiz) saveProgress()
   }
@@ -418,12 +421,6 @@ function saveResults() {
     store.userData.completedQuizNumbers.push(store.currentQuizNumber)
   } else store.userData.completedQuizNumbers = [store.currentQuizNumber]
   set(ref(db, `users/${store.firebaseUser.uid}/completedQuizNumbers`), store.userData.completedQuizNumbers)
-}
-
-function quitApp() {
-  cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
-  // reset the app
-  location.reload(true)
 }
 
 </script>

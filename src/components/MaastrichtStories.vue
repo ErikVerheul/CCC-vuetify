@@ -1,6 +1,6 @@
 <template>
-  <ReportWarning v-if="store.rqActive === 'onWarning'" @exit-now="quitApp()" />
-  <RunQuiz v-else-if="store.msActive === 'doQuiz'" :recoveryMode="state.recoveryMode" @quiz-is-done="store.msActive = 'showRecap'" @logout-app="quitApp" />
+  <ReportWarning v-if="store.rqActive === 'onWarning'"/>
+  <RunQuiz v-else-if="store.msActive === 'doQuiz'" :recoveryMode="state.recoveryMode" @quiz-is-done="store.msActive='showRecap'" />
   <QuizRecap v-else-if="store.msActive === 'showRecap'" @return-to-base="store.msActive = 'showResults'" />
   <QuizResults v-else-if="store.msActive === 'showResults'" @return-to-menu="store.msActive = undefined" />
   <v-sheet v-else class="text-center" :max-width="store.screenWidth">
@@ -121,7 +121,7 @@ function getQuiz(allQuizNumbers) {
     // remove cookie and reset app when the last session ended in an error condition
     const errorConditions = [unfinishedCookieData.msActive, unfinishedCookieData.rqActive]
     if (errorConditions.includes('onError') || errorConditions.includes('onWarning')) {
-      quitApp()
+      emit('logout-app')
     }
     // set recovery mode
     state.recoveryMode = true
@@ -143,9 +143,4 @@ function startQuiz() {
   }
 }
 
-function quitApp() {
-  cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
-  // reset the app
-  location.reload(true)
-}
 </script>
