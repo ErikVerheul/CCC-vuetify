@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "speelmee.app",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -12,16 +12,16 @@
   "dependencies": {
     "@mdi/font": "7.4.47",
     "core-js": "^3.37.1",
-    "firebase": "^10.12.3",
+    "firebase": "^10.12.4",
     "pinia": "^2.1.7",
     "roboto-fontface": "*",
-    "universal-cookie": "^7.1.4",
-    "vue": "^3.4.31",
+    "universal-cookie": "^7.2.0",
+    "vue": "^3.4.33",
     "vue-gtag": "^2.0.1",
     "vue-router": "^4.4.0",
     "@vueup/vue-quill": "^1.2.0",
-    "vuefire": "^3.1.23",
-    "vuetify": "^3.6.12",
+    "vuefire": "^3.1.24",
+    "vuetify": "^3.6.13",
     "webfontloader": "^1.6.28"
   },
   "overrides": {
@@ -29,10 +29,10 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.5",
-    "eslint": "^9.6.0",
+    "eslint": "^9.7.0",
     "eslint-plugin-vue": "^9.27.0",
     "sass": "^1.77.8",
-    "vite": "^5.3.3",
+    "vite": "^5.3.4",
     "vite-plugin-vuetify": "^2.0.3"
   }
 }
