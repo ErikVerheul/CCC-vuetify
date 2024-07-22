@@ -21,7 +21,10 @@
     <template v-else>
       <v-sheet class="ma-2" :max-width="store.screenWidth">
         <template v-if="!state.showExplanation">
-          <v-row no-gutters>
+          <v-row class="mt-n6" no-gutters>
+            <div class="small-font">{{ getProgressIndicator() }}</div>
+          </v-row>
+          <v-row class="mt-2" no-gutters>
             <div v-html="state.currentQuestion.body"></div>
           </v-row>
           <v-row no-gutters>
@@ -68,6 +71,10 @@
 </template>
 
 <style scoped>
+.small-font {
+  font-size: 12px;
+}
+
 .color-red {
   color: red
 }
@@ -213,6 +220,10 @@ function startNewQuiz() {
     store.tipToResolve = `Vraag de redacteur om voor deze quiz vragen aan te maken`
     store.rqActive = 'onWarning'
   }
+}
+
+function getProgressIndicator() {
+  return `(${state.currentQuestionIdx + 1}/${state.questionNumbers.length})`
 }
 
 function createRightOrWrongMessage(val) {
