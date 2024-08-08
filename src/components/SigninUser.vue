@@ -1,58 +1,43 @@
 <template>
-  <v-container class="pa-0 mt-n8">
-    <v-card flat color="#FEF1E5" :width="store.screenWidth" height="100vh">
-      <v-row dense>
-        <v-col cols="12">
-          <v-card-text
-            >Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of tablet?<br />
-            Haal dan <b>eerst schuilnaam en pincode</b> op van dat apparaat en voer hier onder in.</v-card-text
-          >
-        </v-col>
-        <v-col cols="1"></v-col>
-        <v-col cols="10" class="d-flex align-center justify-center">
-          <v-card-text
-            ><small>De schuilnaam en pincode vind je via het menu <v-icon>mdi-dots-vertical</v-icon> (rechtsboven)</small></v-card-text
-          >
-        </v-col>
-        <v-col cols="1"></v-col>
+  <v-container class="max-container-width d-flex flex-column h-100">
+    <div class="flex-grow-1">
+      <p class="mb-4">
+        Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of tablet?<br />
+        Haal dan <b>eerst schuilnaam en pincode</b> op van dat apparaat en voer hier onder in.
+      </p>
 
-        <v-col cols="2"></v-col>
-        <v-col cols="8">
-          <v-autocomplete v-model="state.selectedAlias" :items="props.aliasesInUseInclAdmin" label="Uw schuilnaam" />
-        </v-col>
-        <v-col cols="2"></v-col>
+      <div class="px-8">
+        <p class="mb-2">
+          <small>
+            De schuilnaam en pincode vind je via het menu
+            <v-icon>mdi-dots-vertical</v-icon> (rechtsboven)
+          </small>
+        </p>
 
-        <v-col cols="2"></v-col>
-        <v-col cols="8">
-          <v-text-field v-model.trim="store.userData.PIN" label="PIN" :rules="state.pinRules" />
-        </v-col>
-        <v-col cols="2"></v-col>
+        <v-autocomplete v-model="state.selectedAlias" :items="props.aliasesInUseInclAdmin" label="Uw schuilnaam" />
 
-        <v-col cols="12">
-          <v-card-text>De app <b>onthoudt</b> je schuilnaam en pincode <b>ook</b> op dit apparaat en login gaat dan <b>automatisch</b></v-card-text>
-        </v-col>
-        <div v-if="state.loginErrorMsg !== undefined">
-          <v-card-text class="color-red mx-3">Controleer of uw schuilnaam en pin code kloppen en probeer opnieuw</v-card-text>
-        </div>
-        <v-col>
-          <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
-            <template v-slot:prepend>
-              <v-icon size="x-large" color="purple"></v-icon>
-            </template>
-            Terug
-          </v-btn>
-        </v-col>
-        <v-spacer></v-spacer>
-        <v-col>
-          <v-btn :disabled="!state.selectedAlias || !PINOK" flat append-icon="mdi-arrow-right" @click="doSigninUser">
-            Verder
-            <template v-slot:append>
-              <v-icon size="x-large" color="purple"></v-icon>
-            </template>
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
+        <v-text-field v-model.trim="store.userData.PIN" label="PIN" :rules="state.pinRules" />
+      </div>
+
+      <p>De app <b>onthoudt</b> je schuilnaam en pincode <b>ook</b> op dit apparaat en login gaat dan <b>automatisch</b></p>
+
+      <p v-if="state.loginErrorMsg !== undefined">Controleer of uw schuilnaam en pin code kloppen en probeer opnieuw</p>
+    </div>
+    <div class="d-flex justify-space-between">
+      <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('exit-signup')">
+        <template v-slot:prepend>
+          <v-icon size="x-large" color="purple"></v-icon>
+        </template>
+        Terug
+      </v-btn>
+
+      <v-btn :disabled="!state.selectedAlias || !PINOK" flat append-icon="mdi-arrow-right" @click="doSigninUser">
+        Verder
+        <template v-slot:append>
+          <v-icon size="x-large" color="purple"></v-icon>
+        </template>
+      </v-btn>
+    </div>
   </v-container>
 </template>
 

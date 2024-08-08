@@ -46,7 +46,7 @@
     </v-menu>
   </v-app-bar>
 
-  <v-dialog v-model="state.dialog1" :max-width="store.screenWidth">
+  <v-dialog v-model="state.dialog1">
     <v-card>
       <v-card-text>
         <h3>Om in te loggen op een ander apparaat hebt u nodig:</h3>
@@ -62,7 +62,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog2" :max-width="store.screenWidth">
+  <v-dialog v-model="state.dialog2">
     <v-card>
       <v-card-text>
         <h3>Als u automatisch inloggen heeft uitgezet kunt u inloggen met:</h3>
@@ -79,7 +79,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog4" :max-width="store.screenWidth">
+  <v-dialog v-model="state.dialog4">
     <v-card>
       <v-card-text>
         <h2>Stuur ons een bericht als je:</h2>
@@ -98,7 +98,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog5" :max-width="store.screenWidth">
+  <v-dialog v-model="state.dialog5">
     <v-card>
       <v-card-text>
         <p>Je kunt ons bereiken op ons e-mail adres contact@speelmee.app</p>
@@ -109,7 +109,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog6" :max-width="store.screenWidth">
+  <v-dialog v-model="state.dialog6">
     <v-card>
       <v-card-text>
         <p>Vraag: Is de app wel veilig?</p>
@@ -125,7 +125,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog7" :max-width="store.screenWidth">
+  <v-dialog v-model="state.dialog7">
     <v-card>
       <v-card-text>
         <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.12.2</p>
@@ -137,7 +137,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog9" :max-width="store.screenWidth">
+  <v-dialog v-model="state.dialog9">
     <v-card>
       <v-card-text>
         <p>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten. Als u hier uitlogt stopt u ook de automatische login.</p>
@@ -172,7 +172,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog10" :max-width="store.screenWidth">
+  <v-dialog v-model="state.dialog10">
     <v-card>
       <v-card-text>
         <h3>Als u uw gegevens verwijderd kunt u niet meer inloggen. Wel kunt u een nieuwe schuilnaam en pin code kiezen en fris opnieuw beginnen.</h3>
@@ -202,7 +202,7 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.dialog11" :max-width="store.screenWidth">
+  <v-dialog v-model="state.dialog11">
     <v-card>
       <v-card-text>
         <h3>De scores en de winnaars van de afgelopen 4 weken</h3>

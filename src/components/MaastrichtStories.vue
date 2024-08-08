@@ -1,45 +1,33 @@
 <template>
-  <ReportWarning v-if="store.rqActive === 'onWarning'" />
-  <RunQuiz v-else-if="store.msActive === 'doQuiz'" :recoveryMode="state.recoveryMode" @quiz-is-done="store.msActive = 'showRecap'" />
-  <QuizRecap v-else-if="store.msActive === 'showRecap'" @return-to-base="store.msActive = 'showResults'" />
-  <QuizResults v-else-if="store.msActive === 'showResults'" @return-to-menu="restartPage" />
-  <v-sheet v-else class="pa-0 mt-n6 text-center" color="#FEF1E5" :width="store.screenWidth" height="100vh">
-    <v-row>
-      <v-col cols="12">
-        <h4>Hallo {{ store.userData.alias }}</h4>
-        <h4>
-          De vragen van deze week ({{ store.currentWeekNr }})<br />
-          Per vraag krijg je 1 min de tijd
-        </h4>
-        <h3 class="text-red">Doe mee en win!</h3>
-      </v-col>
-      <v-col cols="12">
-        <v-img :height="240" alt="Afbeelding brug" src="../assets/brug.png"></v-img>
-      </v-col>
-    </v-row>
-    <v-row v-if="!state.userCompletedQuizBefore">
-      <v-col cols="12">
-        <h4 class="text-red">Elke vier weken een prijsuitreiking</h4>
-      </v-col>
-      <v-col cols="2"></v-col>
-      <v-col cols="8">
-        <h4>Te verloten onder de spelers met de hoogste scores<br />Elke week nieuwe vragen</h4>
-      </v-col>
-      <v-col cols="2"></v-col>
-      <v-col cols="12">
-        <v-btn :disabled="!state.quizAvailable" color="purple" @click="startQuiz">Start</v-btn>
-      </v-col>
-    </v-row>
-    <v-row v-else class="mr-2">
-      <v-col cols="1"></v-col>
-      <v-col cols="8" class="text-left">
-        <p>Je hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores</p>
-      </v-col>
-      <v-col cols="3">
-        <v-btn color="purple" @click="store.msActive = 'showRecap'">Toon</v-btn>
-      </v-col>
-    </v-row>
-  </v-sheet>
+  <v-container>
+    <ReportWarning v-if="store.rqActive === 'onWarning'" />
+    <RunQuiz v-else-if="store.msActive === 'doQuiz'" :recoveryMode="state.recoveryMode" @quiz-is-done="store.msActive = 'showRecap'" />
+    <QuizRecap v-else-if="store.msActive === 'showRecap'" @return-to-base="store.msActive = 'showResults'" />
+    <QuizResults v-else-if="store.msActive === 'showResults'" @return-to-menu="restartPage" />
+    <div v-else class="text-center font-weight-bold">
+      <p class="mb-4">Hallo {{ store.userData.alias }}</p>
+      <p class="mb-4">
+        De vragen van deze week ({{ store.currentWeekNr }})<br />
+        Per vraag krijg je 1 min de tijd
+      </p>
+      <p class="text-red mb-4">Doe mee en win!</p>
+
+      <p class="mb-4 d-flex justify-center">
+        <v-img :maxWidth="400" alt="Afbeelding brug" src="../assets/brug.png" />
+      </p>
+    </div>
+
+    <div v-if="!state.userCompletedQuizBefore" class="text-center font-weight-bold">
+      <p class="text-red my-4">Elke vier weken een prijsuitreiking</p>
+      <p class="mb-4">Te verloten onder de spelers met de hoogste scores<br />Elke week nieuwe vragen</p>
+
+      <v-btn :disabled="!state.quizAvailable" color="purple" @click="startQuiz">Start</v-btn>
+    </div>
+    <div v-else class="d-flex align-center justify-center font-weight-bold">
+      <p>Je hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores</p>
+      <v-btn class="ml-2" color="purple" @click="store.msActive = 'showRecap'">Toon</v-btn>
+    </div>
+  </v-container>
 </template>
 
 <script setup>

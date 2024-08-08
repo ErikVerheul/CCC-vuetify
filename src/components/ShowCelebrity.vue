@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="ma-2" :max-width="store.screenWidth">
+  <v-sheet class="ma-2">
     <v-row no-gutters>
       <div v-html="state.aliasInfoContent"></div>
     </v-row>

@@ -8,43 +8,38 @@
         @reset-app="resetApp"
         @show-alias-info="showAliasInfo"
       />
-      <v-row>
-        <v-col cols="auto">
-          <h2 v-if="state.loginErrorMsg !== undefined" class="py-4">Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
-        </v-col>
-      </v-row>
-      <v-row v-if="state.isInitDone" class="d-flex justify-center">
-        <v-col cols="auto">
-          <template v-if="!nowPlaying && state.showAliasInfoActive">
-            <ShowCelebrity @return-to="state.showAliasInfoActive = false" />
-          </template>
-          <MaastrichtStories v-else-if="state.isAuthenticated" @logout-app="returnToLogin" />
-          <template v-else>
-            <NewUser
-              v-if="state.userEntryMode === 'login'"
-              :aliases-in-use-incl-admin="aliasesInUseInclAdmin()"
-              @change-to-signin="switchToSignin"
-              @change-to-signup="switchToSignup"
-              @exit-signin="resetApp"
-            />
-            <!-- Sign up a new user -->
-            <SelectAlias
-              v-if="state.userEntryMode === 'signup'"
-              :aliases-not-in-use="state.aliasesNotInUse"
-              @alias-selected="doCreateUser"
-              @reset-signup="returnToLogin"
-            />
-            <!-- Sign in an existing user -->
-            <SigninUser
-              v-if="state.userEntryMode === 'signin'"
-              :aliases-in-use-incl-admin="aliasesInUseInclAdmin()"
-              :isCelebrity="state.isCelebrity"
-              @signin-completed="continueSignup"
-              @exit-signup="returnToLogin"
-            />
-          </template>
-        </v-col>
-      </v-row>
+
+      <h2 v-if="state.loginErrorMsg !== undefined" class="py-4">Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
+
+      <template v-if="state.isInitDone">
+        <ShowCelebrity v-if="!nowPlaying && state.showAliasInfoActive" @return-to="state.showAliasInfoActive = false" />
+
+        <MaastrichtStories v-else-if="state.isAuthenticated" @logout-app="returnToLogin" />
+        <template v-else>
+          <NewUser
+            v-if="state.userEntryMode === 'login'"
+            :aliases-in-use-incl-admin="aliasesInUseInclAdmin()"
+            @change-to-signin="switchToSignin"
+            @change-to-signup="switchToSignup"
+            @exit-signin="resetApp"
+          />
+          <!-- Sign up a new user -->
+          <SelectAlias
+            v-if="state.userEntryMode === 'signup'"
+            :aliases-not-in-use="state.aliasesNotInUse"
+            @alias-selected="doCreateUser"
+            @reset-signup="returnToLogin"
+          />
+          <!-- Sign in an existing user -->
+          <SigninUser
+            v-if="state.userEntryMode === 'signin'"
+            :aliases-in-use-incl-admin="aliasesInUseInclAdmin()"
+            :isCelebrity="state.isCelebrity"
+            @signin-completed="continueSignup"
+            @exit-signup="returnToLogin"
+          />
+        </template>
+      </template>
     </v-main>
   </v-app>
 </template>

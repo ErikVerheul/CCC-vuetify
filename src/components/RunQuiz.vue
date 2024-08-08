@@ -2,7 +2,7 @@
   <ReportFbError v-if="store.rqActive === 'onError'" />
   <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
   <template v-else>
-    <v-sheet v-if="state.showExplanation" class="ma-2" :max-width="store.screenWidth">
+    <v-sheet v-if="state.showExplanation" class="ma-2">
       <p>
         Je antwoord was <b>{{ getResultText() }}</b>
       </p>
@@ -20,7 +20,7 @@
       <p class="py-2">Meer hierover na afloop van de quiz</p>
     </v-sheet>
     <template v-else>
-      <v-sheet class="mt-6 ml-2 mr-2" :max-width="store.screenWidth">
+      <v-sheet class="mt-6 ml-2 mr-2">
         <template v-if="!state.showExplanation">
           <v-row class="mt-n6" no-gutters>
             <div class="small-font">{{ getProgressIndicator() }}</div>
@@ -40,7 +40,7 @@
           </v-row>
         </template>
       </v-sheet>
-      <v-sheet class="pa-2" :height="state.counterHeight" :max-width="store.screenWidth">
+      <v-sheet class="pa-2" :height="state.counterHeight">
         <v-row v-if="!state.questionDone">
           <v-col cols="7">
             <p>{{ state.currentQuestion.gameRules }}<br />Binnen 1 min</p>

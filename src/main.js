@@ -10,6 +10,7 @@ import App from './App.vue'
 import { firebaseApp } from './firebase'
 import VueGtag from 'vue-gtag'
 import router from './router/index'
+import './styles/index.css'
 
 // Plugins
 import { registerPlugins } from '@/plugins'

@@ -15,7 +15,6 @@ function getWeekNumber() {
 export const useAppStore = defineStore('app', {
   state: () => ({
     largeScreenDetected: window.screen.availWidth >= 1280,
-    screenWidth: window.screen.availWidth > 600 ? 600 : window.screen.availWidth,
     msActive: undefined,
     rqActive: undefined,
     metaObject: {},
