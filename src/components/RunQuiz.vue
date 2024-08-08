@@ -7,19 +7,25 @@
   <ReportFbError v-if="store.rqActive === 'onError'" />
   <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
   <template v-else>
-    <v-sheet v-if="state.showExplanation" class="ma-2" :max-width="store.screenWidth">
-      <p>Je antwoord was <b>{{ getResultText() }}</b></p>
+    <v-sheet v-if="state.showExplanation" class="ma-2">
+      <p>
+        Je antwoord was <b>{{ getResultText() }}</b>
+      </p>
       <p v-if="state.correctStatements.length === 1">Het juiste antwoord is:</p>
       <p v-else>De juiste antwoorden zijn:</p>
       <v-list lines="two" density="compact">
-        <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="state.correctStatements[index]" :style="{ 'background-color': '#DCEDC8' }"></v-list-item>
+        <v-list-item
+          v-for="(num, index) in state.correctStatements"
+          :subtitle="state.correctStatements[index]"
+          :style="{ 'background-color': '#DCEDC8' }"
+        ></v-list-item>
       </v-list>
       <p v-if="isTextAvailable()" v-html="state.currentQuestion.correctAnswer"></p>
       <h3 v-if="!isTextAvailable()" class="py-12">Sorry, de toelichting is niet beschikbaar</h3>
       <p class="py-2">Meer hierover na afloop van de quiz</p>
     </v-sheet>
     <template v-else>
-      <v-sheet class="ma-2" :max-width="store.screenWidth">
+      <v-sheet class="ma-2">
         <template v-if="!state.showExplanation">
           <v-row class="mt-n6" no-gutters>
             <div class="small-font">{{ getProgressIndicator() }}</div>
@@ -29,19 +35,23 @@
           </v-row>
           <v-row no-gutters>
             <v-list lines="two" density="compact">
-              <v-list-item v-for="(num, index) in state.currentQuestion.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)"
-                :style="{ 'background-color': bgColor }"></v-list-item>
+              <v-list-item
+                v-for="(num, index) in state.currentQuestion.statementsArray"
+                :subtitle="composeStatement(index)"
+                @click="qAnswer(index)"
+                :style="{ 'background-color': bgColor }"
+              ></v-list-item>
             </v-list>
           </v-row>
         </template>
       </v-sheet>
-      <v-sheet class="pa-2" :height="state.counterHeight" :max-width="store.screenWidth">
+      <v-sheet class="pa-2" :height="state.counterHeight">
         <v-row v-if="!state.questionDone">
           <v-col v-if="state.answerClicked" cols="7">
             <v-btn @click="finishQuestion()">{{ getReadyText() }}</v-btn>
           </v-col>
           <v-col v-else cols="7">
-            <p>{{ state.currentQuestion.gameRules }}<br>Binnen 1 min</p>
+            <p>{{ state.currentQuestion.gameRules }}<br />Binnen 1 min</p>
           </v-col>
           <v-col cols="5">
             <p class="text-right">Resterende tijd</p>
@@ -76,19 +86,20 @@
 }
 
 .color-red {
-  color: red
+  color: red;
 }
 </style>
 
-// to allow to exit the app and return to the state where left, the needed data is collected in the object state.progress and saved in the cookie spleelmee-progress
+// to allow to exit the app and return to the state where left, the needed data is collected in the object
+state.progress and saved in the cookie spleelmee-progress
 
 <script setup>
 import { onBeforeMount, reactive, watch } from 'vue'
 import { useAppStore } from '../store/app.js'
 import { db, dbRef } from '../firebase'
 import { ref, child, get, set } from 'firebase/database'
-import ReportFbError from "./ReportFbError.vue"
-import ReportWarning from "./ReportWarning.vue"
+import ReportFbError from './ReportFbError.vue'
+import ReportWarning from './ReportWarning.vue'
 import Cookies from 'universal-cookie'
 
 const store = useAppStore()
@@ -128,40 +139,42 @@ const state = reactive({
   counterHeight: 60,
   quizResult: {},
   lastCookieQuestionResult: null,
-  quizProgress: {}
+  quizProgress: {},
 })
 
 function loadQuestionNumbers() {
-  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      state.indexObject = snapshot.val()
-      const allQuestionNumbers = Object.keys(state.indexObject)
-      // get the question numbers of the questions assigned to this quiz
-      state.questionNumbers = []
-      allQuestionNumbers.forEach((key) => {
-        if (Number(state.indexObject[key].quizNumber) === store.currentQuizNumber) {
-          state.questionNumbers.push(key)
+  get(child(dbRef, `/quizzes/questions/index/`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        state.indexObject = snapshot.val()
+        const allQuestionNumbers = Object.keys(state.indexObject)
+        // get the question numbers of the questions assigned to this quiz
+        state.questionNumbers = []
+        allQuestionNumbers.forEach((key) => {
+          if (Number(state.indexObject[key].quizNumber) === store.currentQuizNumber) {
+            state.questionNumbers.push(key)
+          }
+        })
+        if (state.questionNumbers.length > 0) {
+          checkForRecovery()
+        } else {
+          store.problemText = `Kan geen vragen vinden voor quiz ${store.currentQuizNumber}`
+          store.problemCause = `Er zijn geen vragen toegewezen aan quiz ${store.currentQuizNumber}`
+          store.tipToResolve = `Vraag de redacteur om voor deze quiz vragen aan te maken`
+          store.rqActive = 'onWarning'
         }
-      })
-      if (state.questionNumbers.length > 0) {
-        checkForRecovery()
       } else {
-        store.problemText = `Kan geen vragen vinden voor quiz ${store.currentQuizNumber}`
-        store.problemCause = `Er zijn geen vragen toegewezen aan quiz ${store.currentQuizNumber}`
-        store.tipToResolve = `Vraag de redacteur om voor deze quiz vragen aan te maken`
+        store.problemText = `Kan de index van alle quiz vragen vinden`
+        store.problemCause = `De index is leeg`
+        store.tipToResolve = `Vraag de redacteur om een of meerdere quiz vragen aan te maken`
         store.rqActive = 'onWarning'
       }
-    } else {
-      store.problemText = `Kan de index van alle quiz vragen vinden`
-      store.problemCause = `De index is leeg`
-      store.tipToResolve = `Vraag de redacteur om een of meerdere quiz vragen aan te maken`
-      store.rqActive = 'onWarning'
-    }
-  }).catch((error) => {
-    store.firebaseError = error
-    store.fbErrorContext = `De fout is opgetreden bij het lezen van de index van alle quiz vragen`
-    store.rqActive = 'onError'
-  })
+    })
+    .catch((error) => {
+      store.firebaseError = error
+      store.fbErrorContext = `De fout is opgetreden bij het lezen van de index van alle quiz vragen`
+      store.rqActive = 'onError'
+    })
 }
 
 function checkForRecovery() {
@@ -241,7 +254,11 @@ function saveProgress() {
   state.quizProgress.rqActive = store.rqActive || null
   state.quizProgress.showExplanation = state.showExplanation
   state.quizProgress.quizResult = state.quizResult
-  cookies.set(`speelMee${store.userData.alias}`, state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
+  cookies.set(`speelMee${store.userData.alias}`, state.quizProgress, {
+    path: '/',
+    maxAge: 60 * 60,
+    sameSite: true,
+  })
 }
 
 function loadQuestion(resetShowExplanation) {
@@ -252,45 +269,47 @@ function loadQuestion(resetShowExplanation) {
     state.quizProgress.quizNumber = store.currentQuizNumber
     state.quizProgress.showExplanation = false
   }
-  get(child(dbRef, `/quizzes/questions/${Number(questId)}`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      state.currentQuestion = snapshot.val()
-      // collect the correct statements
-      state.correctStatements = []
-      const answerKeys = Object.keys(state.currentQuestion.answers)
-      answerKeys.forEach((key) => {
-        if (state.currentQuestion.answers[key] === true) {
-          const line = `${letters[key]}. ${state.currentQuestion.statementsArray[key]}`
-          state.correctStatements.push(line)
-        }
-      })
-      // initialize user answers to false (not selected)
-      state.userAnswers = []
-      const statementKeys = Object.keys(state.currentQuestion.statementsArray)
-      statementKeys.forEach(() => {
-        state.userAnswers.push(false)
-      })
+  get(child(dbRef, `/quizzes/questions/${Number(questId)}`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        state.currentQuestion = snapshot.val()
+        // collect the correct statements
+        state.correctStatements = []
+        const answerKeys = Object.keys(state.currentQuestion.answers)
+        answerKeys.forEach((key) => {
+          if (state.currentQuestion.answers[key] === true) {
+            const line = `${letters[key]}. ${state.currentQuestion.statementsArray[key]}`
+            state.correctStatements.push(line)
+          }
+        })
+        // initialize user answers to false (not selected)
+        state.userAnswers = []
+        const statementKeys = Object.keys(state.currentQuestion.statementsArray)
+        statementKeys.forEach(() => {
+          state.userAnswers.push(false)
+        })
 
-      if (props.recoveryMode) {
-        if (state.questionDone && state.lastCookieQuestionResult && !state.lastCookieQuestionResult.overdue) {
-          // restore answers of last question
-          state.userAnswers = state.lastCookieQuestionResult.answers
+        if (props.recoveryMode) {
+          if (state.questionDone && state.lastCookieQuestionResult && !state.lastCookieQuestionResult.overdue) {
+            // restore answers of last question
+            state.userAnswers = state.lastCookieQuestionResult.answers
+          }
         }
+        if (!state.questionDone) startTimer()
+        // show data when loaded
+        if (resetShowExplanation) state.showExplanation = false
+      } else {
+        store.problemText = `Kan de quiz vraag niet vinden`
+        store.problemCause = `De quiz vraag met nummer ${questId} bestaat niet.`
+        store.tipToResolve = `Vraag de redacteur om deze quiz vraag aan te maken`
+        store.rqActive = 'onWarning'
       }
-      if (!state.questionDone) startTimer()
-      // show data when loaded
-      if (resetShowExplanation) state.showExplanation = false
-    } else {
-      store.problemText = `Kan de quiz vraag niet vinden`
-      store.problemCause = `De quiz vraag met nummer ${questId} bestaat niet.`
-      store.tipToResolve = `Vraag de redacteur om deze quiz vraag aan te maken`
-      store.rqActive = 'onWarning'
-    }
-  }).catch((error) => {
-    store.rqActive = 'onError'
-    store.firebaseError = error
-    store.fbErrorContext = `De fout is opgetreden bij het lezen van quiz vraag met nummer ${questId}`
-  })
+    })
+    .catch((error) => {
+      store.rqActive = 'onError'
+      store.firebaseError = error
+      store.fbErrorContext = `De fout is opgetreden bij het lezen van quiz vraag met nummer ${questId}`
+    })
 }
 
 function getReadyText() {
@@ -305,7 +324,7 @@ function getResultText() {
 }
 
 function composeStatement(idx) {
-  if (idx > 12) return "Fout: Meer dan 12 statements?"
+  if (idx > 12) return 'Fout: Meer dan 12 statements?'
   const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
   bgColor = 'white'
   if (state.userAnswers[idx]) {
@@ -324,7 +343,7 @@ function numberOfCorrectAnswers() {
   if (state.currentQuestion.answers === undefined) return 0
   const keys = Object.keys(state.currentQuestion.answers)
   let count = 0
-  keys.forEach(k => {
+  keys.forEach((k) => {
     if (state.currentQuestion.answers[k] === true) count++
   })
   return count
@@ -334,7 +353,7 @@ function countUserSelectedCorrectAnswers() {
   if (state.currentQuestion.answers === undefined) return 0
   const keys = Object.keys(state.currentQuestion.answers)
   let count = 0
-  keys.forEach(k => {
+  keys.forEach((k) => {
     if (state.currentQuestion.answers[k] === true && state.userAnswers[k] === true) count++
   })
   return count
@@ -342,7 +361,7 @@ function countUserSelectedCorrectAnswers() {
 
 function countUserSelectedWrongAnswers() {
   let count = 0
-  state.userAnswers.forEach(ind => {
+  state.userAnswers.forEach((ind) => {
     if (state.userAnswers[ind] === true && state.currentQuestion.answers[ind] !== true) count++
   })
   return count
@@ -410,28 +429,33 @@ function isTextAvailable() {
   return (state.currentQuestion.correctAnswer && state.currentQuestion.correctAnswer.length > 7) || false
 }
 
-watch(() => state.seconds, () => {
-  if (state.seconds >= state.timeout) {
-    // stop the timer
-    clearInterval(state.timerId)
-    state.questionDone = true
-    state.wrapupMsg = 'Je antwoord was niet binnen de tijd'
-    state.quizResult[state.currentQuestionIdx] = {}
-    state.quizResult[state.currentQuestionIdx].overdue = true
-    state.isLastAnswerOverdue = true
-    store.compactResult.push(false)
-    if (!store.isArchivedQuiz) saveProgress()
+watch(
+  () => state.seconds,
+  () => {
+    if (state.seconds >= state.timeout) {
+      // stop the timer
+      clearInterval(state.timerId)
+      state.questionDone = true
+      state.wrapupMsg = 'Je antwoord was niet binnen de tijd'
+      state.quizResult[state.currentQuestionIdx] = {}
+      state.quizResult[state.currentQuestionIdx].overdue = true
+      state.isLastAnswerOverdue = true
+      store.compactResult.push(false)
+      if (!store.isArchivedQuiz) saveProgress()
+    }
   }
-})
+)
 
 function saveResults() {
   // save the results of this quiz for presentation purposes
-  set(ref(db, `/quizzes/results/${store.currentYear}/${store.userData.alias}/${store.quizObject.actionWeek}/`), state.quizResult)
+  set(
+    ref(db, `/quizzes/results/${store.currentYear}/${store.userData.alias}/${store.quizObject.actionWeek}/`),
+    state.quizResult
+  )
   // save this quiz number as completed to user data
   if (store.userData.completedQuizNumbers) {
     store.userData.completedQuizNumbers.push(store.currentQuizNumber)
   } else store.userData.completedQuizNumbers = [store.currentQuizNumber]
   set(ref(db, `users/${store.firebaseUser.uid}/completedQuizNumbers`), store.userData.completedQuizNumbers)
 }
-
 </script>

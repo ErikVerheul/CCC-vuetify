@@ -1,17 +1,30 @@
 <template>
   <ReportFbError v-if="store.rqActive === 'onError'" />
   <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
-  <ViewQExplanation v-else-if="state.doActivate === 'showExpl'" :questionObject="state.questionObject" @view-over="state.doActivate = undefined"></ViewQExplanation>
-  <v-card v-else width="store.screenWidth">
-    <v-card-title v-if="!store.isArchivedQuiz">Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title>
-    <v-card-title v-else>Je hebt de quiz van het jaar {{ store.quizObject.actionYear }} en week {{ store.quizObject.actionWeek }} voltooid</v-card-title>   
+  <ViewQExplanation
+    v-else-if="state.doActivate === 'showExpl'"
+    :questionObject="state.questionObject"
+    @view-over="state.doActivate = undefined"
+  ></ViewQExplanation>
+  <v-card v-else>
+    <v-card-title v-if="!store.isArchivedQuiz"
+      >Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title
+    >
+    <v-card-title v-else
+      >Je hebt de quiz van het jaar {{ store.quizObject.actionYear }} en week
+      {{ store.quizObject.actionWeek }} voltooid</v-card-title
+    >
     <v-card-text>Je had {{ countGood() }} van de {{ countAll() }} antwoorden goed</v-card-text>
     <v-card-title class="text-center">{{ appreciationText() }}</v-card-title>
     <v-card-text>Bekijk nu de verhalen achter de vragen. Of ga verder met de ranglijst.</v-card-text>
     <v-row>
       <v-col cols="12">
         <v-list lines="one">
-          <v-list-item v-for="item in state.questionIndexData" :title="getText(item)" @click="showExplanation(item)"></v-list-item>
+          <v-list-item
+            v-for="item in state.questionIndexData"
+            :title="getText(item)"
+            @click="showExplanation(item)"
+          ></v-list-item>
         </v-list>
       </v-col>
     </v-row>
@@ -41,13 +54,13 @@ import { child, get } from 'firebase/database'
 import { onBeforeMount, reactive } from 'vue'
 import { useAppStore } from '../store/app.js'
 import ViewQExplanation from './ViewQExplanation.vue'
-import ReportFbError from "./ReportFbError.vue"
-import ReportWarning from "./ReportWarning.vue"
+import ReportFbError from './ReportFbError.vue'
+import ReportWarning from './ReportWarning.vue'
 
 const state = reactive({
   doActivate: undefined,
   questionIndexData: [],
-  questionObject: {}
+  questionObject: {},
 })
 
 onBeforeMount(() => {
@@ -65,7 +78,7 @@ function countAll() {
 function countGood() {
   if (store.compactResult) {
     let count = 0
-    store.compactResult.forEach(el => {
+    store.compactResult.forEach((el) => {
       if (el === true) count++
     })
     return count
@@ -83,31 +96,33 @@ function appreciationText() {
 
 function loadQuizQuestionsIndex() {
   // get all question index data for the current quiz
-  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      state.indexObject = snapshot.val()
-      const indexObjectKeys = Object.keys(state.indexObject)
-      // get the question numbers of the questions assigned to this quiz
-      state.questionIndexData = []
-      indexObjectKeys.forEach((key) => {
-        // get the question with currentQuizNumber
-        if (Number(state.indexObject[key].quizNumber) === store.currentQuizNumber) {
-          // add this data to these objects
-          state.indexObject[key].qNumber = key
-          state.questionIndexData.push(state.indexObject[key])
-        }
-      })
-    } else {
-      store.problemText = `Kan de index van alle quiz vragen vinden`
-      store.problemCause = `De index is leeg`
-      store.tipToResolve = `Vraag de redacteur om een of meerdere quiz vragen aan te maken`
-      store.rqActive = 'onWarning'
-    }
-  }).catch((error) => {
-    store.firebaseError = error
-    store.fbErrorContext = `De fout is opgetreden bij het lezen van de index van alle quiz vragen`
-    store.rqActive = 'onError'
-  })
+  get(child(dbRef, `/quizzes/questions/index/`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        state.indexObject = snapshot.val()
+        const indexObjectKeys = Object.keys(state.indexObject)
+        // get the question numbers of the questions assigned to this quiz
+        state.questionIndexData = []
+        indexObjectKeys.forEach((key) => {
+          // get the question with currentQuizNumber
+          if (Number(state.indexObject[key].quizNumber) === store.currentQuizNumber) {
+            // add this data to these objects
+            state.indexObject[key].qNumber = key
+            state.questionIndexData.push(state.indexObject[key])
+          }
+        })
+      } else {
+        store.problemText = `Kan de index van alle quiz vragen vinden`
+        store.problemCause = `De index is leeg`
+        store.tipToResolve = `Vraag de redacteur om een of meerdere quiz vragen aan te maken`
+        store.rqActive = 'onWarning'
+      }
+    })
+    .catch((error) => {
+      store.firebaseError = error
+      store.fbErrorContext = `De fout is opgetreden bij het lezen van de index van alle quiz vragen`
+      store.rqActive = 'onError'
+    })
 }
 
 function getText(item) {
@@ -116,22 +131,23 @@ function getText(item) {
 }
 
 function showExplanation(item) {
-  get(child(dbRef, `/quizzes/questions/${Number(item.qNumber)}`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      state.questionObject = snapshot.val()
-      state.questionObject.qTitle = item.title
-      state.doActivate = 'showExpl'
-    } else {
-      store.problemText = `Kan de quiz vraag niet vinden`
-      store.problemCause = `De quiz vraag met nummer ${item.qNumber} bestaat niet.`
-      store.tipToResolve = `Vraag de redacteur om deze quiz vraag aan te maken`
-      store.rqActive = 'onWarning'
-    }
-  }).catch((error) => {
-    store.rqActive = 'onError'
-    store.firebaseError = error
-    store.fbErrorContext = `De fout is opgetreden bij het lezen van quiz vraag met nummer ${item.qNumber}`
-  })
+  get(child(dbRef, `/quizzes/questions/${Number(item.qNumber)}`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        state.questionObject = snapshot.val()
+        state.questionObject.qTitle = item.title
+        state.doActivate = 'showExpl'
+      } else {
+        store.problemText = `Kan de quiz vraag niet vinden`
+        store.problemCause = `De quiz vraag met nummer ${item.qNumber} bestaat niet.`
+        store.tipToResolve = `Vraag de redacteur om deze quiz vraag aan te maken`
+        store.rqActive = 'onWarning'
+      }
+    })
+    .catch((error) => {
+      store.rqActive = 'onError'
+      store.firebaseError = error
+      store.fbErrorContext = `De fout is opgetreden bij het lezen van quiz vraag met nummer ${item.qNumber}`
+    })
 }
-
 </script>

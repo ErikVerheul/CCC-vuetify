@@ -1,5 +1,5 @@
 <template>
-  <v-card width="store.screenWidth">
+  <v-card>
     <v-card-title class="text-center">{{ props.questionObject.qTitle }}</v-card-title>
     <v-row justify="space-around">
       <v-col cols="12" md="8">
@@ -32,5 +32,4 @@
 <script setup>
 const emit = defineEmits(['view-over'])
 const props = defineProps(['questionObject'])
-
 </script>
