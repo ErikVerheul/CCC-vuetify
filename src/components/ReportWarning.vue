@@ -1,5 +1,5 @@
 <template>
-  <v-card width="store.screenWidth">
+  <v-card>
     <v-card-title>De app meld een probleem</v-card-title>
     <v-card-text>
       <p><b>Probleem:</b> {{ store.problemText }}</p>
@@ -34,5 +34,4 @@ function quitApp() {
   // reset the app
   location.reload(true)
 }
-
 </script>

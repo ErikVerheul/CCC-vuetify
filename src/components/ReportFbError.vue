@@ -1,8 +1,11 @@
 <template>
-  <v-card width="store.screenWidth">
+  <v-card>
     <v-card-title>Er is een fout opgetreden</v-card-title>
     <v-card-text>
-      <p><b>De database geeft de volgende melding:</b> {{ store.firebaseError.message }}</p>
+      <p>
+        <b>De database geeft de volgende melding:</b>
+        {{ store.firebaseError.message }}
+      </p>
       <p><b>Tijdens/bij:</b> {{ store.fbErrorContext }}</p>
     </v-card-text>
     <v-card-actions>
@@ -33,5 +36,4 @@ function quitApp() {
   // reset the app
   location.reload(true)
 }
-
 </script>

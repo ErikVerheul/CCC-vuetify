@@ -1,8 +1,8 @@
 <template>
   <v-container>
     <v-row class="d-flex align-center justify-center">
-      <AppBar :withActivator=false />
-      <v-sheet class="mx-3" :width="store.screenWidth">
+      <AppBar :withActivator="false" />
+      <v-sheet class="mx-3">
         <QuizResults @return-to-menu="router.replace({ path: '/' })" />
       </v-sheet>
     </v-row>

@@ -13,17 +13,17 @@ const routes = [
       {
         path: '/',
         name: 'Home',
-        component: HomeView
+        component: HomeView,
       },
       {
         path: '/Privacybeleid',
         name: 'Privacy',
-        component: PrivacyView
+        component: PrivacyView,
       },
       {
         path: '/QuizResultsView',
         name: 'QuizResults',
-        component: QuizResultsView
+        component: QuizResultsView,
       },
       {
         path: '/superAdmin',
@@ -33,20 +33,20 @@ const routes = [
         // which is lazy-loaded when the route is visited.
         component: () => import('@/views/SuperAdminView.vue'),
         // prevent any other account than admin to access this view
-        beforeEnter (to, from, next) {
+        beforeEnter(to, from, next) {
           const store = useAppStore()
           if (store.userData && store.userData.alias === 'admin') {
             next()
           } else {
             next('/')
           }
-        }
+        },
       },
       {
         // route any unknown path to HomeView
         path: '/:pathMatch(.*)*',
-        component: HomeView
-      }
+        component: HomeView,
+      },
     ],
   },
 ]

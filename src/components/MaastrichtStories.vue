@@ -1,26 +1,30 @@
 <template>
-  <ReportWarning v-if="store.rqActive === 'onWarning'"/>
-  <RunQuiz v-else-if="store.msActive === 'doQuiz'" :recoveryMode="state.recoveryMode" @quiz-is-done="store.msActive='showRecap'" />
+  <ReportWarning v-if="store.rqActive === 'onWarning'" />
+  <RunQuiz
+    v-else-if="store.msActive === 'doQuiz'"
+    :recoveryMode="state.recoveryMode"
+    @quiz-is-done="store.msActive = 'showRecap'"
+  />
   <QuizRecap v-else-if="store.msActive === 'showRecap'" @return-to-base="store.msActive = 'showResults'" />
   <QuizResults v-else-if="store.msActive === 'showResults'" @return-to-menu="store.msActive = undefined" />
-  <v-sheet v-else class="text-center" :max-width="store.screenWidth">
-    <v-row>
-      <v-col cols="12" class="my-0 py-0">
-        <h4>Hallo {{ store.userData.alias }}</h4>
-        <h4>De vragen van deze week ({{ store.currentWeekNr }})<br>
-          Per vraag krijg je 1 min de tijd</h4>
-        <h3 class="text-red">Doe mee en win!</h3>
-      </v-col>
+  <v-sheet v-else class="text-center">
+    <h4>Hallo {{ store.userData.alias }}</h4>
+    <h4>
+      De vragen van deze week ({{ store.currentWeekNr }})<br />
+      Per vraag krijg je 1 min de tijd
+    </h4>
+    <h3 class="text-red">Doe mee en win!</h3>
+
+    <v-img :height="240" alt="Afbeelding mok" src="../assets/mok.png"></v-img>
+
+    <h3 class="text-red">Unieke erfgoed beker *)</h3>
+
+    <div v-if="!state.userCompletedQuizBefore">
       <v-col cols="12">
-        <v-img :height="240" alt="Afbeelding mok" src="../assets/mok.png"></v-img>
-      </v-col>
-      <v-col cols="12" class="my-0 py-0">
-        <h3 class="text-red">Unieke erfgoed beker *)</h3>
-      </v-col>
-    </v-row>
-    <v-row v-if="!state.userCompletedQuizBefore">
-      <v-col cols="12">
-        <h4>Elke vier weken met nieuwe opdruk. Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</h4>
+        <h4>
+          Elke vier weken met nieuwe opdruk. Te verloten onder de spelers met de hoogste scores. Elke week nieuwe
+          vragen.
+        </h4>
       </v-col>
       <v-col cols="12">
         <v-btn :disabled="!state.quizAvailable" color="purple" @click="startQuiz">Start</v-btn>
@@ -28,11 +32,10 @@
       <v-col cols="12" class="ml-2 text-left">
         <p>*) Voor 12.50 ook verkrijgbaar bij CoffeeLovers</p>
       </v-col>
-    </v-row>
+    </div>
     <v-row v-else class="mr-2">
-      <v-col cols="1"></v-col>
-      <v-col cols="8" class="text-left">
-        <p>Je hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores </p>
+      <v-col cols="8" :offset="1" class="text-left">
+        <p>Je hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores</p>
       </v-col>
       <v-col cols="3">
         <v-btn color="purple" @click="store.msActive = 'showRecap'">Toon</v-btn>
@@ -50,7 +53,7 @@ import RunQuiz from './RunQuiz.vue'
 import QuizRecap from './QuizRecap.vue'
 import QuizResults from './QuizResults.vue'
 import Cookies from 'universal-cookie'
-import ReportWarning from "./ReportWarning.vue"
+import ReportWarning from './ReportWarning.vue'
 
 const emit = defineEmits(['quiz-is-done', 'logout-app'])
 
@@ -71,18 +74,20 @@ onBeforeMount(() => {
 })
 
 function loadMetaData() {
-  get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      store.metaObject = snapshot.val()
-      const quizStrNumbers = Object.keys(store.metaObject)
-      // get the quiz with quizNumbers converted to integers
-      getQuiz(quizStrNumbers.map((strNr) => Number(strNr)))
-    } else {
-      console.log("Quiz meta data not found")
-    }
-  }).catch((error) => {
-    console.error('Error while reading all available quizzes from database: ' + error.message)
-  })
+  get(child(dbRef, `/quizzes/metaData/`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        store.metaObject = snapshot.val()
+        const quizStrNumbers = Object.keys(store.metaObject)
+        // get the quiz with quizNumbers converted to integers
+        getQuiz(quizStrNumbers.map((strNr) => Number(strNr)))
+      } else {
+        console.log('Quiz meta data not found')
+      }
+    })
+    .catch((error) => {
+      console.error('Error while reading all available quizzes from database: ' + error.message)
+    })
 }
 
 function getQuiz(allQuizNumbers) {
@@ -115,7 +120,11 @@ function getQuiz(allQuizNumbers) {
 
   /* Override the quiz number from unfinished quiz data if available */
   const unfinishedCookieData = cookies.get(`speelMee${store.userData.alias}`)
-  if (unfinishedCookieData && unfinishedCookieData.alias === store.userData.alias && Object.keys(unfinishedCookieData.quizResult).length > 0) {
+  if (
+    unfinishedCookieData &&
+    unfinishedCookieData.alias === store.userData.alias &&
+    Object.keys(unfinishedCookieData.quizResult).length > 0
+  ) {
     // remove cookie and reset app when the last session ended in an error condition
     const errorConditions = [unfinishedCookieData.msActive, unfinishedCookieData.rqActive]
     if (errorConditions.includes('onError') || errorConditions.includes('onWarning')) {
@@ -132,7 +141,11 @@ function getQuiz(allQuizNumbers) {
 
 /* Start the action week quiz if not completed before*/
 function startQuiz() {
-  if (store.userData.alias !== 'admin' && store.userData.completedQuizNumbers && store.userData.completedQuizNumbers.includes(store.currentQuizNumber)) {
+  if (
+    store.userData.alias !== 'admin' &&
+    store.userData.completedQuizNumbers &&
+    store.userData.completedQuizNumbers.includes(store.currentQuizNumber)
+  ) {
     // admin can run a quiz multiple times but not take part in a competition
     state.userCompletedQuizBefore = true
   } else {
@@ -140,5 +153,4 @@ function startQuiz() {
     store.msActive = 'doQuiz'
   }
 }
-
 </script>
