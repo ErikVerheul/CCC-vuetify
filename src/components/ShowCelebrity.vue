@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, reactive} from 'vue'
+import { onBeforeMount, reactive } from 'vue'
 import { useAppStore } from '../store/app.js'
 import { dbRef } from '../firebase'
 import { child, get } from 'firebase/database'

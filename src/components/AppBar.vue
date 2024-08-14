@@ -1,7 +1,8 @@
 <template>
   <v-app-bar density="compact" color="purple">
     <v-app-bar-title class="flex text-center">Hoe goed ken je Maastricht?</v-app-bar-title>
-    <v-btn v-if="store.largeScreenDetected && props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined" @click="doAdmin">Admin</v-btn>
+    <v-btn v-if="store.largeScreenDetected && props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined"
+      @click="doAdmin">Admin</v-btn>
     <v-btn v-if="props.withActivator" icon id="menu-activator">
       <v-icon>mdi-dots-vertical</v-icon>
     </v-btn>

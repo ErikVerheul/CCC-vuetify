@@ -9,5 +9,5 @@
 </template>
 
 <script setup>
-  const emit = defineEmits(['m-done'])
+const emit = defineEmits(['m-done'])
 </script>

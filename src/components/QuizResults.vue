@@ -1,8 +1,8 @@
 <template>
-  <ReportFbError v-if="store.rqActive==='onError'" />
-  <ReportWarning v-else-if="store.rqActive==='onWarning'" />
-  <RunQuiz v-else-if="state.doActivate==='playOldQuiz'" @quiz-is-done="state.doActivate='showRecap'"></RunQuiz>
-  <QuizRecap v-else-if="state.doActivate==='showRecap'" @return-to-base="state.doActivate=undefined"></QuizRecap>
+  <ReportFbError v-if="store.rqActive === 'onError'" />
+  <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
+  <RunQuiz v-else-if="state.doActivate === 'playOldQuiz'" @quiz-is-done="state.doActivate = 'showRecap'"></RunQuiz>
+  <QuizRecap v-else-if="state.doActivate === 'showRecap'" @return-to-base="state.doActivate = undefined"></QuizRecap>
   <template v-else>
     <v-container>
       <template v-if="!store.isArchivedQuiz">
@@ -10,8 +10,8 @@
           <b>Zondag 13:00 wordt de ranglijst definitief</b>
         </v-row>
         <v-row>
-          <v-data-table mobile-breakpoint="0" density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy" :headers="getHeaders()" :items="state.scores"
-            item-value="name">
+          <v-data-table mobile-breakpoint="0" density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy"
+            :headers="getHeaders()" :items="state.scores" item-value="name">
           </v-data-table>
         </v-row>
       </template>

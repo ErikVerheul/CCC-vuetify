@@ -1,6 +1,6 @@
 <template>
   <v-container class="pa-0 mt-n8">
-    <v-card flat class="text-center" color="amber-lighten-3" :width="store.screenWidth" >
+    <v-card flat class="text-center" color="amber-lighten-3" :width="store.screenWidth">
       <v-card-text>Gebruik je deze app voor het eerst?</v-card-text>
       <v-btn color="blue" @click="emit('change-to-signup')">Kies dan een schuilnaam</v-btn>
       <v-card-text><small>Dan houdt de app je score bij!</small></v-card-text>

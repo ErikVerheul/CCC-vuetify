@@ -1,14 +1,16 @@
 <template>
-  <ReportWarning v-if="store.rqActive === 'onWarning'"/>
-  <RunQuiz v-else-if="store.msActive === 'doQuiz'" :recoveryMode="state.recoveryMode" @quiz-is-done="store.msActive='showRecap'" />
+  <ReportWarning v-if="store.rqActive === 'onWarning'" />
+  <RunQuiz v-else-if="store.msActive === 'doQuiz'" :recoveryMode="state.recoveryMode" @quiz-is-done="store.msActive = 'showRecap'" />
   <QuizRecap v-else-if="store.msActive === 'showRecap'" @return-to-base="store.msActive = 'showResults'" />
   <QuizResults v-else-if="store.msActive === 'showResults'" @return-to-menu="store.msActive = undefined" />
   <v-sheet v-else class="text-center" :max-width="store.screenWidth">
     <v-row>
       <v-col cols="12" class="my-0 py-0">
         <h4>Hallo {{ store.userData.alias }}</h4>
-        <h4>De vragen van deze week ({{ store.currentWeekNr }})<br>
-          Per vraag krijg je 1 min de tijd</h4>
+        <h4>
+          De vragen van deze week ({{ store.currentWeekNr }})<br />
+          Per vraag krijg je 1 min de tijd
+        </h4>
         <h3 class="text-red">Doe mee en win!</h3>
       </v-col>
       <v-col cols="12">
@@ -32,7 +34,7 @@
     <v-row v-else class="mr-2">
       <v-col cols="1"></v-col>
       <v-col cols="8" class="text-left">
-        <p>Je hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores </p>
+        <p>Je hebt de quiz van deze week ({{ store.currentWeekNr }}) al gedaan. Zie de scores</p>
       </v-col>
       <v-col cols="3">
         <v-btn color="purple" @click="store.msActive = 'showRecap'">Toon</v-btn>
@@ -50,7 +52,7 @@ import RunQuiz from './RunQuiz.vue'
 import QuizRecap from './QuizRecap.vue'
 import QuizResults from './QuizResults.vue'
 import Cookies from 'universal-cookie'
-import ReportWarning from "./ReportWarning.vue"
+import ReportWarning from './ReportWarning.vue'
 
 const emit = defineEmits(['quiz-is-done', 'logout-app'])
 
@@ -71,18 +73,20 @@ onBeforeMount(() => {
 })
 
 function loadMetaData() {
-  get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      store.metaObject = snapshot.val()
-      const quizStrNumbers = Object.keys(store.metaObject)
-      // get the quiz with quizNumbers converted to integers
-      getQuiz(quizStrNumbers.map((strNr) => Number(strNr)))
-    } else {
-      console.log("Quiz meta data not found")
-    }
-  }).catch((error) => {
-    console.error('Error while reading all available quizzes from database: ' + error.message)
-  })
+  get(child(dbRef, `/quizzes/metaData/`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        store.metaObject = snapshot.val()
+        const quizStrNumbers = Object.keys(store.metaObject)
+        // get the quiz with quizNumbers converted to integers
+        getQuiz(quizStrNumbers.map((strNr) => Number(strNr)))
+      } else {
+        console.log('Quiz meta data not found')
+      }
+    })
+    .catch((error) => {
+      console.error('Error while reading all available quizzes from database: ' + error.message)
+    })
 }
 
 function getQuiz(allQuizNumbers) {
@@ -140,5 +144,4 @@ function startQuiz() {
     store.msActive = 'doQuiz'
   }
 }
-
 </script>

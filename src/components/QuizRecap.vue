@@ -1,10 +1,11 @@
 <template>
   <ReportFbError v-if="store.rqActive === 'onError'" />
   <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
-  <ViewQExplanation v-else-if="state.doActivate === 'showExpl'" :questionObject="state.questionObject" @view-over="state.doActivate = undefined"></ViewQExplanation>
+  <ViewQExplanation v-else-if="state.doActivate === 'showExpl'" :questionObject="state.questionObject" @view-over="state.doActivate = undefined">
+  </ViewQExplanation>
   <v-card v-else width="store.screenWidth">
     <v-card-title v-if="!store.isArchivedQuiz">Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title>
-    <v-card-title v-else>Je hebt de quiz van het jaar {{ store.quizObject.actionYear }} en week {{ store.quizObject.actionWeek }} voltooid</v-card-title>   
+    <v-card-title v-else>Je hebt de quiz van het jaar {{ store.quizObject.actionYear }} en week {{ store.quizObject.actionWeek }} voltooid</v-card-title>
     <v-card-text>Je had {{ countGood() }} van de {{ countAll() }} antwoorden goed</v-card-text>
     <v-card-title class="text-center">{{ appreciationText() }}</v-card-title>
     <v-card-text>Bekijk nu de verhalen achter de vragen. Of ga verder met de ranglijst.</v-card-text>

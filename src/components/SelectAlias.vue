@@ -22,8 +22,7 @@
       </v-col>
       <v-spacer></v-spacer>
       <v-col>
-        <v-btn :disabled="state.aliasSelected === undefined" flat append-icon="mdi-arrow-right"
-          @click="emit('alias-selected', state.aliasSelected)">
+        <v-btn :disabled="state.aliasSelected === undefined" flat append-icon="mdi-arrow-right" @click="emit('alias-selected', state.aliasSelected)">
           Verder
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>

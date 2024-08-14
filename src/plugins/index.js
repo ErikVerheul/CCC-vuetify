@@ -16,15 +16,12 @@ const globalOptions = {
   debug: 'warn',
   placeholder: 'Compose your text...',
   readOnly: false,
-  theme: 'snow'
+  theme: 'snow',
 }
 
 export function registerPlugins(app) {
   loadFonts()
   QuillEditor.props.globalOptions.default = () => globalOptions
   app.component('QuillEditor', QuillEditor)
-  app
-    .use(vuetify)
-    .use(router)
-    .use(pinia)
+  app.use(vuetify).use(router).use(pinia)
 }
