@@ -1,10 +1,4 @@
 <template>
-  <p>state.actionYear = {{ state.actionYear }}</p>
-  <p>state.actionWeek = {{ state.actionWeek }}</p>
-  <p>state.quizNumberInput = {{ state.quizNumberInput }}</p>
-  <p>actionWeekInUse = {{ actionWeekInUse }}</p>
-  <p>checkForQuizzesAssignedAlready = {{ quizzesAssignedAlready }}</p>
-  <p>state.quizNumberInput = {{ state.quizNumberInput }}</p>
   <v-card>
     <v-card-title>Quiz meta data onderhouden</v-card-title>
     <v-row>
