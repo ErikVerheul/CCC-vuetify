@@ -23,6 +23,7 @@
             <v-radio-group inline v-model="state.action">
               <v-radio @change="changeMode" label="Veranderen" value="2"></v-radio>
               <v-radio @change="changeMode" label="Maak quiz leeg" value="3"></v-radio>
+              <v-radio @change="createQuestionsList(state.quizNumberInput)" label="Toon vragen" value="4"></v-radio>
             </v-radio-group>
           </v-col>
           <v-col cols="3"></v-col>
@@ -135,6 +136,29 @@
       </v-row>
     </v-card>
   </v-dialog>
+
+  <template>
+    <v-row justify="center">
+      <v-dialog v-model="state.showQuestions" width="600px">
+        <v-card>
+          <v-card-title>
+            <span class="text-h5">Vragen van quiz met nummer {{ state.quizNumberInput }}</span>
+          </v-card-title>
+          <v-card-text>
+            <v-list lines="one">
+              <v-list-item v-for="item in state.questionsList" :title="composeQuestionLine(item)"></v-list-item>
+            </v-list>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" text @click="state.showQuestions = false">
+              Done
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
+  </template>
 </template>
 
 <script setup>
@@ -232,7 +256,9 @@ const state = reactive({
   ],
   saveSuccess: 0,
   resetCount: 0,
-  checkMultipleAssignments: false
+  checkMultipleAssignments: false,
+  questionsList: [],
+  showQuestions: false
 })
 
 function actionSettingsOk() {
@@ -278,6 +304,26 @@ function removeQuizRefs(quizNr) {
       }).catch((error) => {
         console.error('Failed to save the questions index to the database: ' + error.message)
       })
+    } else {
+      console.log("No quiz-questions available")
+    }
+  }).catch((error) => {
+    console.error('Error while reading all available quiz-question names from database: ' + error.message)
+  })
+}
+
+function createQuestionsList(quizNr) {
+  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
+    state.questionsList = []
+    if (snapshot.exists()) {
+      const indexObject = snapshot.val()
+      const indexObjectKeys = Object.keys(indexObject)
+      indexObjectKeys.forEach((key) => {
+        if (indexObject[key].quizNumber == quizNr) {
+          state.questionsList.push({ question: key, title: indexObject[key].title })
+        }
+      })
+      state.showQuestions = !state.showQuestions
     } else {
       console.log("No quiz-questions available")
     }
@@ -344,6 +390,10 @@ const quizzesAssignedAlready = computed(() => {
 function composeLine(item) {
   const nr = Object.keys(item)[0]
   return `${nr}) ${item[nr].title}`
+}
+
+function composeQuestionLine(item) {
+  return `Vraagnummer: ${item.question} Titel: ${item.title}`
 }
 
 function doAction() {
