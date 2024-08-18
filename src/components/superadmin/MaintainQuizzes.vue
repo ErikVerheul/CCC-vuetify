@@ -1,4 +1,5 @@
 <template>
+  <p>state.action {{ state.action }}</p>
   <v-card>
     <v-card-title>Quiz meta data onderhouden</v-card-title>
     <v-row>
@@ -88,7 +89,7 @@
       <v-col v-if="!state.saveSuccess === 2">
         "{{ saveButtonText }}" is mislukt
       </v-col>
-      <v-col class="text-right">
+      <v-col v-if="state.action != '4'" class="text-right">
         <v-btn :disabled="!allowSave" :color="saveButtonColor" append-icon="mdi-arrow-right" @click="doAction">
           {{ saveButtonText }}
           <template v-slot:append>
@@ -139,7 +140,7 @@
 
   <template>
     <v-row justify="center">
-      <v-dialog v-model="state.showQuestions" width="600px">
+      <v-dialog v-model="state.showQuestions" width="70%">
         <v-card>
           <v-card-title>
             <span class="text-h5">Vragen van quiz met nummer {{ state.quizNumberInput }}</span>
@@ -151,9 +152,16 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="state.showQuestions = false">
-              Done
-            </v-btn>
+            <v-row class="mt-2">
+              <v-col>
+                <v-btn prepend-icon="mdi-arrow-left" @click="state.showQuestions = false">
+                  <template v-slot:prepend>
+                    <v-icon size="x-large" color="purple"></v-icon>
+                  </template>
+                  Terug
+                </v-btn>
+              </v-col>
+            </v-row>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -323,7 +331,7 @@ function createQuestionsList(quizNr) {
           state.questionsList.push({ question: key, title: indexObject[key].title })
         }
       })
-      state.showQuestions = !state.showQuestions
+      state.showQuestions = true
     } else {
       console.log("No quiz-questions available")
     }
@@ -369,6 +377,7 @@ const saveButtonText = computed(() => {
   if (state.action === '1') return 'Voeg toe'
   if (state.action === '2') return 'Sla op'
   if (state.action === '3') return 'Maak leeg'
+  if (state.action === '4') return 'TEST'
   return ''
 })
 
