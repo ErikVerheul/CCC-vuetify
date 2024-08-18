@@ -1,7 +1,7 @@
 <template>
   <PreviewQuestion v-if="state.showPreviewQuestion" :content="state.content" :statementsArray="state.statementsArray" :quizQAnswers="state.quizQAnswers"
     :gameRules="state.gameRules" :correctAnswer="state.correctAnswer" @return-to="state.showPreviewQuestion = false"></PreviewQuestion>
-  <PreviewFullExplanation v-else-if="state.showFullExplanation" :resultInfo="state.resultInfo" @return-to="state.showFullExplanation = false">
+  <PreviewFullExplanation v-else-if="state.showFullExplanation" :longExplanation="state.longExplanation" @return-to="state.showFullExplanation = false">
   </PreviewFullExplanation>
   <v-sheet v-else>
     <v-row class="d-flex align-center justify-center">
@@ -118,7 +118,7 @@
       <v-row>
         <v-col cols="12">
           <p>Lange toelichting</p>
-          <QuillEditor v-model:content="state.resultInfo" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+          <QuillEditor v-model:content="state.longExplanation" contentType="html" :toolbar="editorToolbar"></QuillEditor>
         </v-col>
       </v-row>
 
@@ -260,7 +260,7 @@ const state = reactive({
   gameRules: '',
   quizQAnswers: {},
   correctAnswer: undefined,
-  resultInfo: undefined,
+  longExplanation: undefined,
   questionNumberRules: [
     (value) => {
       if (value) return true
@@ -330,7 +330,7 @@ function clearAll() {
   state.statementsArray = []
   state.quizQAnswers = []
   state.correctAnswer = undefined
-  state.resultInfo = undefined
+  state.longExplanation = undefined
   state.gameRules = ''
   state.quizNumber = ''
 }
@@ -397,11 +397,11 @@ function doLoadQuestion() {
     .then((snapshot) => {
       if (snapshot.exists()) {
         const quizObject = snapshot.val()
-        state.content = quizObject.body || ''
+        state.content = quizObject.body || '<p><br></p>'
         state.statementsArray = quizObject.statementsArray
         state.quizQAnswers = quizObject.answers
-        state.correctAnswer = quizObject.correctAnswer || '<p></p>'
-        state.resultInfo = quizObject.resultInfo
+        state.correctAnswer = quizObject.correctAnswer || '<p><br></p>'
+        state.longExplanation = quizObject.resultInfo || '<p><br></p>'
         state.gameRules = quizObject.gameRules
         state.statementNumber = state.statementsArray.length - 1
         // assign the quiz number
@@ -486,11 +486,13 @@ function canSave() {
     !isNaN(state.quizNumber) &&
     !isNaN(state.questionNumber) &&
     state.allQuizNumbers.includes(state.quizNumber) &&
-    state.questionTitle &&
-    state.questionTitle.length > 0 &&
+    state.questionTitle && state.questionTitle.length > 0 &&
+    state.ankeiler && state.ankeiler.length > 0 &&
     countGoodAnswers() > 0 &&
-    state.gameRules &&
-    state.gameRules.length > 0
+    state.gameRules && state.gameRules.length > 0 &&
+    state.content && state.content.length > 0 && state.content !== '<p><br></p>' &&
+    state.correctAnswer && state.correctAnswer.length > 0 && state.correctAnswer !== '<p><br></p>' &&
+    state.longExplanation && state.longExplanation.length > 0 && state.longExplanation !== '<p><br></p>'
   )
 }
 
@@ -501,7 +503,7 @@ function doSaveQuestion() {
     statementsArray: state.statementsArray,
     answers: state.quizQAnswers,
     correctAnswer: state.correctAnswer,
-    resultInfo: state.resultInfo,
+    resultInfo: state.longExplanation,
     gameRules: state.gameRules,
   })
     .then(() => {
