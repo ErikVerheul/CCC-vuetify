@@ -151,17 +151,7 @@
             </v-list>
           </v-card-text>
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-row class="mt-2">
-              <v-col>
-                <v-btn prepend-icon="mdi-arrow-left" @click="state.showQuestions = false">
-                  <template v-slot:prepend>
-                    <v-icon size="x-large" color="purple"></v-icon>
-                  </template>
-                  Terug
-                </v-btn>
-              </v-col>
-            </v-row>
+            <v-btn color="purple" block @click="state.showQuestions = false">Sluit</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
