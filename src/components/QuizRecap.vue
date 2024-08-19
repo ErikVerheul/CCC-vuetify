@@ -3,24 +3,15 @@
   <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
   <ViewQExplanation v-else-if="state.doActivate === 'showExpl'" :questionObject="state.questionObject" @view-over="state.doActivate = undefined">
   </ViewQExplanation>
-  <v-card v-else width="store.screenWidth">
-    <v-card-title v-if="!store.isArchivedQuiz">Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title>
-    <v-card-title v-else>Je hebt de quiz van het jaar {{ store.quizObject.actionYear }} en week {{ store.quizObject.actionWeek }} voltooid</v-card-title>
+  <v-card v-else color="#FEF1E5" width="store.screenWidth" min-height="100vh">
+    <v-card-title v-if="!store.isArchivedQuiz" class="text-center">Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title>
+    <v-card-title v-else class="text-center">Je hebt de quiz voltooid</v-card-title>
     <v-card-text>Je had {{ countGood() }} van de {{ countAll() }} antwoorden goed</v-card-text>
     <v-card-title class="text-center">{{ appreciationText() }}</v-card-title>
     <v-card-text>Bekijk nu de verhalen achter de vragen. Of ga verder met de ranglijst.</v-card-text>
-    <v-row>
-      <v-col cols="12">
-        <v-list lines="one">
-          <v-list-item v-for="item in state.questionIndexData" :title="getText(item)" @click="showExplanation(item)"></v-list-item>
-        </v-list>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <v-divider></v-divider>
-      </v-col>
-    </v-row>
+    <v-list lines="one">
+      <v-list-item v-for="item in state.questionIndexData" :subtitle="getText(item)" @click="showExplanation(item)"></v-list-item>
+    </v-list>
     <v-card-actions>
       <v-row>
         <v-col cols="12" class="text-right">
