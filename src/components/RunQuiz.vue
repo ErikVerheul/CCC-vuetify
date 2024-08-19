@@ -1,9 +1,4 @@
 <template>
-  <!-- <p>store.currentQuizNumber = {{ store.currentQuizNumber }}</p>
-  <p>state.currentQuestionIdx = {{ state.currentQuestionIdx }}</p>
-  <p>store.rqActive = {{ store.rqActive }}</p>
-  <p>state.showExplanation = {{ state.showExplanation }}</p>
-  <p>store.isArchivedQuiz = {{ store.isArchivedQuiz }}</p> -->
   <ReportFbError v-if="store.rqActive === 'onError'" />
   <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
   <template v-else>
@@ -20,7 +15,7 @@
       <p class="py-2">Meer hierover na afloop van de quiz</p>
     </v-sheet>
     <template v-else>
-      <v-sheet class="ma-2" :max-width="store.screenWidth">
+      <v-sheet class="mt-6 ml-2 mr-2" :max-width="store.screenWidth">
         <template v-if="!state.showExplanation">
           <v-row class="mt-n6" no-gutters>
             <div class="small-font">{{ getProgressIndicator() }}</div>
