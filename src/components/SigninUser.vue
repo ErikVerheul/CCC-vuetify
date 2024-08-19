@@ -1,6 +1,6 @@
 <template>
   <v-container class="pa-0 mt-n8">
-    <v-card flat color="amber-lighten-3" :width="store.screenWidth">
+    <v-card flat color="#FEF1E5" :width="store.screenWidth" height="100vh">
       <v-row dense>
         <v-col cols="12">
           <v-card-text>Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of tablet?<br>
