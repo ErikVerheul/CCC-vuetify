@@ -1,6 +1,6 @@
 <template>
   <PreviewQuestion v-if="state.showPreviewQuestion" :content="state.content" :statementsArray="state.statementsArray" :quizQAnswers="state.quizQAnswers"
-    :gameRules="state.gameRules" :correctAnswer="state.correctAnswer" @return-to="state.showPreviewQuestion = false"></PreviewQuestion>
+    :gameRules="gameRules" :correctAnswer="state.correctAnswer" @return-to="state.showPreviewQuestion = false"></PreviewQuestion>
   <PreviewFullExplanation v-else-if="state.showFullExplanation" :longExplanation="state.longExplanation" @return-to="state.showFullExplanation = false">
   </PreviewFullExplanation>
   <v-sheet v-else>
@@ -96,7 +96,7 @@
           <QuillEditor v-model:content="state.correctAnswer" contentType="html" :toolbar="editorToolbar"></QuillEditor>
         </v-col>
         <v-col class="mt-12" cols="12">
-          <v-text-field v-model="state.gameRules" label="Spelregels (verplicht)" />
+          <h4>Spelregel: {{ gameRules }}</h4>
         </v-col>
       </v-row>
       <v-row no-gutters>
@@ -310,6 +310,18 @@ const editMode = computed(() => {
   } else return 'add'
 })
 
+const gameRules = computed(() => {
+  if (state.quizQAnswers === undefined) return ''
+  const keys = Object.keys(state.quizQAnswers)
+  let count = 0
+  keys.forEach((k) => {
+    if (state.quizQAnswers[k] === true && state.quizQAnswers[k] === true) count++
+  })
+  if (count === 0) return '!! onbepaald !!'
+  if (count === 1) return 'Kies het goede antwoord!'
+  return `Kies ${count} juiste antwoorden!`
+})
+
 function showInputFields() {
   return !isNaN(state.questionNumber) && state.questionNumber > 0
 }
@@ -331,7 +343,6 @@ function clearAll() {
   state.quizQAnswers = []
   state.correctAnswer = undefined
   state.longExplanation = undefined
-  state.gameRules = ''
   state.quizNumber = ''
 }
 
@@ -402,7 +413,6 @@ function doLoadQuestion() {
         state.quizQAnswers = quizObject.answers
         state.correctAnswer = quizObject.correctAnswer || '<p><br></p>'
         state.longExplanation = quizObject.resultInfo || '<p><br></p>'
-        state.gameRules = quizObject.gameRules
         state.statementNumber = state.statementsArray.length - 1
         // assign the quiz number
         state.quizNumber = state.indexObject[state.questionNumber].quizNumber
@@ -489,7 +499,6 @@ function canSave() {
     state.questionTitle && state.questionTitle.length > 0 &&
     state.ankeiler && state.ankeiler.length > 0 &&
     countGoodAnswers() > 0 &&
-    state.gameRules && state.gameRules.length > 0 &&
     state.content && state.content.length > 0 && state.content !== '<p><br></p>' &&
     state.correctAnswer && state.correctAnswer.length > 0 && state.correctAnswer !== '<p><br></p>' &&
     state.longExplanation && state.longExplanation.length > 0 && state.longExplanation !== '<p><br></p>'
@@ -504,7 +513,6 @@ function doSaveQuestion() {
     answers: state.quizQAnswers,
     correctAnswer: state.correctAnswer,
     resultInfo: state.longExplanation,
-    gameRules: state.gameRules,
   })
     .then(() => {
       const newIndexObject = { quizNumber: state.quizNumber, title: state.questionTitle, ankeiler: state.ankeiler, creationDate: Number(new Date()) }
