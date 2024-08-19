@@ -513,6 +513,7 @@ function doSaveQuestion() {
     answers: state.quizQAnswers,
     correctAnswer: state.correctAnswer,
     resultInfo: state.longExplanation,
+    gameRules: gameRules.value
   })
     .then(() => {
       const newIndexObject = { quizNumber: state.quizNumber, title: state.questionTitle, ankeiler: state.ankeiler, creationDate: Number(new Date()) }
