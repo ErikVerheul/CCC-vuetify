@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getDatabase, ref } from 'firebase/database'
-// ... other firebase imports
+// other firebase imports
 
 // see https://jsmobiledev.com/article/hide-firebase-api/ on why it is not a security risk to expose these credentials
 export const firebaseApp = initializeApp({
