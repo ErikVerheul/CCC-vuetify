@@ -2,7 +2,7 @@
   <ReportWarning v-if="store.rqActive === 'onWarning'" />
   <RunQuiz v-else-if="store.msActive === 'doQuiz'" :recoveryMode="state.recoveryMode" @quiz-is-done="store.msActive = 'showRecap'" />
   <QuizRecap v-else-if="store.msActive === 'showRecap'" @return-to-base="store.msActive = 'showResults'" />
-  <QuizResults v-else-if="store.msActive === 'showResults'" @return-to-menu="store.msActive = undefined" />
+  <QuizResults v-else-if="store.msActive === 'showResults'" @return-to-menu="restartPage" />
   <v-sheet v-else class="text-center" :max-width="store.screenWidth">
     <v-row>
       <v-col cols="12" class="my-0 py-0">
@@ -143,5 +143,10 @@ function startQuiz() {
     state.userCompletedQuizBefore = false
     store.msActive = 'doQuiz'
   }
+}
+
+function restartPage() {
+  loadMetaData()
+  store.msActive = undefined
 }
 </script>
