@@ -1,12 +1,20 @@
-With this application, an editorial team can generate quizzes flexibly:
+<h2>With this application, an editorial team can generate quizzes flexibly:</h2>
+<ul>
+  <li>A quiz can contain any number of questions</li>
+  <li>A quiz question can have any number of correct or incorrect answers</li>
+  <li>A quiz question has rules, for example
+    <ul>
+      <li>“choose the correct answer”</li>
+      <li>“which two answers are correct”</li>
+      <li>the time the participant has for an answer
+      <ul>
+        <li>for example 1min</li>
+      </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
 
-● A quiz can contain any number of questions
-● A quiz question can have any number of correct or incorrect answers
-● A quiz question has rules, for example
-○ “choose the correct answer”
-○ “which two answers are correct”
-○ the time the participant has for an answer
-■ for example 1min
 ● A quiz has a start and end date after which the ranking can be drawn up
 ● The quiz
 ○ runs equally well on PC, Mac, Android and iOS devices
