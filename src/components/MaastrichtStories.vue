@@ -3,9 +3,9 @@
   <RunQuiz v-else-if="store.msActive === 'doQuiz'" :recoveryMode="state.recoveryMode" @quiz-is-done="store.msActive = 'showRecap'" />
   <QuizRecap v-else-if="store.msActive === 'showRecap'" @return-to-base="store.msActive = 'showResults'" />
   <QuizResults v-else-if="store.msActive === 'showResults'" @return-to-menu="restartPage" />
-  <v-sheet v-else class="text-center" :max-width="store.screenWidth">
+  <v-sheet v-else class="pa-0 mt-n6 text-center" color="#FEF1E5" :width="store.screenWidth" height="100vh">
     <v-row>
-      <v-col cols="12" class="my-0 py-0">
+      <v-col cols="12">
         <h4>Hallo {{ store.userData.alias }}</h4>
         <h4>
           De vragen van deze week ({{ store.currentWeekNr }})<br />
@@ -14,21 +14,18 @@
         <h3 class="text-red">Doe mee en win!</h3>
       </v-col>
       <v-col cols="12">
-        <v-img :height="240" alt="Afbeelding mok" src="../assets/mok.png"></v-img>
-      </v-col>
-      <v-col cols="12" class="my-0 py-0">
-        <h3 class="text-red">Unieke erfgoed beker *)</h3>
+        <v-img :height="240" alt="Afbeelding mok" src="../assets/de-nieuwe-ster.png"></v-img>
       </v-col>
     </v-row>
     <v-row v-if="!state.userCompletedQuizBefore">
       <v-col cols="12">
-        <h4>Elke vier weken met nieuwe opdruk. Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</h4>
+        <h4 class="text-red">Elke vier weken een Nieuw Ster T-shirt.</h4>
+      </v-col>
+      <v-col cols="12">
+        <h4>Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</h4>
       </v-col>
       <v-col cols="12">
         <v-btn :disabled="!state.quizAvailable" color="purple" @click="startQuiz">Start</v-btn>
-      </v-col>
-      <v-col cols="12" class="ml-2 text-left">
-        <p>*) Voor 12.50 ook verkrijgbaar bij CoffeeLovers</p>
       </v-col>
     </v-row>
     <v-row v-else class="mr-2">
