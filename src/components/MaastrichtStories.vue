@@ -21,10 +21,12 @@
       <v-col cols="12">
         <h4 class="text-red">Elke vier weken een Nieuw Ster T-shirt.</h4>
       </v-col>
-      <v-col cols="12">
-        <h4>Te verloten onder de spelers met de hoogste scores. Elke week nieuwe vragen.</h4>
+      <v-col cols="2"></v-col>
+      <v-col cols="8">
+        <h4>Te verloten onder de spelers met de hoogste scores<br>Elke week nieuwe vragen</h4>
       </v-col>
-      <v-col cols="12">
+      <v-col cols="2"></v-col>
+      <v-col cols="10">
         <v-btn :disabled="!state.quizAvailable" color="purple" @click="startQuiz">Start</v-btn>
       </v-col>
     </v-row>
