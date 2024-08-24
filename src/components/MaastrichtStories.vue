@@ -26,7 +26,7 @@
         <h4>Te verloten onder de spelers met de hoogste scores<br>Elke week nieuwe vragen</h4>
       </v-col>
       <v-col cols="2"></v-col>
-      <v-col cols="10">
+      <v-col cols="12">
         <v-btn :disabled="!state.quizAvailable" color="purple" @click="startQuiz">Start</v-btn>
       </v-col>
     </v-row>
