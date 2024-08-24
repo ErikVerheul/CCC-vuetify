@@ -1,5 +1,4 @@
 <template>
-  <p>state.action {{ state.action }}</p>
   <v-card>
     <v-card-title>Quiz meta data onderhouden</v-card-title>
     <v-row>
@@ -22,7 +21,7 @@
           <v-col cols="3"></v-col>
           <v-col cols="6">
             <v-radio-group inline v-model="state.action">
-              <v-radio @change="changeMode" label="Veranderen" value="2"></v-radio>
+              <v-radio :disabled="state.quizNumberInput === '0'" @change="changeMode" label="Veranderen" value="2"></v-radio>
               <v-radio @change="changeMode" label="Maak quiz leeg" value="3"></v-radio>
               <v-radio @change="createQuestionsList(state.quizNumberInput)" label="Toon vragen" value="4"></v-radio>
             </v-radio-group>
@@ -200,9 +199,9 @@ const state = reactive({
       return 'Vul alleen cijfers in.'
     },
     value => {
-      if (value > 0) return true
+      if (value >= 0) return true
 
-      return 'Moet een positief getal zijn.'
+      return 'Moet 0 of een positief getal zijn.'
     }
   ],
   newNameRules: [
@@ -331,7 +330,7 @@ function createQuestionsList(quizNr) {
 }
 
 function QNumberOk() {
-  return !isNaN(state.quizNumberInput) && state.quizNumberInput > 0
+  return !isNaN(state.quizNumberInput) && state.quizNumberInput >= 0
 }
 
 function QNameOk() {
