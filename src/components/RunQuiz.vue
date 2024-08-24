@@ -33,10 +33,7 @@
       </v-sheet>
       <v-sheet class="pa-2" :height="state.counterHeight" :max-width="store.screenWidth">
         <v-row v-if="!state.questionDone">
-          <v-col v-if="state.answerClicked" cols="7">
-            <v-btn @click="finishQuestion()">{{ getReadyText() }}</v-btn>
-          </v-col>
-          <v-col v-else cols="7">
+          <v-col cols="7">
             <p>{{ state.currentQuestion.gameRules }}<br>Binnen 1 min</p>
           </v-col>
           <v-col cols="5">
@@ -55,7 +52,7 @@
     <v-divider></v-divider>
     <v-row class="mt-2">
       <v-col class="text-right">
-        <v-btn :disabled="!state.questionDone" flat append-icon="mdi-arrow-right" @click="nextStep">
+        <v-btn :disabled="!canProceed" flat append-icon="mdi-arrow-right" @click="nextStep">
           Verder
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
@@ -82,7 +79,7 @@
 */
 
 <script setup>
-import { onBeforeMount, reactive, watch } from 'vue'
+import { computed, onBeforeMount, reactive, watch } from 'vue'
 import { useAppStore } from '../store/app.js'
 import { db, dbRef } from '../firebase'
 import { ref, child, get, set } from 'firebase/database'
@@ -128,6 +125,10 @@ const state = reactive({
   quizResult: {},
   lastCookieQuestionResult: null,
   quizProgress: {}
+})
+
+const canProceed = computed(() => {
+  return state.showExplanation || state.isLastAnswerOverdue || numberOfCorrectAnswers() === numberOfSelectedAnswers()
 })
 
 function loadQuestionNumbers() {
@@ -292,11 +293,6 @@ function loadQuestion(resetShowExplanation) {
   })
 }
 
-function getReadyText() {
-  if (store.isArchivedQuiz) return 'Onthul resultaat'
-  return 'Verzend antwoord'
-}
-
 function getResultText() {
   if (state.isLastAnswerOverdue) return 'te laat'
   if (state.answerIsRight) return 'goed!'
@@ -317,6 +313,14 @@ function qAnswer(idx) {
   if (state.questionDone) return
   state.userAnswers[idx] = !state.userAnswers[idx]
   state.answerClicked = true
+}
+
+function numberOfSelectedAnswers() {
+  let count = 0
+  state.userAnswers.forEach(a => {
+    if (a === true) count++
+  })
+  return count
 }
 
 function numberOfCorrectAnswers() {
@@ -361,7 +365,7 @@ function startTimer() {
 }
 
 function finishQuestion() {
-  state.questionDone = true
+  state.questionDone = canProceed.value
   // stop the timer
   clearInterval(state.timerId)
   state.answerClicked = false
@@ -379,30 +383,31 @@ function finishQuestion() {
     store.compactResult.push(false)
     state.quizResult[state.currentQuestionIdx].correctAnswer = false
   }
-  state.showExplanation = false
+  state.showExplanation = true
   if (!store.isArchivedQuiz) saveProgress()
+}
+
+function nextQuestion() {
+  state.isLastAnswerOverdue = false
+  state.currentQuestionIdx++
+  if (state.currentQuestionIdx < state.questionNumbers.length) {
+    state.quizProgress.showExplanation = false
+    state.questionDone = false
+    state.clockValue = `1:00`
+    loadQuestion(true)
+  } else {
+    // the user finished the quiz; remove the cookie containing the progress as it is obsolete now that the user finished the quiz to the end
+    cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
+    // save quiz result only if not an archived quiz and it is not admin who is playing
+    if (!store.isArchivedQuiz && store.userData.alias !== 'admin') saveResults()
+    emit('quiz-is-done')
+  }
 }
 
 function nextStep() {
   if (state.showExplanation) {
-    state.isLastAnswerOverdue = false
-    state.currentQuestionIdx++
-    if (state.currentQuestionIdx < state.questionNumbers.length) {
-      state.quizProgress.showExplanation = false
-      state.questionDone = false
-      state.clockValue = `1:00`
-      loadQuestion(true)
-    } else {
-      // the user finished the quiz; remove the cookie containing the progress as it is obsolete now that the user finished the quiz to the end
-      cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
-      // save quiz result only if not an archived quiz and it is not admin who is playing
-      if (!store.isArchivedQuiz && store.userData.alias !== 'admin') saveResults()
-      emit('quiz-is-done')
-    }
-  } else {
-    state.showExplanation = true
-    if (!store.isArchivedQuiz) saveProgress()
-  }
+    nextQuestion()
+  } else finishQuestion()
 }
 
 function isTextAvailable() {
