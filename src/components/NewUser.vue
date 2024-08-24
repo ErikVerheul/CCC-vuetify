@@ -4,7 +4,7 @@
       <v-card-text>Gebruik je deze app voor het eerst?</v-card-text>
       <v-btn color="blue" @click="emit('change-to-signup')">Kies dan een schuilnaam</v-btn>
       <v-card-text><small>Dan houdt de app je score bij!</small></v-card-text>
-      <v-img src="../assets/de-nieuwe-ster.png"></v-img>
+      <v-img src="../assets/brug.png"></v-img>
       <v-card-text><i>Test je kennis over historie en natuur</i></v-card-text>
       <v-btn color="blue" @click="emit('change-to-signin')">Heb je al een schuilnaam?</v-btn>
       <v-card-text><small>Lees het <router-link to="/Privacybeleid">privacybeleid</router-link> nu of later.<br>

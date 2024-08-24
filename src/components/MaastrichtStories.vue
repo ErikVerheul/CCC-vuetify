@@ -14,12 +14,12 @@
         <h3 class="text-red">Doe mee en win!</h3>
       </v-col>
       <v-col cols="12">
-        <v-img :height="240" alt="Afbeelding mok" src="../assets/de-nieuwe-ster.png"></v-img>
+        <v-img :height="240" alt="Afbeelding mok" src="../assets/brug.png"></v-img>
       </v-col>
     </v-row>
     <v-row v-if="!state.userCompletedQuizBefore">
       <v-col cols="12">
-        <h4 class="text-red">Elke vier weken een Nieuw Ster T-shirt</h4>
+        <h4 class="text-red">Elke vier weken een prijsuitreiking</h4>
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="8">
