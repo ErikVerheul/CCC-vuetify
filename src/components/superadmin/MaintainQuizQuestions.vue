@@ -33,8 +33,8 @@
     <template v-if="showInputFields()">
       <v-row>
         <v-col cols="6">
-          <v-select v-model="state.selectedQuizItem" label="Kies of verander de quiz voor deze quiz-vraag" :items="state.quizItems" item-value="key"
-            return-object />
+          <v-autocomplete v-model="state.selectedQuizItemNumber" item-value="key" :items="state.quizItems"
+            label="Kies of verander de quiz voor deze quiz-vraag" />
         </v-col>
         <v-col cols="6">
           <v-text-field v-model="state.questionTitle" label="Quiz-vraag titel" />
@@ -155,7 +155,7 @@
   <v-dialog v-model="state.showQuestionSelect" width="70%">
     <v-card>
       <v-card-title>Kies een bestaande quiz-vraag</v-card-title>
-      <v-select :items="state.questionItems" item-value="key" v-model="state.selectedQuestionItem" return-object single-line />
+      <v-autocomplete v-model="state.selectedQuestionNumber" item-value="key" :items="state.questionItems" label="Kies een bestaande quiz-vraag" />
       <v-divider></v-divider>
       <v-card-actions>
         <v-row>
@@ -213,7 +213,7 @@
   <v-dialog v-model="state.showQuestionRemove" width="70%">
     <v-card>
       <v-card-title>Kies een te verwijderen quiz-vraag</v-card-title>
-      <v-select :items="state.questionItems" item-value="key" v-model="state.selectedQuestionItem" return-object single-line />
+      <v-autocomplete v-model="state.selectedQuestionNumber" item-value="key" :items="state.questionItems" label="Kies de te verwijderen quiz-vraag" />
       <v-divider></v-divider>
       <v-card-actions>
         <v-row>
@@ -275,13 +275,13 @@ const state = reactive({
   quizTitle: '',
   ankeiler: '',
   quizItems: [],
-  selectedQuizItem: { key: 0, title: '' },
+  selectedQuizItemNumber: undefined,
 
   questionNumber: undefined,
   newQuestionNumber: undefined,
   questionTitle: '',
   questionItems: [],
-  selectedQuestionItem: { key: undefined, title: 'Kies een quiz-vraag' },
+  selectedQuestionNumber: undefined,
 
   showCreateQuestion: false,
   showQuestionSelect: false,
@@ -367,8 +367,8 @@ function clearAll() {
   state.changeQuestionNumber = false
   state.showQuestionRemove = false
 
-  state.selectedQuizItem = { key: 0, title: '' }
-  state.selectedQuestionItem = { key: undefined, title: 'Kies een quiz-vraag' }
+  state.selectedQuizItemNumber = undefined
+  state.selectedQuestionNumber = undefined
   state.questionNumber = ''
   state.newQuestionNumber = ''
   state.questionTitle = ''
@@ -455,7 +455,7 @@ function doLoadQuestion() {
         // assign the quiz number
         state.quizNumber = state.indexObject[state.questionNumber].quizNumber
         // preset the quiz select
-        state.selectedQuizItem = state.quizItems.filter((q) => q.key === state.quizNumber)[0]
+        state.selectedQuizItemNumber = state.quizNumber
       } else {
         console.log('No quiz-question data available')
       }
@@ -620,24 +620,20 @@ function doChangeQuestionNumber(newQuestionNr) {
 }
 
 watch(
-  () => state.selectedQuizItem,
+  () => state.selectedQuizItemNumber,
   () => {
-    // fires only when state.someObject is replaced
-    if (state.selectedQuizItem.key) {
-      // suppress events not coming from v-select
-      state.quizNumber = state.selectedQuizItem.key
+    if (state.selectedQuizItemNumber) {
+      state.quizNumber = state.selectedQuizItemNumber
       state.quizTitle = store.metaObject[state.quizNumber].title
     }
   },
 )
 
 watch(
-  () => state.selectedQuestionItem,
+  () => state.selectedQuestionNumber,
   () => {
-    // fires only when state.someObject is replaced
-    if (state.selectedQuestionItem.key) {
-      // suppress events not coming from v-select
-      state.questionNumber = state.selectedQuestionItem.key
+    if (state.selectedQuestionNumber) {
+      state.questionNumber = state.selectedQuestionNumber
       state.questionTitle = state.indexObject[state.questionNumber].title
       state.ankeiler = state.indexObject[state.questionNumber].ankeiler
     }
