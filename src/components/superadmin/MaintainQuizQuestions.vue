@@ -18,6 +18,10 @@
       </v-col>
       <v-spacer></v-spacer>
       <v-col>
+        <v-btn :disabled="state.questionNumber === ''" @click="state.changeQuestionNumber = true">Verander quiz-vraag nummer</v-btn>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col>
         <v-btn color="red" @click="removeQuestion()">Verwijder een quiz-vraag</v-btn>
       </v-col>
     </v-row>
@@ -138,7 +142,7 @@
       </v-col>
       <v-spacer></v-spacer>
       <v-col class="text-right">
-        <v-btn :disabled="!canSave()" append-icon="mdi-arrow-right" @click="doSaveQuestion()">
+        <v-btn :disabled="!canSave()" append-icon="mdi-arrow-right" @click="doSaveQuestion(state.questionNumber)">
           Bewaar Quiz-vraag
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
@@ -177,6 +181,35 @@
     </v-card>
   </v-dialog>
 
+  <v-dialog v-model="state.changeQuestionNumber" width="70%">
+    <v-card>
+      <v-card-title>Verander het nummer van deze quiz-vraag</v-card-title>
+      <v-text-field v-model="state.newQuestionNumber" :rules="state.questionNumberRules" label="Nieuw quiz-vraag nummer" />
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-row>
+          <v-col>
+            <v-btn prepend-icon="mdi-arrow-left" @click="clearAll()">
+              <template v-slot:prepend>
+                <v-icon size="x-large" color="purple"></v-icon>
+              </template>
+              Terug
+            </v-btn>
+          </v-col>
+          <v-spacer></v-spacer>
+          <v-col>
+            <v-btn :disabled="!canChangeTo(state.newQuestionNumber)" append-icon="mdi-arrow-right" @click="doChangeQuestionNumber(state.newQuestionNumber)">
+              Verder
+              <template v-slot:append>
+                <v-icon size="x-large" color="red"></v-icon>
+              </template>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
   <v-dialog v-model="state.showQuestionRemove" width="70%">
     <v-card>
       <v-card-title>Kies een te verwijderen quiz-vraag</v-card-title>
@@ -194,7 +227,7 @@
           </v-col>
           <v-spacer></v-spacer>
           <v-col>
-            <v-btn :disabled="!canRemove()" append-icon="mdi-arrow-right" @click="doRemoveQuestion">
+            <v-btn :disabled="!canRemove()" append-icon="mdi-arrow-right" @click="doRemoveQuestion(state.questionNumber)">
               Verder
               <template v-slot:append>
                 <v-icon size="x-large" color="red"></v-icon>
@@ -219,7 +252,7 @@ const store = useAppStore()
 const emit = defineEmits(['m-done'])
 
 onBeforeMount(() => {
-  loadMetaData()
+  loadQuestionsIndex()
 })
 
 const editorToolbar = [
@@ -245,12 +278,14 @@ const state = reactive({
   selectedQuizItem: { key: 0, title: '' },
 
   questionNumber: undefined,
+  newQuestionNumber: undefined,
   questionTitle: '',
   questionItems: [],
   selectedQuestionItem: { key: undefined, title: 'Kies een quiz-vraag' },
 
   showCreateQuestion: false,
   showQuestionSelect: false,
+  changeQuestionNumber: false,
   showQuestionRemove: false,
 
   content: undefined,
@@ -284,7 +319,7 @@ const state = reactive({
       return 'Mag geen negatief getal zijn.'
     },
     (value) => {
-      if (!state.indexObjectKeys.includes(value)) return true
+      if (!state.allQuizNumbers.includes(value)) return true
 
       return 'Dit quiz-vraag nummer bestaat al'
     },
@@ -329,11 +364,13 @@ function showInputFields() {
 function clearAll() {
   state.showCreateQuestion = false
   state.showQuestionSelect = false
+  state.changeQuestionNumber = false
   state.showQuestionRemove = false
 
   state.selectedQuizItem = { key: 0, title: '' }
   state.selectedQuestionItem = { key: undefined, title: 'Kies een quiz-vraag' }
   state.questionNumber = ''
+  state.newQuestionNumber = ''
   state.questionTitle = ''
   state.ankeiler = ''
   state.statementNumber = 0
@@ -375,17 +412,18 @@ function createQuestionItems(questionObject, indexObjectKeys) {
   })
 }
 
-/* Get quiz and questions meta data */
-function loadMetaData() {
+/* Get or refresh questions meta data */
+function loadQuestionsIndex() {
   clearAll()
   state.allQuizNumbers = Object.keys(store.metaObject)
   createQuizItems(store.metaObject, state.allQuizNumbers)
-  // get all available question numbers and titles
+  // get all available question numbers and meta data
   get(child(dbRef, `/quizzes/questions/index/`))
     .then((snapshot) => {
       if (snapshot.exists()) {
         state.indexObject = snapshot.val()
         state.indexObjectKeys = Object.keys(state.indexObject)
+        // note: indexObjectKeys is an array of integers
         createQuestionItems(state.indexObject, state.indexObjectKeys)
       } else {
         console.log('No quiz-questions available')
@@ -505,9 +543,13 @@ function canSave() {
   )
 }
 
-function doSaveQuestion() {
+function doSaveQuestion(questionNr, toSubmit) {
   // note: Using set() overwrites data at the specified location, including any child nodes.
-  set(ref(db, '/quizzes/questions/' + state.questionNumber), {
+  if (!questionNr || isNaN(questionNr)) {
+    console.error(`The write of the question data failed: the question number '${questionNr}' (quotes not included) is incorrect`)
+    return
+  }
+  set(ref(db, `/quizzes/questions/${questionNr}`), {
     body: state.content || '',
     statementsArray: state.statementsArray,
     answers: state.quizQAnswers,
@@ -517,17 +559,27 @@ function doSaveQuestion() {
   })
     .then(() => {
       const newIndexObject = { quizNumber: state.quizNumber, title: state.questionTitle, ankeiler: state.ankeiler, creationDate: Number(new Date()) }
-      set(ref(db, '/quizzes/questions/index/' + state.questionNumber.toString()), newIndexObject)
+      set(ref(db, `/quizzes/questions/index/${questionNr}`), newIndexObject)
         .then(() => {
-          // reset current activity and refresh the meta data
-          loadMetaData()
+          // submit another call if provided
+          if (toSubmit) {
+            try {
+              toSubmit()
+              state.changeQuestionNumber = false
+            } catch (e) {
+              console.error(`Failed to remove the quiz question: ${e.message}`)
+            }
+          } else {
+            // reset current activity and refresh the meta data
+            loadQuestionsIndex()
+          }
         })
         .catch((error) => {
-          console.error('The write of the index data failed: ' + error.message)
+          console.error(`The write of the index data failed: ${e.message}`)
         })
     })
     .catch((error) => {
-      console.error('The write of the question data failed: ' + error.message)
+      console.error(`TThe write of the question data failed: ${e.message}`)
     })
 }
 
@@ -536,21 +588,35 @@ function canRemove() {
   return !isNaN(state.questionNumber) && state.questionNumber > 0
 }
 
-function doRemoveQuestion() {
-  remove(child(dbRef, `/quizzes/questions/index/${state.questionNumber}`))
+function canChangeTo(newNumber) {
+  return !state.allQuizNumbers.includes(newNumber)
+}
+
+function doRemoveQuestion(questionNr) {
+  if (!questionNr || isNaN(questionNr)) {
+    console.error(`The removal of the question data failed: the question number '${questionNr}' (quotes not included) is incorrect`)
+    return
+  }
+  remove(child(dbRef, `/quizzes/questions/index/${questionNr}`))
     .then(() => {
-      remove(child(dbRef, `/quizzes/questions/${state.questionNumber})`))
+      remove(child(dbRef, `/quizzes/questions/${questionNr})`))
         .then(() => {
+          remove(child(dbRef, `/quizzes/questions/${questionNr}`))
           state.showQuestionRemove = false
-          loadMetaData()
+          // reset current activity and refresh the meta data
+          loadQuestionsIndex()
         })
         .catch((error) => {
-          console.error('The removal of the quiz-question failed: ' + error.message)
+          console.error(`The removal of the quiz-question failed: ${error.message}`)
         })
     })
     .catch((error) => {
-      console.error('The removal of the index entry of the quiz-question failed: ' + error.message)
+      console.error(`The removal of the index entry of the quiz-question failed: ${error.message}`)
     })
+}
+
+function doChangeQuestionNumber(newQuestionNr) {
+  doSaveQuestion(newQuestionNr, function () { doRemoveQuestion(state.questionNumber) })
 }
 
 watch(
