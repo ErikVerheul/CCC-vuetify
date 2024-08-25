@@ -268,6 +268,7 @@ const state = reactive({
   showFullExplanation: false,
 
   indexObject: {},
+  allQuestionNumbers: [],
   allQuizNumbers: [],
   indexObjectKeys: [],
 
@@ -319,7 +320,7 @@ const state = reactive({
       return 'Mag geen negatief getal zijn.'
     },
     (value) => {
-      if (!state.allQuizNumbers.includes(value)) return true
+      if (!state.allQuestionNumbers.includes(value)) return true
 
       return 'Dit quiz-vraag nummer bestaat al'
     },
@@ -363,6 +364,7 @@ function showInputFields() {
 
 function clearAll() {
   state.showCreateQuestion = false
+  // remove modals
   state.showQuestionSelect = false
   state.changeQuestionNumber = false
   state.showQuestionRemove = false
@@ -405,9 +407,11 @@ function createQuizItems(quizzesObject, allQuizNumbers) {
   })
 }
 
-function createQuestionItems(questionObject, indexObjectKeys) {
+function collectQuestionData(questionObject, indexObjectKeys) {
+  state.allQuestionNumbers = []
   state.questionItems = []
   indexObjectKeys.forEach((el) => {
+    state.allQuestionNumbers.push(el)
     state.questionItems.push({ key: el, title: `(${el}) ${questionObject[el].title}` })
   })
 }
@@ -424,7 +428,7 @@ function loadQuestionsIndex() {
         state.indexObject = snapshot.val()
         state.indexObjectKeys = Object.keys(state.indexObject)
         // note: indexObjectKeys is an array of integers
-        createQuestionItems(state.indexObject, state.indexObjectKeys)
+        collectQuestionData(state.indexObject, state.indexObjectKeys)
       } else {
         console.log('No quiz-questions available')
       }
@@ -441,8 +445,9 @@ function canLoad() {
 
 /* Get the quiz-question data */
 function doLoadQuestion() {
+  // remove modal
   state.showQuestionSelect = false
-  get(child(dbRef, `/quizzes/questions/` + state.questionNumber))
+  get(child(dbRef, `/quizzes/questions/${state.questionNumber}`))
     .then((snapshot) => {
       if (snapshot.exists()) {
         const quizObject = snapshot.val()
@@ -565,7 +570,6 @@ function doSaveQuestion(questionNr, toSubmit) {
           if (toSubmit) {
             try {
               toSubmit()
-              state.changeQuestionNumber = false
             } catch (e) {
               console.error(`Failed to remove the quiz question: ${e.message}`)
             }
@@ -589,7 +593,7 @@ function canRemove() {
 }
 
 function canChangeTo(newNumber) {
-  return !state.allQuizNumbers.includes(newNumber)
+  return !state.allQuestionNumbers.includes(newNumber)
 }
 
 function doRemoveQuestion(questionNr) {
@@ -602,7 +606,6 @@ function doRemoveQuestion(questionNr) {
       remove(child(dbRef, `/quizzes/questions/${questionNr})`))
         .then(() => {
           remove(child(dbRef, `/quizzes/questions/${questionNr}`))
-          state.showQuestionRemove = false
           // reset current activity and refresh the meta data
           loadQuestionsIndex()
         })
