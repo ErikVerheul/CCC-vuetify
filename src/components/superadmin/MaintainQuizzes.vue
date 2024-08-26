@@ -394,7 +394,7 @@ const saveButtonText = computed(() => {
   if (state.action === '1') return 'Voeg toe'
   if (state.action === '2') return 'Sla op'
   if (state.action === '3') return 'Maak leeg'
-  if (state.action === '4') return 'TEST'
+  if (state.action === '4') return 'Toon vragen'
   return ''
 })
 
