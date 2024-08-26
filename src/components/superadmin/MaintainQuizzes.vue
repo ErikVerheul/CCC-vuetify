@@ -1,12 +1,4 @@
 <template>
-  <p>state.newQuizNumberInput = {{ state.newQuizNumberInput }}</p>
-  <p>state.quizNumberInput = {{ state.quizNumberInput }}</p>
-  <p>state.actionWeek = {{ state.actionWeek }}</p>
-  <p>state.action = {{ state.action }}</p>
-  <p>quizzesAssignedAlready = {{ JSON.stringify(quizzesAssignedAlready) }}</p>
-  <p>editNew = {{ editNew }}</p>
-  <p>editExisting = {{ editExisting }}</p>
-  <p>saveButtonText = {{ saveButtonText }}</p>
   <v-card>
     <v-card-title class="text-center">Quiz meta data onderhouden</v-card-title>
     <v-row>
@@ -76,6 +68,13 @@
         <v-text-field v-model="state.actionWeek" label="Actie week" :rules="state.weekRules" />
       </v-col>
     </v-row>
+    <v-row v-if="!(editExisting && editNew) && state.action">
+      <v-col cols="12">
+        <p>Toelichting op het thema van deze quiz</p>
+        <QuillEditor v-model:content="state.theme" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+      </v-col>
+    </v-row>
+    <v-divider class="mb-5"></v-divider>
     <v-row v-if="state.resetCount > 0">
       <v-col cols="12">
         <h4>{{ state.resetCount }} referenties naar deze quiz in de quiz vragen zijn verwijderd.</h4>
@@ -85,7 +84,7 @@
       <v-col cols="5" class="text-left">
         <v-btn @click="doCancel">Cancel</v-btn>
       </v-col>
-      <v-col cols="4" v-if="successText">"{{ successText }}"</v-col>
+      <v-col cols="4" v-if="state.successText">"{{ state.successText }}"</v-col>
       <v-col v-else cols="4"></v-col>
       <v-col cols="3" v-if="state.action && state.action != '4'" class="text-right">
         <v-btn :disabled="!allowSave" :color="saveButtonColor" @click="doAction">
@@ -176,6 +175,7 @@ const state = reactive({
   actionYear: undefined,
   actionWeek: undefined,
   creationDate: undefined,
+  theme: '<p><br></p>',
   newNumberRules: [
     value => {
       if (value) return true
@@ -251,12 +251,21 @@ const state = reactive({
       return 'Weeknummer moet tussen 0 (geen actie week) en 53 liggen.'
     }
   ],
-  saveSuccess: 0,
   resetCount: 0,
   checkMultipleAssignments: false,
   questionsList: [],
-  showQuestions: false
+  showQuestions: false,
+  theme: '<p><br></p>',
+  successText: undefined
 })
+
+const editorToolbar = [
+  [{ header: [false, 1, 2, 3, 4, 5, 6] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
+  ['link', 'image', 'code-block'],
+]
 
 const editExisting = computed(() => {
   return (state.newQuizNumberInput === '' && state.quizNumberInput === '') || (state.quizNumberInput !== '' && state.newQuizNumberInput === '')
@@ -281,7 +290,7 @@ function resetAndloadQuizes() {
   state.actionYear = undefined
   state.actionWeek = undefined
   state.creationDate = undefined
-  state.saveSuccess = 0
+  state.theme = '<p><br></p>'
   // get all available quizzes
   get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
     if (snapshot.exists()) {
@@ -364,7 +373,8 @@ function changeMode() {
   state.actionYear = store.metaObject[state.quizNumberInput].actionYear
   state.actionWeek = store.metaObject[state.quizNumberInput].actionWeek
   state.creationDate = store.metaObject[state.quizNumberInput].creationDate
-  state.saveSuccess = 0
+  state.theme = store.metaObject[state.quizNumberInput].theme || '<p>De themabeschrijving is nog niet beschikbaar</p>'
+  state.successText = undefined
   state.resetCount = 0
 }
 
@@ -388,12 +398,13 @@ const saveButtonText = computed(() => {
   return ''
 })
 
-const successText = computed(() => {
-  if (saveButtonText.value === '') return undefined
-  if (state.saveSuccess === 1) return saveButtonText.value + ' is gelukt'
-  if (state.saveSuccess === 2) return saveButtonText.value + ' is mislukt'
-  return undefined
-})
+function createSuccessText(val) {
+  console.log('createSuccessText is called')
+  if (saveButtonText.value === '') { state.successText = undefined } else
+    if (val) { state.successText = saveButtonText.value + ' is gelukt' } else
+      if (!val) { state.successText = saveButtonText.value + ' is mislukt' } else
+        state.successText = undefined
+}
 
 const actionWeekInUse = computed(() => {
   return quizzesAssignedAlready.value.length > 0
@@ -421,6 +432,7 @@ function composeQuestionLine(item) {
 
 function doCancel() {
   // refresh overall quiz data
+  state.successText = undefined
   resetAndloadQuizes()
 }
 
@@ -431,13 +443,14 @@ function doAction() {
       "title": state.quizTitle,
       "actionYear": state.actionYear,
       "actionWeek": state.actionWeek,
-      "creationDate": Number(new Date())
+      "creationDate": Number(new Date()),
+      "theme": state.theme
     }).then(() => {
+      createSuccessText(true)
       // refresh overall quiz data
       resetAndloadQuizes()
-      state.saveSuccess = 1
     }).catch((error) => {
-      state.saveSuccess = 2
+      createSuccessText(false)
       console.error('The write failed, error message = ' + error.message)
     })
   }
@@ -446,16 +459,17 @@ function doAction() {
       "title": state.quizTitle,
       "actionYear": state.actionYear,
       "actionWeek": state.actionWeek,
-      "creationDate": state.creationDate
+      "creationDate": state.creationDate,
+      "theme": state.theme
     }
     const updates = {}
     updates[`quizzes/metaData/${state.quizNumberInput}`] = newQuizObject
     update(dbRef, updates).then(() => {
+      createSuccessText(true)
       // refresh overall quiz data
       resetAndloadQuizes()
-      state.saveSuccess = 1
     }).catch((error) => {
-      state.saveSuccess = 2
+      createSuccessText(false)
       console.error('The title update failed, error message = ' + error.message)
     })
   }
@@ -465,29 +479,32 @@ function doAction() {
       "title": state.quizTitle,
       "actionYear": state.actionYear,
       "actionWeek": '0',
-      "creationDate": state.creationDate
+      "creationDate": state.creationDate,
+      "theme": state.theme
     }
     const updates = {}
     updates[`quizzes/metaData/${state.quizNumberInput}`] = newQuizObject
     update(dbRef, updates).then(() => {
       // remove references to the removed quiz
       removeQuizRefs(state.quizNumberInput)
+      createSuccessText(true)
       // refresh overall quiz data
       resetAndloadQuizes()
-      state.saveSuccess = 1
     }).catch((error) => {
-      state.saveSuccess = 2
+      createSuccessText(false)
       console.error('The title update failed, error message = ' + error.message)
     })
   }
 }
 
 watch(() => editNew.value, () => {
-  if (editNew.value) { state.action = '1' } else state.action = undefined
+  if (editNew.value && !editExisting.value) state.action = '1'
+  if (editExisting.value && !editNew.value) state.action = undefined
 })
 
 watch(() => editExisting.value, () => {
-  if (editExisting.value) { state.action = undefined } else state.action = '1'
+  if (editNew.value && !editExisting.value) state.action = '1'
+  if (editExisting.value && !editNew.value) state.action = undefined
 })
 </script>
 
