@@ -6,7 +6,7 @@
         <v-navigation-drawer width="100%" class="bg-deep-purple" theme="dark" permanent>
           <v-list color="transparent">
             <v-list-item prepend-icon="mdi-view-dashboard" title="Schuilnamen onderhouden" @click="state.action = 'mAliases'"></v-list-item>
-            <v-list-item prepend-icon="mdi-account" title="Quiz meta data onderhouden" @click="state.action = 'mQuizzes'"></v-list-item>
+            <v-list-item prepend-icon="mdi-account" title="Quiz data onderhouden" @click="state.action = 'mQuizzes'"></v-list-item>
             <v-list-item prepend-icon="mdi-account" title="Quiz vragen onderhouden" @click="state.action = 'mQuizQuestions'"></v-list-item>
             <v-list-item prepend-icon="mdi-account-box" title="Berichten maken en versturen" @click="state.action = 'mMessages'"></v-list-item>
             <v-list-item prepend-icon="mdi-gavel" title="Andere gebruikers rechten geven" @click="state.action = 'mRoles'"></v-list-item>

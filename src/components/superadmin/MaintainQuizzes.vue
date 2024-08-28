@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title class="text-center">Quiz meta data onderhouden</v-card-title>
+    <v-card-title class="text-center">Quiz data onderhouden</v-card-title>
     <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="6">
