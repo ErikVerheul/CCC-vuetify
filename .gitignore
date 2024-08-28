@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 /dist
+.firebase*
 # untrack file with API key
 src/firebase.js
 
