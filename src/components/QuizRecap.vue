@@ -74,7 +74,6 @@ function loadQuizExplanation() {
   get(child(dbRef, `/quizzes/themes/${store.currentQuizNumber}`)).then((snapshot) => {
     if (snapshot.exists()) {
       const explanation = snapshot.val()
-      console.log('loadQuizExplanation: explanation = ' + explanation)
       if (explanation === '<p><br></p>' || explanation === '') {
         state.quizExplanation = '<p>De toelichting is nog niet beschikbaar'
       } else state.quizExplanation = explanation 
