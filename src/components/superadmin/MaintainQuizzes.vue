@@ -75,7 +75,7 @@
     </v-row>
     <v-row v-if="!(editExisting && editNew) && state.action">
       <v-col cols="12">
-        <p>Toelichting op het thema van deze quiz</p>
+        <h2>Toelichting op het thema van deze quiz</h2>
         <QuillEditor v-model:content="state.theme" contentType="html" :toolbar="editorToolbar"></QuillEditor>
       </v-col>
     </v-row>
@@ -166,6 +166,8 @@ import { ref, child, get, set, remove, update } from 'firebase/database'
 const store = useAppStore()
 const emit = defineEmits(['m-done'])
 
+const emptyEditorValue = '<p><br></p>'
+
 onBeforeMount(() => {
   resetAndloadQuizes()
 })
@@ -174,13 +176,13 @@ const state = reactive({
   allQuizNumbers: [],
   allQuizItems: [],
   newQuizNumberInput: undefined,
-  quizNumberInput: undefined,
+  quizNumberInput: null,
   action: undefined,
   quizTitle: '',
   actionYear: undefined,
   actionWeek: undefined,
   creationDate: undefined,
-  theme: '<p><br></p>',
+  theme: emptyEditorValue,
   newNumberRules: [
     value => {
       if (value) return true
@@ -260,7 +262,6 @@ const state = reactive({
   checkMultipleAssignments: false,
   questionsList: [],
   listQuestions: false,
-  theme: '<p><br></p>',
   successText: undefined
 })
 
@@ -273,11 +274,11 @@ const editorToolbar = [
 ]
 
 const editExisting = computed(() => {
-  return (state.newQuizNumberInput === '' && state.quizNumberInput === '') || (state.quizNumberInput !== '' && state.newQuizNumberInput === '')
+  return (state.newQuizNumberInput === '' && state.quizNumberInput === null) || (state.quizNumberInput !== null && state.newQuizNumberInput === '')
 })
 
 const editNew = computed(() => {
-  return (state.newQuizNumberInput === '' && state.quizNumberInput === '') || (state.newQuizNumberInput !== '' && state.quizNumberInput === '')
+  return (state.newQuizNumberInput === '' && state.quizNumberInput === null) || (state.newQuizNumberInput !== '' && state.quizNumberInput === null)
 })
 
 function actionSettingsOk() {
@@ -289,13 +290,13 @@ function actionSettingsOk() {
 function resetAndloadQuizes() {
   // reset input
   state.newQuizNumberInput = ''
-  state.quizNumberInput = ''
+  state.quizNumberInput = null
   state.action = undefined
   state.quizTitle = ''
   state.actionYear = undefined
   state.actionWeek = undefined
   state.creationDate = undefined
-  state.theme = '<p><br></p>'
+  state.theme = emptyEditorValue
   // get all available quizzes
   get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
     if (snapshot.exists()) {
@@ -383,10 +384,10 @@ function startChangeMode() {
     if (snapshot.exists()) {
       state.theme = snapshot.val()
     } else {
-      state.theme = '<p><br></p>'
+      state.theme = emptyEditorValue
     }
   }).catch((warn) => {
-    state.theme = '<p><br></p>'
+    state.theme = emptyEditorValue
     console.log('Thema beschrijving niet gevonden; default is gezet: ' + warn.message)
   })
   state.listQuestions = false
@@ -519,6 +520,7 @@ function doAction() {
 
 watch(() => state.quizNumberInput, () => {
   state.action = undefined
+  if (state.quizNumberInput === null) resetAndloadQuizes()
 })
 
 watch(() => state.newQuizNumberInput, () => {
