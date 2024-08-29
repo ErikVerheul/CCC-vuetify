@@ -33,7 +33,7 @@
     <template v-if="showInputFields()">
       <v-row>
         <v-col cols="6">
-          <v-autocomplete v-model="state.selectedQuizItemNumber" item-value="key" :items="state.quizItems"
+          <v-autocomplete v-model="state.selectedQuizNumber" item-value="key" :items="state.quizItems"
             label="Kies of verander de quiz voor deze quiz-vraag" />
         </v-col>
         <v-col cols="6">
@@ -276,13 +276,13 @@ const state = reactive({
   quizTitle: '',
   ankeiler: '',
   quizItems: [],
-  selectedQuizItemNumber: undefined,
+  selectedQuizNumber: null,
 
   questionNumber: undefined,
   newQuestionNumber: undefined,
   questionTitle: '',
   questionItems: [],
-  selectedQuestionNumber: undefined,
+  selectedQuestionNumber: null,
 
   showCreateQuestion: false,
   showQuestionSelect: false,
@@ -369,8 +369,8 @@ function clearAll() {
   state.changeQuestionNumber = false
   state.showQuestionRemove = false
 
-  state.selectedQuizItemNumber = undefined
-  state.selectedQuestionNumber = undefined
+  state.selectedQuizNumber = null
+  state.selectedQuestionNumber = null
   state.questionNumber = ''
   state.newQuestionNumber = ''
   state.questionTitle = ''
@@ -460,7 +460,7 @@ function doLoadQuestion() {
         // assign the quiz number
         state.quizNumber = state.indexObject[state.questionNumber].quizNumber
         // preset the quiz select
-        state.selectedQuizItemNumber = state.quizNumber
+        state.selectedQuizNumber = state.quizNumber
       } else {
         console.log('No quiz-question data available')
       }
@@ -623,10 +623,10 @@ function doChangeQuestionNumber(newQuestionNr) {
 }
 
 watch(
-  () => state.selectedQuizItemNumber,
+  () => state.selectedQuizNumber,
   () => {
-    if (state.selectedQuizItemNumber) {
-      state.quizNumber = state.selectedQuizItemNumber
+    if (state.selectedQuizNumber) {
+      state.quizNumber = state.selectedQuizNumber
       state.quizTitle = store.metaObject[state.quizNumber].title
     }
   },

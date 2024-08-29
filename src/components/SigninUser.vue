@@ -71,7 +71,7 @@ const emit = defineEmits(['signin-completed', 'exit-signup'])
 const store = useAppStore()
 
 const state = reactive({
-  selectedAlias: '',
+  selectedAlias: null,
   pinRules: [
     value => {
       if (value) return true

@@ -96,7 +96,7 @@ const state = reactive({
   allAliases: [],
   action: 'newAlias',
   newAlias: '',
-  selectedAlias: '',
+  selectedAlias: null,
   isCelebrity: false,
   replaceAlias: '',
   nameRules: [
@@ -325,7 +325,7 @@ function doSave() {
 // reset the user input when changing action
 function resetInput() {
   state.newAlias = ''
-  state.selectedAlias = ''
+  state.selectedAlias = null
   state.replaceAlias = ''
   state.isCelebrity = false
   state.saveSuccess = 0
@@ -336,7 +336,7 @@ function resetInput() {
 watch(
   () => state.selectedAlias,
   () => {
-    // prevent null when backspacing
+    // check for null when backspacing
     if (state.selectedAlias === null) return
     // clear data from previous action
     state.saveSuccess = 0
