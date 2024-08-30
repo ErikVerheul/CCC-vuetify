@@ -250,6 +250,7 @@ import PreviewFullExplanation from './PreviewFullExplanation.vue'
 
 const store = useAppStore()
 const emit = defineEmits(['m-done'])
+const emptyQuillValue = '<p><br></p>'
 
 onBeforeMount(() => {
   loadQuestionsIndex()
@@ -451,11 +452,11 @@ function doLoadQuestion() {
     .then((snapshot) => {
       if (snapshot.exists()) {
         const quizObject = snapshot.val()
-        state.content = quizObject.body || '<p><br></p>'
+        state.content = quizObject.body || emptyQuillValue
         state.statementsArray = quizObject.statementsArray
         state.quizQAnswers = quizObject.answers
-        state.correctAnswer = quizObject.correctAnswer || '<p><br></p>'
-        state.longExplanation = quizObject.resultInfo || '<p><br></p>'
+        state.correctAnswer = quizObject.correctAnswer || emptyQuillValue
+        state.longExplanation = quizObject.resultInfo || emptyQuillValue
         state.statementNumber = state.statementsArray.length - 1
         // assign the quiz number
         state.quizNumber = state.indexObject[state.questionNumber].quizNumber
@@ -542,9 +543,9 @@ function canSave() {
     state.questionTitle && state.questionTitle.length > 0 &&
     state.ankeiler && state.ankeiler.length > 0 &&
     countGoodAnswers() > 0 &&
-    state.content && state.content.length > 0 && state.content !== '<p><br></p>' &&
-    state.correctAnswer && state.correctAnswer.length > 0 && state.correctAnswer !== '<p><br></p>' &&
-    state.longExplanation && state.longExplanation.length > 0 && state.longExplanation !== '<p><br></p>'
+    state.content && state.content.length > 0 && state.content !== emptyQuillValue &&
+    state.correctAnswer && state.correctAnswer.length > 0 && state.correctAnswer !== emptyQuillValue &&
+    state.longExplanation && state.longExplanation.length > 0 && state.longExplanation !== emptyQuillValue
   )
 }
 

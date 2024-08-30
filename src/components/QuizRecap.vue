@@ -35,6 +35,7 @@ import ReportWarning from "./ReportWarning.vue"
 
 const store = useAppStore()
 const emit = defineEmits(['return-to-base'])
+const emptyQuillValue = '<p><br></p>'
 
 const state = reactive({
   quizExplanation: undefined,
@@ -70,11 +71,10 @@ function appreciationText() {
 }
 
 function loadQuizExplanation() {
-  console.log('loadQuizExplanation: is executed for quiz ' + store.currentQuizNumber)
   get(child(dbRef, `/quizzes/themes/${store.currentQuizNumber}`)).then((snapshot) => {
     if (snapshot.exists()) {
       const explanation = snapshot.val()
-      if (explanation === '<p><br></p>' || explanation === '') {
+      if (explanation === emptyQuillValue || explanation === '') {
         state.quizExplanation = '<p>De toelichting is nog niet beschikbaar'
       } else state.quizExplanation = explanation 
     } else state.quizExplanation = '<p>De toelichting is nog niet beschikbaar'

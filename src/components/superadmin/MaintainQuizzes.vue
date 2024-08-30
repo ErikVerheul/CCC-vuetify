@@ -166,7 +166,7 @@ import { ref, child, get, set, remove, update } from 'firebase/database'
 const store = useAppStore()
 const emit = defineEmits(['m-done'])
 
-const emptyEditorValue = '<p><br></p>'
+const emptyQuillValue = '<p><br></p>'
 
 onBeforeMount(() => {
   resetAndloadQuizes()
@@ -182,7 +182,7 @@ const state = reactive({
   actionYear: undefined,
   actionWeek: undefined,
   creationDate: undefined,
-  theme: emptyEditorValue,
+  theme: emptyQuillValue,
   newNumberRules: [
     value => {
       if (value) return true
@@ -296,7 +296,7 @@ function resetAndloadQuizes() {
   state.actionYear = undefined
   state.actionWeek = undefined
   state.creationDate = undefined
-  state.theme = emptyEditorValue
+  state.theme = emptyQuillValue
   // get all available quizzes
   get(child(dbRef, `/quizzes/metaData/`)).then((snapshot) => {
     if (snapshot.exists()) {
@@ -384,10 +384,10 @@ function startChangeMode() {
     if (snapshot.exists()) {
       state.theme = snapshot.val()
     } else {
-      state.theme = emptyEditorValue
+      state.theme = emptyQuillValue
     }
   }).catch((warn) => {
-    state.theme = emptyEditorValue
+    state.theme = emptyQuillValue
     console.log('Thema beschrijving niet gevonden; default is gezet: ' + warn.message)
   })
   state.listQuestions = false
