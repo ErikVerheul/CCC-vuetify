@@ -14,7 +14,7 @@
         <h3 class="text-red">Doe mee en win!</h3>
       </v-col>
       <v-col cols="12">
-        <v-img :height="240" alt="Afbeelding mok" src="../assets/brug.png"></v-img>
+        <v-img :height="240" alt="Afbeelding brug" src="../assets/brug.png"></v-img>
       </v-col>
     </v-row>
     <v-row v-if="!state.userCompletedQuizBefore">

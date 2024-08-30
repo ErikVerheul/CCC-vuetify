@@ -186,7 +186,7 @@ function getHeaders() {
       { title: 'Week', align: 'start', sortable: false, key: 'name' },
       { title: 'score', sortable: false, align: 'end', key: 'sum' },
       { title: 'tijd (sec)', sortable: false, align: 'end', key: 'time' },
-      { title: 'mok', sortable: false, align: 'end', key: 'winner' },
+      { title: 'prijs', sortable: false, align: 'end', key: 'winner' },
     ]
   } else return [
     { title: 'Week', align: 'start', sortable: false, key: 'name' },
