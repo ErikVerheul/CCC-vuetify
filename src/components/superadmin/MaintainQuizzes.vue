@@ -4,10 +4,8 @@
     <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="6">
-        <v-text-field v-if="editNew" v-model="state.newQuizNumberInput" label="Nieuw quiz nummer"
-          :rules="state.newNumberRules" />
-        <v-autocomplete v-if="editExisting" v-model="state.quizNumberInput" item-value="key" :items="state.allQuizItems"
-          label="Te veranderen quiz" />
+        <v-text-field v-if="editNew" v-model="state.newQuizNumberInput" label="Nieuw quiz nummer" :rules="state.newNumberRules" />
+        <v-autocomplete v-if="editExisting" v-model="state.quizNumberInput" item-value="key" :items="state.allQuizItems" label="Te veranderen quiz" />
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
@@ -25,10 +23,8 @@
         <v-col cols="3"></v-col>
         <v-col cols="6">
           <v-radio-group inline v-model="state.action">
-            <v-radio :disabled="state.quizNumberInput === '0'" @change="startChangeMode" label="Veranderen"
-              value="2"></v-radio>
-            <v-radio :disabled="state.quizNumberInput === '0'" @change="startChangeMode" label="Maak quiz leeg"
-              value="3"></v-radio>
+            <v-radio :disabled="state.quizNumberInput === '0'" @change="startChangeMode" label="Veranderen" value="2"></v-radio>
+            <v-radio :disabled="state.quizNumberInput === '0'" @change="startChangeMode" label="Maak quiz leeg" value="3"></v-radio>
             <v-radio @change="createQuestionsList(state.quizNumberInput)" label="Toon vragen" value="4"></v-radio>
           </v-radio-group>
         </v-col>
@@ -36,8 +32,7 @@
 
         <v-col cols="3"></v-col>
         <v-col cols="6">
-          <v-text-field v-if="state.action === '2'" v-model.trim="state.quizTitle" label="Verander quiz naam"
-            :rules="state.newNameRules" />
+          <v-text-field v-if="state.action === '2'" v-model.trim="state.quizTitle" label="Verander quiz naam" :rules="state.newNameRules" />
           <p v-if="state.action === '3'">Leeg te maken quiz naam: {{ state.quizTitle }}</p>
         </v-col>
         <v-col cols="3"></v-col>
@@ -76,7 +71,7 @@
     <v-row v-if="!(editExisting && editNew) && state.action">
       <v-col cols="12">
         <h2>Toelichting op het thema van deze quiz</h2>
-        <QuillEditor v-model:content="state.theme" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+        <QuillEditor v-model:content="state.theme" contentType="html"></QuillEditor>
       </v-col>
     </v-row>
     <v-divider class="mb-5"></v-divider>
@@ -264,14 +259,6 @@ const state = reactive({
   listQuestions: false,
   successText: undefined
 })
-
-const editorToolbar = [
-  [{ header: [false, 1, 2, 3, 4, 5, 6] }],
-  ['bold', 'italic', 'underline', 'strike'],
-  [{ list: 'ordered' }, { list: 'bullet' }],
-  [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
-  ['link', 'image', 'code-block'],
-]
 
 const editExisting = computed(() => {
   return (state.newQuizNumberInput === '' && state.quizNumberInput === null) || (state.quizNumberInput !== null && state.newQuizNumberInput === '')

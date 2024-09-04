@@ -33,8 +33,7 @@
     <template v-if="showInputFields()">
       <v-row>
         <v-col cols="6">
-          <v-autocomplete v-model="state.selectedQuizNumber" item-value="key" :items="state.quizItems"
-            label="Kies of verander de quiz voor deze quiz-vraag" />
+          <v-autocomplete v-model="state.selectedQuizNumber" item-value="key" :items="state.quizItems" label="Kies of verander de quiz voor deze quiz-vraag" />
         </v-col>
         <v-col cols="6">
           <v-text-field v-model="state.questionTitle" label="Quiz-vraag titel" />
@@ -48,7 +47,7 @@
       <v-row>
         <v-col cols="12">
           <p>Body met optionele afbeelding:</p>
-          <QuillEditor v-model:content="state.content" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+          <QuillEditor v-model:content="state.content" contentType="html"></QuillEditor>
         </v-col>
       </v-row>
       <v-row class="py-15">
@@ -97,7 +96,7 @@
       <v-row>
         <v-col cols="12">
           <p>Toelichting correcte antwoord</p>
-          <QuillEditor v-model:content="state.correctAnswer" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+          <QuillEditor v-model:content="state.correctAnswer" contentType="html"></QuillEditor>
         </v-col>
         <v-col class="mt-12" cols="12">
           <h4>Spelregel: {{ gameRules }}</h4>
@@ -122,7 +121,7 @@
       <v-row>
         <v-col cols="12">
           <p>Lange toelichting</p>
-          <QuillEditor v-model:content="state.longExplanation" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+          <QuillEditor v-model:content="state.longExplanation" contentType="html"></QuillEditor>
         </v-col>
       </v-row>
 
@@ -255,14 +254,6 @@ const emptyQuillValue = '<p><br></p>'
 onBeforeMount(() => {
   loadQuestionsIndex()
 })
-
-const editorToolbar = [
-  [{ header: [false, 1, 2, 3, 4, 5, 6] }],
-  ['bold', 'italic', 'underline', 'strike'],
-  [{ list: 'ordered' }, { list: 'bullet' }],
-  [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
-  ['link', 'image', 'code-block'],
-]
 
 const state = reactive({
   showPreviewQuestion: false,

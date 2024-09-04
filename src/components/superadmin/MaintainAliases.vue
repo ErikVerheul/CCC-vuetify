@@ -48,7 +48,7 @@
     <v-row v-if="showEditInfo()" class="d-flex align-center justify-center">
       <h2>Onderhoud schuilnaam info</h2>
       <v-sheet>
-        <QuillEditor v-model:content="state.aliasInfoContent" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+        <QuillEditor v-model:content="state.aliasInfoContent" contentType="html"></QuillEditor>
       </v-sheet>
       <v-row justify="space-around">
         <v-col cols="6" md="4">
@@ -82,14 +82,6 @@ const emit = defineEmits(['m-done'])
 onBeforeMount(() => {
   resetAndLoadAliases()
 })
-
-const editorToolbar = [
-  [{ header: [false, 1, 2, 3, 4, 5, 6] }],
-  ['bold', 'italic', 'underline', 'strike'],
-  [{ list: 'ordered' }, { list: 'bullet' }],
-  [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
-  ['link', 'image', 'code-block'],
-]
 
 const state = reactive({
   aliasesObj: {},

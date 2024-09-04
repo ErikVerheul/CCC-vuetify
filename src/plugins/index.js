@@ -17,6 +17,16 @@ const globalOptions = {
   placeholder: 'Compose your text...',
   readOnly: false,
   theme: 'snow',
+  modules: {
+    toolbar: [
+      [{ header: [false, 1, 2, 3, 4, 5, 6] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
+      ['link', 'image', 'code-block'],
+      [{ align: [] }],
+    ],
+  },
 }
 
 export function registerPlugins(app) {
