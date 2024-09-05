@@ -1,6 +1,13 @@
 <template>
-  <PreviewQuestion v-if="state.showPreviewQuestion" :content="state.content" :statementsArray="state.statementsArray" :quizQAnswers="state.quizQAnswers"
-    :gameRules="gameRules" :correctAnswer="state.correctAnswer" @return-to="state.showPreviewQuestion = false"></PreviewQuestion>
+  <PreviewQuestion
+    v-if="state.showPreviewQuestion"
+    :content="state.content"
+    :statementsArray="state.statementsArray"
+    :quizQAnswers="state.quizQAnswers"
+    :gameRules="gameRules"
+    :correctAnswer="state.correctAnswer"
+    @return-to="state.showPreviewQuestion = false"
+  ></PreviewQuestion>
   <PreviewFullExplanation v-else-if="state.showFullExplanation" :longExplanation="state.longExplanation" @return-to="state.showFullExplanation = false">
   </PreviewFullExplanation>
   <v-sheet v-else>
@@ -104,8 +111,12 @@
       </v-row>
       <v-row no-gutters>
         <v-list lines="two" density="compact">
-          <v-list-item v-for="(num, index) in state.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)"
-            :style="{ 'background-color': bgColor }"></v-list-item>
+          <v-list-item
+            v-for="(num, index) in state.statementsArray"
+            :subtitle="composeStatement(index)"
+            @click="qAnswer(index)"
+            :style="{ 'background-color': bgColor }"
+          ></v-list-item>
         </v-list>
       </v-row>
       <v-row v-if="countGoodAnswers() === 0">
@@ -531,12 +542,20 @@ function canSave() {
     !isNaN(state.quizNumber) &&
     !isNaN(state.questionNumber) &&
     state.allQuizNumbers.includes(state.quizNumber) &&
-    state.questionTitle && state.questionTitle.length > 0 &&
-    state.ankeiler && state.ankeiler.length > 0 &&
+    state.questionTitle &&
+    state.questionTitle.length > 0 &&
+    state.ankeiler &&
+    state.ankeiler.length > 0 &&
     countGoodAnswers() > 0 &&
-    state.content && state.content.length > 0 && state.content !== emptyQuillValue &&
-    state.correctAnswer && state.correctAnswer.length > 0 && state.correctAnswer !== emptyQuillValue &&
-    state.longExplanation && state.longExplanation.length > 0 && state.longExplanation !== emptyQuillValue
+    state.content &&
+    state.content.length > 0 &&
+    state.content !== emptyQuillValue &&
+    state.correctAnswer &&
+    state.correctAnswer.length > 0 &&
+    state.correctAnswer !== emptyQuillValue &&
+    state.longExplanation &&
+    state.longExplanation.length > 0 &&
+    state.longExplanation !== emptyQuillValue
   )
 }
 
@@ -552,7 +571,7 @@ function doSaveQuestion(questionNr, toSubmit) {
     answers: state.quizQAnswers,
     correctAnswer: state.correctAnswer,
     resultInfo: state.longExplanation,
-    gameRules: gameRules.value
+    gameRules: gameRules.value,
   })
     .then(() => {
       const newIndexObject = { quizNumber: state.quizNumber, title: state.questionTitle, ankeiler: state.ankeiler, creationDate: Number(new Date()) }
@@ -611,7 +630,9 @@ function doRemoveQuestion(questionNr) {
 }
 
 function doChangeQuestionNumber(newQuestionNr) {
-  doSaveQuestion(newQuestionNr, function () { doRemoveQuestion(state.questionNumber) })
+  doSaveQuestion(newQuestionNr, function () {
+    doRemoveQuestion(state.questionNumber)
+  })
 }
 
 watch(

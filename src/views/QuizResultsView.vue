@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row class="d-flex align-center justify-center">
-      <AppBar :withActivator=false />
+      <AppBar :withActivator="false" />
       <v-sheet class="mx-3" :width="store.screenWidth">
         <QuizResults @return-to-menu="router.replace({ path: '/' })" />
       </v-sheet>

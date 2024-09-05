@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <AppBar :withActivator=false />
+    <AppBar :withActivator="false" />
     <v-sheet v-if="state.action === 'menu'">
       <v-row>
         <v-navigation-drawer width="100%" class="bg-deep-purple" theme="dark" permanent>
@@ -45,8 +45,6 @@ import MaintainMessages from './MaintainMessages.vue'
 import MaintainRoles from './MaintainRoles.vue'
 
 const state = reactive({
-  action: 'menu'
+  action: 'menu',
 })
-
-
 </script>

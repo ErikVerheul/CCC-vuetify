@@ -3,12 +3,16 @@
     <v-card flat color="#FEF1E5" :width="store.screenWidth" height="100vh">
       <v-row dense>
         <v-col cols="12">
-          <v-card-text>Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of tablet?<br>
-            Haal dan <b>eerst schuilnaam en pincode</b> op van dat apparaat en voer hier onder in.</v-card-text>
+          <v-card-text
+            >Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of tablet?<br />
+            Haal dan <b>eerst schuilnaam en pincode</b> op van dat apparaat en voer hier onder in.</v-card-text
+          >
         </v-col>
         <v-col cols="1"></v-col>
         <v-col cols="10" class="d-flex align-center justify-center">
-          <v-card-text><small>De schuilnaam en pincode vind je via het menu <v-icon>mdi-dots-vertical</v-icon> (rechtsboven)</small></v-card-text>
+          <v-card-text
+            ><small>De schuilnaam en pincode vind je via het menu <v-icon>mdi-dots-vertical</v-icon> (rechtsboven)</small></v-card-text
+          >
         </v-col>
         <v-col cols="1"></v-col>
 
@@ -54,7 +58,7 @@
 
 <style scoped>
 .color-red {
-  color: red
+  color: red;
 }
 </style>
 
@@ -62,8 +66,8 @@
 import { computed, reactive } from 'vue'
 import { useAppStore } from '../store/app.js'
 import { dbRef } from '../firebase.js'
-import { get, child, update } from "firebase/database"
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth"
+import { get, child, update } from 'firebase/database'
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import Cookies from 'universal-cookie'
 
 const props = defineProps(['isCelebrity', 'aliasesInUseInclAdmin'])
@@ -73,23 +77,23 @@ const store = useAppStore()
 const state = reactive({
   selectedAlias: null,
   pinRules: [
-    value => {
+    (value) => {
       if (value) return true
 
       return 'Vul 4 of meer cijfers in.'
     },
-    value => {
+    (value) => {
       if (!isNaN(value)) return true
 
       return 'Vul alleen cijfers in.'
     },
-    value => {
+    (value) => {
       if (value && value.length >= 4) return true
 
       return 'Vul minimaal 4 cijfers in.'
     },
   ],
-  loginErrorMsg: undefined
+  loginErrorMsg: undefined,
 })
 
 const PINOK = computed(() => {
@@ -109,35 +113,36 @@ function doSigninUser() {
       // signed in as user
       store.firebaseUser = userCredential.user
       // get user data from the database
-      get(child(dbRef, `users/` + store.firebaseUser.uid)).then((snapshot) => {
-        if (snapshot.exists()) {
-          // get the user data in the store including its alias
-          store.userData = snapshot.val()
-          if (state.selectedAlias !== store.userData.alias) {
-            console.log('doSigninUser: SOMETHING WENT WRONG: the alias of the retrieved user is different from the selected alias. STOP')
-            return
+      get(child(dbRef, `users/` + store.firebaseUser.uid))
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            // get the user data in the store including its alias
+            store.userData = snapshot.val()
+            if (state.selectedAlias !== store.userData.alias) {
+              console.log('doSigninUser: SOMETHING WENT WRONG: the alias of the retrieved user is different from the selected alias. STOP')
+              return
+            }
+            // save a cookie for auto login next time
+            const cookies = new Cookies()
+            cookies.set('speelMee', { alias: store.userData.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+            // update the login date/time
+            const now = Date.now()
+            store.userData.lastLogin = now
+            const updates = {}
+            updates['/users/' + store.firebaseUser.uid + '/lastLogin'] = now
+            update(dbRef, updates)
+            emit('signin-completed')
+          } else {
+            console.log(`doSigninUser: cannot find user ${store.userData.alias} in the database`)
           }
-          // save a cookie for auto login next time
-          const cookies = new Cookies()
-          cookies.set('speelMee', { alias: store.userData.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
-          // update the login date/time
-          const now = Date.now()
-          store.userData.lastLogin = now
-          const updates = {}
-          updates['/users/' + store.firebaseUser.uid + '/lastLogin'] = now
-          update(dbRef, updates)
-          emit('signin-completed')
-        } else {
-          console.log(`doSigninUser: cannot find user ${store.userData.alias} in the database`)
-        }
-      }).catch((error) => {
-        console.error(`While reading child ${store.userData.alias} from database: error message = ` + error.message)
-      })
+        })
+        .catch((error) => {
+          console.error(`While reading child ${store.userData.alias} from database: error message = ` + error.message)
+        })
     })
     .catch((error) => {
       console.error('Firebase signin: error message = ' + error.message)
       state.loginErrorMsg = error.message
     })
 }
-
 </script>

@@ -34,5 +34,4 @@ function quitApp() {
   // reset the app
   location.reload(true)
 }
-
 </script>
