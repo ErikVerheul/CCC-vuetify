@@ -1,48 +1,37 @@
 <template>
-  <div class="container">
-    <div class="main">
-      <v-container>
-        <h2>Blader, en kies een schuilnaam</h2>
+  <v-sheet class="top" max-width="store.screenWidth">
+    <v-row no-gutters class="d-flex align-center justify-center">
+      <h2>Blader, en kies een schuilnaam</h2>
+    </v-row>
+    <v-row no-gutters class="text-center overflow-auto" align="center" justify="center" style="display: flex">
+      <SelectAliasRow v-for="(num, index) in state.numberOfRows" :random-names="state.randomNames" :row-length="state.rowLength" :row="index"
+        :alias-button-selections="state.aliasButtonSelections" />
+    </v-row>
+  </v-sheet>
 
-        <SelectAliasRow v-for="(num, index) in state.numberOfRows" :random-names="state.randomNames" :row-length="state.rowLength" :row="index"
-          :alias-button-selections="state.aliasButtonSelections" />
-      </v-container>
-    </div>
-
-    <v-container class="d-flex justify-space-between py-4">
-      <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
-        <template v-slot:prepend>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-        Terug
-      </v-btn>
-
-      <v-btn :disabled="state.aliasSelected === undefined" flat append-icon="mdi-arrow-right" @click="emit('alias-selected', state.aliasSelected)">
-        Verder
-        <template v-slot:append>
-          <v-icon size="x-large" color="purple"></v-icon>
-        </template>
-      </v-btn>
-    </v-container>
-  </div>
+  <v-sheet class="bottom" max-width="store.screenWidth">
+    <v-divider></v-divider>
+    <v-row no-gutters class="py-10">
+      <v-col>
+        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('reset-signup')">
+          <template v-slot:prepend>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+          Terug
+        </v-btn>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col>
+        <v-btn :disabled="state.aliasSelected === undefined" flat append-icon="mdi-arrow-right" @click="emit('alias-selected', state.aliasSelected)">
+          Verder
+          <template v-slot:append>
+            <v-icon size="x-large" color="purple"></v-icon>
+          </template>
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-sheet>
 </template>
-
-<style scoped>
-.container {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  height: calc(100dvh - 60px);
-  /* subtract app bar + 12 px to lift 'Terug' and 'Verder' buttons from the bottom */
-}
-
-.main {
-  padding-left: 1em;
-  padding-right: 1em;
-  flex: 1;
-  overflow: auto;
-}
-</style>
 
 <script setup>
 import { onBeforeMount, reactive, watch } from 'vue'
@@ -109,3 +98,19 @@ watch(state.aliasButtonSelections, (rowValue, oldRowValue) => {
   state.aliasSelected = state.randomNames[index]
 })
 </script>
+
+<style scoped>
+.top {
+  top: 0px;
+  height: 88%;
+  width: 100%;
+  position: sticky;
+}
+
+.bottom {
+  bottom: 0px;
+  height: 12%;
+  width: 100%;
+  position: fixed;
+}
+</style>
