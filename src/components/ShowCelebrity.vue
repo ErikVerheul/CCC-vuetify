@@ -31,19 +31,20 @@ onBeforeMount(() => {
 })
 
 const state = reactive({
-  aliasInfoContent: {}
+  aliasInfoContent: {},
 })
 
 function loadAliasInfo() {
-  get(child(dbRef, `aliasInfo/${store.userData.alias}`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      state.aliasInfoContent = snapshot.val()
-    } else {
-      console.log(`No info for alias ${store.userData.alias} found`)
-    }
-  }).catch((error) => {
-    console.log(`Error while loading info for alias ${store.userData.alias}: ${error.message}`)
-  })
+  get(child(dbRef, `aliasInfo/${store.userData.alias}`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        state.aliasInfoContent = snapshot.val()
+      } else {
+        console.log(`No info for alias ${store.userData.alias} found`)
+      }
+    })
+    .catch((error) => {
+      console.log(`Error while loading info for alias ${store.userData.alias}: ${error.message}`)
+    })
 }
-
 </script>

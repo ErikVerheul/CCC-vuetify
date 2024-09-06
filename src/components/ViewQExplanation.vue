@@ -29,5 +29,4 @@
 <script setup>
 const emit = defineEmits(['view-over'])
 const props = defineProps(['quizExplanation'])
-
 </script>

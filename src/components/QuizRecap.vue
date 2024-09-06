@@ -8,7 +8,7 @@
     <v-card-title v-else class="text-center">Je hebt de quiz voltooid</v-card-title>
     <v-card-text>Je had {{ countGood() }} van de {{ countAll() }} antwoorden goed</v-card-text>
     <v-card-title class="text-center">{{ appreciationText() }}</v-card-title>
-    <v-btn @click="state.doActivate='showExpl'">Bekijk nu de toelichting op de quiz</v-btn>
+    <v-btn @click="state.doActivate = 'showExpl'">Bekijk nu de toelichting op de quiz</v-btn>
     <v-card-actions>
       <v-row>
         <v-col cols="12" class="text-right">
@@ -30,8 +30,8 @@ import { child, get } from 'firebase/database'
 import { onBeforeMount, reactive } from 'vue'
 import { useAppStore } from '../store/app.js'
 import ViewQExplanation from './ViewQExplanation.vue'
-import ReportFbError from "./ReportFbError.vue"
-import ReportWarning from "./ReportWarning.vue"
+import ReportFbError from './ReportFbError.vue'
+import ReportWarning from './ReportWarning.vue'
 
 const store = useAppStore()
 const emit = defineEmits(['return-to-base'])
@@ -39,7 +39,7 @@ const emptyQuillValue = '<p><br></p>'
 
 const state = reactive({
   quizExplanation: undefined,
-  doActivate: undefined
+  doActivate: undefined,
 })
 
 onBeforeMount(() => {
@@ -54,7 +54,7 @@ function countAll() {
 function countGood() {
   if (store.compactResult) {
     let count = 0
-    store.compactResult.forEach(el => {
+    store.compactResult.forEach((el) => {
       if (el === true) count++
     })
     return count
@@ -71,18 +71,19 @@ function appreciationText() {
 }
 
 function loadQuizExplanation() {
-  get(child(dbRef, `/quizzes/themes/${store.currentQuizNumber}`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      const explanation = snapshot.val()
-      if (explanation === emptyQuillValue || explanation === '') {
-        state.quizExplanation = '<p>De toelichting is nog niet beschikbaar'
-      } else state.quizExplanation = explanation 
-    } else state.quizExplanation = '<p>De toelichting is nog niet beschikbaar'
-  }).catch((error) => {
-    store.firebaseError = error
-    store.fbErrorContext = `De fout is opgetreden bij het lezen van de toelichting op de quiz`
-    store.rqActive = 'onError'
-  })
+  get(child(dbRef, `/quizzes/themes/${store.currentQuizNumber}`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        const explanation = snapshot.val()
+        if (explanation === emptyQuillValue || explanation === '') {
+          state.quizExplanation = '<p>De toelichting is nog niet beschikbaar'
+        } else state.quizExplanation = explanation
+      } else state.quizExplanation = '<p>De toelichting is nog niet beschikbaar'
+    })
+    .catch((error) => {
+      store.firebaseError = error
+      store.fbErrorContext = `De fout is opgetreden bij het lezen van de toelichting op de quiz`
+      store.rqActive = 'onError'
+    })
 }
-
 </script>

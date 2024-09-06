@@ -15,5 +15,4 @@ const props = defineProps(['randomNames', 'rowLength', 'row', 'aliasButtonSelect
 const indexOffset = computed(() => {
   return props.row * props.rowLength
 })
-
 </script>

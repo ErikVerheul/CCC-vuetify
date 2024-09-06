@@ -1,67 +1,46 @@
 <template>
   <v-app-bar density="compact" color="purple">
     <v-app-bar-title class="flex text-center">Hoe goed ken je Maastricht?</v-app-bar-title>
-    <v-btn v-if="store.largeScreenDetected && props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined"
-      @click="doAdmin">Admin</v-btn>
+    <v-btn v-if="store.largeScreenDetected && props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined" @click="doAdmin"
+      >Admin</v-btn
+    >
     <v-btn v-if="props.withActivator" icon id="menu-activator">
       <v-icon>mdi-dots-vertical</v-icon>
     </v-btn>
     <v-menu activator="#menu-activator">
       <v-list>
         <v-list-item v-if="props.isAuthenticated && aliasIsCelebrity(store.userData.alias)">
-          <v-btn flat size="small" @click="emit('show-alias-info')">
-            Wie was {{ store.userData.alias }}?
-          </v-btn>
+          <v-btn flat size="small" @click="emit('show-alias-info')"> Wie was {{ store.userData.alias }}? </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog1 = true">
-            Schuilnaam en pincode
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog1 = true"> Schuilnaam en pincode </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog2 = true">
-            Stop automatisch inloggen
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog2 = true"> Stop automatisch inloggen </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="state.dialog4 = true">
-            Feedback
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog4 = true"> Feedback </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="state.dialog5 = true">
-            Contact
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog5 = true"> Contact </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="state.dialog6 = true">
-            Veelgestelde vragen
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog6 = true"> Veelgestelde vragen </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="state.dialog7 = true">
-            Over de Speelmee app
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog7 = true"> Over de Speelmee app </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="router.push({ path: '/Privacybeleid' })">
-            Privacybeleid
-          </v-btn>
+          <v-btn flat size="small" @click="router.push({ path: '/Privacybeleid' })"> Privacybeleid </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog9 = true">
-            Log uit
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog9 = true"> Log uit </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated && store.userData.alias !== 'admin'">
-          <v-btn color="pink" flat @click="state.dialog10 = true">
-            Ik speel niet meer mee.<br>Verwijder mijn gegevens
-          </v-btn>
+          <v-btn color="pink" flat @click="state.dialog10 = true"> Ik speel niet meer mee.<br />Verwijder mijn gegevens </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated && store.userData.alias === 'admin'">
-          <v-btn color="green" flat @click="showScores">
-            Toon de scores en de winnaars
-          </v-btn>
+          <v-btn color="green" flat @click="showScores"> Toon de scores en de winnaars </v-btn>
         </v-list-item>
       </v-list>
     </v-menu>
@@ -134,10 +113,11 @@
     <v-card>
       <v-card-text>
         <p>Vraag: Is de app wel veilig?</p>
-        <p>Ja, de app is veilig omdat er geen persoonlijke gegevens worden bewaard, zoals jouw e-mail adres, of ieder ander naar jou
-          indentificerend gegeven.
-          Het ergste wat kan gebeuren is dat iemand anders jouw pin code raadt en namens jou gaat spelen. Mail ons naar contact@speelmee.app
-          als je vermoedt dat dit is gebeurd.</p>
+        <p>
+          Ja, de app is veilig omdat er geen persoonlijke gegevens worden bewaard, zoals jouw e-mail adres, of ieder ander naar jou indentificerend gegeven. Het
+          ergste wat kan gebeuren is dat iemand anders jouw pin code raadt en namens jou gaat spelen. Mail ons naar contact@speelmee.app als je vermoedt dat dit
+          is gebeurd.
+        </p>
       </v-card-text>
       <v-card-actions>
         <v-btn color="purple" block @click="state.dialog6 = false">Sluit</v-btn>
@@ -160,8 +140,7 @@
   <v-dialog v-model="state.dialog9" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
-        <p>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten.
-          Als u hier uitlogt stopt u ook de automatische login.</p>
+        <p>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten. Als u hier uitlogt stopt u ook de automatische login.</p>
         <h3>Om opnieuw in te loggen noteer deze gegevens:</h3>
         <ul class="mx-5">
           <li>Uw schuilnaam: {{ store.userData.alias }}</li>
@@ -169,7 +148,7 @@
         </ul>
       </v-card-text>
       <v-divider></v-divider>
-      <v-card-actions style="height: 60px;">
+      <v-card-actions style="height: 60px">
         <v-row>
           <v-col>
             <v-btn flat prepend-icon="mdi-arrow-left" @click="state.dialog9 = false">
@@ -196,12 +175,11 @@
   <v-dialog v-model="state.dialog10" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
-        <h3>Als u uw gegevens verwijderd kunt u niet meer inloggen. Wel kunt u een nieuwe schuilnaam en pin code kiezen en fris opnieuw
-          beginnen.</h3>
+        <h3>Als u uw gegevens verwijderd kunt u niet meer inloggen. Wel kunt u een nieuwe schuilnaam en pin code kiezen en fris opnieuw beginnen.</h3>
         <h3>UW GEGEVENS WORDEN VERNIETIGD NIEMAND KAN DIE NOG TERUGHALEN</h3>
       </v-card-text>
       <v-divider></v-divider>
-      <v-card-actions style="height: 60px;">
+      <v-card-actions style="height: 60px">
         <v-row>
           <v-col>
             <v-btn flat prepend-icon="mdi-arrow-left" @click="state.dialog10 = false">
@@ -252,8 +230,8 @@ const props = defineProps({
   },
   withActivator: {
     type: Boolean,
-    required: true
-  }
+    required: true,
+  },
 })
 
 const emit = defineEmits(['logout-app', 'reset-app', 'app-settings', 'show-alias-info'])
@@ -268,7 +246,7 @@ const state = reactive({
   dialog9: false,
   dialog10: false,
   dialog11: false,
-  cookieIsRemoved: false
+  cookieIsRemoved: false,
 })
 
 function removeCookies() {
@@ -289,20 +267,25 @@ function removeAccount() {
     updates[`quizzes/results/${store.currentYear - n}/${store.userData.alias}`] = null
   }
   // remove the users account, data and cookie
-  update(dbRef, updates).then(() => {
-    store.firebaseUser.delete().then(() => {
-      removeCookies()
-      state.dialog10 = false
-      emit('reset-app')
-    }).catch((error) => {
-      state.dialog10 = false
-      console.log(`Account and/or cookie deletion failed: ${error.message}`)
-      // emit('reset-app')
+  update(dbRef, updates)
+    .then(() => {
+      store.firebaseUser
+        .delete()
+        .then(() => {
+          removeCookies()
+          state.dialog10 = false
+          emit('reset-app')
+        })
+        .catch((error) => {
+          state.dialog10 = false
+          console.log(`Account and/or cookie deletion failed: ${error.message}`)
+          // emit('reset-app')
+        })
     })
-  }).catch((error) => {
-    removeCookies()
-    console.log(`Removal of ${store.userData.alias} data failed: ${error.message}`)
-  })
+    .catch((error) => {
+      removeCookies()
+      console.log(`Removal of ${store.userData.alias} data failed: ${error.message}`)
+    })
 }
 
 function aliasIsCelebrity(alias) {
@@ -323,5 +306,4 @@ function logout() {
 function doAdmin() {
   router.push({ path: 'superAdmin' })
 }
-
 </script>

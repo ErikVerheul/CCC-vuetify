@@ -23,7 +23,7 @@
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="8">
-        <h4>Te verloten onder de spelers met de hoogste scores<br>Elke week nieuwe vragen</h4>
+        <h4>Te verloten onder de spelers met de hoogste scores<br />Elke week nieuwe vragen</h4>
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="12">

@@ -3,9 +3,14 @@
     <v-row no-gutters class="d-flex align-center justify-center">
       <h2>Blader, en kies een schuilnaam</h2>
     </v-row>
-    <v-row no-gutters class="text-center overflow-auto" align="center" justify="center" style="display: flex ">
-      <SelectAliasRow v-for="(num, index) in state.numberOfRows" :random-names="state.randomNames" :row-length="state.rowLength" :row=index
-        :alias-button-selections="state.aliasButtonSelections" />
+    <v-row no-gutters class="text-center overflow-auto" align="center" justify="center" style="display: flex">
+      <SelectAliasRow
+        v-for="(num, index) in state.numberOfRows"
+        :random-names="state.randomNames"
+        :row-length="state.rowLength"
+        :row="index"
+        :alias-button-selections="state.aliasButtonSelections"
+      />
     </v-row>
   </v-sheet>
 
@@ -71,7 +76,7 @@ const state = reactive({
   lastIndex: undefined,
   randomNames: [],
   skipWatch: false,
-  aliasSelected: undefined
+  aliasSelected: undefined,
 })
 
 watch(state.aliasButtonSelections, (rowValue, oldRowValue) => {

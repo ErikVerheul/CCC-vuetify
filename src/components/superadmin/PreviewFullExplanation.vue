@@ -40,5 +40,4 @@
 <script setup>
 const emit = defineEmits(['return-to'])
 const props = defineProps(['longExplanation'])
-
 </script>
