@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="top" max-width="store.screenWidth">
+  <v-sheet class="top" :max-width="store.screenWidth">
     <v-row no-gutters class="d-flex align-center justify-center">
       <h2>Blader, en kies een schuilnaam</h2>
     </v-row>
@@ -9,7 +9,7 @@
     </v-row>
   </v-sheet>
 
-  <v-sheet class="bottom" max-width="store.screenWidth">
+  <v-sheet class="bottom" :max-width="store.screenWidth">
     <v-divider></v-divider>
     <v-row no-gutters class="py-10">
       <v-col>
