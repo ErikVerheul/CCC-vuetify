@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-0 mt-0">
+  <v-container class="d-flex justify-center pa-0 mt-0">
     <v-card flat class="text-center" color="#FEF1E5" :width="store.screenWidth" height="100vh">
       <v-card-text>Gebruik je deze app voor het eerst?</v-card-text>
       <v-btn color="blue" @click="emit('change-to-signup')">Kies dan een schuilnaam</v-btn>

@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-0 mt-0">
+  <v-container class="d-flex justify-center pa-0 mt-0">
     <v-card flat color="#FEF1E5" :width="store.screenWidth" height="100vh">
       <v-row dense>
         <v-col cols="12">
@@ -7,7 +7,7 @@
             Haal dan <b>eerst schuilnaam en pincode</b> op van dat apparaat en voer hier onder in.</v-card-text>
         </v-col>
         <v-col cols="1"></v-col>
-        <v-col cols="10" class="d-flex align-center justify-center">
+        <v-col cols="10">
           <v-card-text><small>De schuilnaam en pincode vind je via het menu <v-icon>mdi-dots-vertical</v-icon> (rechtsboven)</small></v-card-text>
         </v-col>
         <v-col cols="1"></v-col>
