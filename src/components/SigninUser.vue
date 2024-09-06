@@ -1,18 +1,14 @@
 <template>
-  <v-container class="pa-0 mt-n8">
+  <v-container class="pa-0 mt-0">
     <v-card flat color="#FEF1E5" :width="store.screenWidth" height="100vh">
       <v-row dense>
         <v-col cols="12">
-          <v-card-text
-            >Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of tablet?<br />
-            Haal dan <b>eerst schuilnaam en pincode</b> op van dat apparaat en voer hier onder in.</v-card-text
-          >
+          <v-card-text>Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of tablet?<br />
+            Haal dan <b>eerst schuilnaam en pincode</b> op van dat apparaat en voer hier onder in.</v-card-text>
         </v-col>
         <v-col cols="1"></v-col>
         <v-col cols="10" class="d-flex align-center justify-center">
-          <v-card-text
-            ><small>De schuilnaam en pincode vind je via het menu <v-icon>mdi-dots-vertical</v-icon> (rechtsboven)</small></v-card-text
-          >
+          <v-card-text><small>De schuilnaam en pincode vind je via het menu <v-icon>mdi-dots-vertical</v-icon> (rechtsboven)</small></v-card-text>
         </v-col>
         <v-col cols="1"></v-col>
 

@@ -3,7 +3,7 @@
   <RunQuiz v-else-if="store.msActive === 'doQuiz'" :recoveryMode="state.recoveryMode" @quiz-is-done="store.msActive = 'showRecap'" />
   <QuizRecap v-else-if="store.msActive === 'showRecap'" @return-to-base="store.msActive = 'showResults'" />
   <QuizResults v-else-if="store.msActive === 'showResults'" @return-to-menu="restartPage" />
-  <v-sheet v-else class="pa-0 mt-n6 text-center" color="#FEF1E5" :width="store.screenWidth" height="100vh">
+  <v-sheet v-else class="text-center" color="#FEF1E5" :width="store.screenWidth" height="100vh">
     <v-row>
       <v-col cols="12">
         <h4>Hallo {{ store.userData.alias }}</h4>

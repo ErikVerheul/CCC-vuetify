@@ -10,7 +10,7 @@
         </v-sheet>
       </v-col>
     </v-row>
-    <v-divider class="my-5"></v-divider>
+    <v-divider></v-divider>
 
     <v-card-actions>
       <v-row>
