@@ -1,9 +1,8 @@
 <template>
   <v-app-bar density="compact" color="purple">
     <v-app-bar-title class="flex text-center">Hoe goed ken je Maastricht?</v-app-bar-title>
-    <v-btn v-if="store.largeScreenDetected && props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined" @click="doAdmin"
-      >Admin</v-btn
-    >
+    <v-btn v-if="store.largeScreenDetected && props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined"
+      @click="doAdmin">Admin</v-btn>
     <v-btn v-if="props.withActivator" icon id="menu-activator">
       <v-icon>mdi-dots-vertical</v-icon>
     </v-btn>
@@ -128,7 +127,7 @@
   <v-dialog v-model="state.dialog7" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
-        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.12.2</p>
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.12.3</p>
         <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>
