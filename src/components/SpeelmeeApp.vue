@@ -9,9 +9,13 @@
         @show-alias-info="showAliasInfo"
       />
 
+<<<<<<< HEAD
       <h2 v-if="state.loginErrorMsg !== undefined" class="py-4">
         Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}
       </h2>
+=======
+      <h2 v-if="state.loginErrorMsg !== undefined" class="py-4">Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 
       <template v-if="state.isInitDone">
         <ShowCelebrity v-if="!nowPlaying && state.showAliasInfoActive" @return-to="state.showAliasInfoActive = false" />
@@ -107,6 +111,7 @@ onBeforeMount(() => {
                           cookies.remove('speelMee', { sameSite: true })
                           cookies.set(
                             'speelMee',
+<<<<<<< HEAD
                             {
                               alias: retrievedCookie.alias,
                               fpw: retrievedCookie.fpw,
@@ -116,6 +121,10 @@ onBeforeMount(() => {
                               maxAge: 60 * 60 * 24 * 365,
                               sameSite: true,
                             }
+=======
+                            { alias: retrievedCookie.alias, fpw: retrievedCookie.fpw },
+                            { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true },
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
                           )
                           // save the login date/time
                           const updates = {}

@@ -32,7 +32,11 @@ app.use(
   {
     config: { id: 'G-JYFV02BZH6' },
   },
+<<<<<<< HEAD
   router
+=======
+  router,
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 )
 
 // Global components

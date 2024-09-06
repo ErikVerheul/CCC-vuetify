@@ -1,11 +1,18 @@
 <template>
-  <PreviewQuestion v-if="state.showPreviewQuestion" :content="state.content" :statementsArray="state.statementsArray" :quizQAnswers='state.quizQAnswers' :gameRules="state.gameRules"
-    :correctAnswer="state.correctAnswer" @return-to="state.showPreviewQuestion = false"></PreviewQuestion>
-  <PreviewFullExplanation v-else-if="state.showFullExplanation" :resultInfo="state.resultInfo" @return-to="state.showFullExplanation = false"></PreviewFullExplanation>
+  <PreviewQuestion
+    v-if="state.showPreviewQuestion"
+    :content="state.content"
+    :statementsArray="state.statementsArray"
+    :quizQAnswers="state.quizQAnswers"
+    :gameRules="gameRules"
+    :correctAnswer="state.correctAnswer"
+    @return-to="state.showPreviewQuestion = false"
+  ></PreviewQuestion>
+  <PreviewFullExplanation v-else-if="state.showFullExplanation" :longExplanation="state.longExplanation" @return-to="state.showFullExplanation = false">
+  </PreviewFullExplanation>
   <v-sheet v-else>
     <v-row class="d-flex align-center justify-center">
-      <h2 v-if="state.quizNumber && state.questionNumber !== ''">Onderhoud quiz-vraag {{ state.questionNumber }} voor quiz {{ state.quizNumber
-        }}</h2>
+      <h2 v-if="state.quizNumber && state.questionNumber !== ''">Onderhoud quiz-vraag {{ state.questionNumber }} voor quiz {{ state.quizNumber }}</h2>
       <h2 v-else>Onderhoud quiz-vraag gegevens</h2>
     </v-row>
     <v-row>
@@ -15,6 +22,10 @@
       <v-spacer></v-spacer>
       <v-col>
         <v-btn @click="createNewQuestion()">Maak een nieuwe quiz-vraag</v-btn>
+      </v-col>
+      <v-spacer></v-spacer>
+      <v-col>
+        <v-btn :disabled="state.questionNumber === ''" @click="state.changeQuestionNumber = true">Verander quiz-vraag nummer</v-btn>
       </v-col>
       <v-spacer></v-spacer>
       <v-col>
@@ -29,7 +40,7 @@
     <template v-if="showInputFields()">
       <v-row>
         <v-col cols="6">
-          <v-select v-model="state.selectedQuizItem" label="Kies of verander de quiz voor deze quiz-vraag" :items="state.quizItems" item-value="key" return-object />
+          <v-autocomplete v-model="state.selectedQuizNumber" item-value="key" :items="state.quizItems" label="Kies of verander de quiz voor deze quiz-vraag" />
         </v-col>
         <v-col cols="6">
           <v-text-field v-model="state.questionTitle" label="Quiz-vraag titel" />
@@ -43,7 +54,7 @@
       <v-row>
         <v-col cols="12">
           <p>Body met optionele afbeelding:</p>
-          <QuillEditor v-model:content="state.content" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+          <QuillEditor v-model:content="state.content" contentType="html"></QuillEditor>
         </v-col>
       </v-row>
       <v-row class="py-15">
@@ -92,15 +103,20 @@
       <v-row>
         <v-col cols="12">
           <p>Toelichting correcte antwoord</p>
-          <QuillEditor v-model:content="state.correctAnswer" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+          <QuillEditor v-model:content="state.correctAnswer" contentType="html"></QuillEditor>
         </v-col>
         <v-col class="mt-12" cols="12">
-          <v-text-field v-model="state.gameRules" label="Spelregels (verplicht)" />
+          <h4>Spelregel: {{ gameRules }}</h4>
         </v-col>
       </v-row>
       <v-row no-gutters>
         <v-list lines="two" density="compact">
-          <v-list-item v-for="(num, index) in state.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)" :style="{ 'background-color': bgColor }"></v-list-item>
+          <v-list-item
+            v-for="(num, index) in state.statementsArray"
+            :subtitle="composeStatement(index)"
+            @click="qAnswer(index)"
+            :style="{ 'background-color': bgColor }"
+          ></v-list-item>
         </v-list>
       </v-row>
       <v-row v-if="countGoodAnswers() === 0">
@@ -116,12 +132,11 @@
       <v-row>
         <v-col cols="12">
           <p>Lange toelichting</p>
-          <QuillEditor v-model:content="state.resultInfo" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+          <QuillEditor v-model:content="state.longExplanation" contentType="html"></QuillEditor>
         </v-col>
       </v-row>
 
       <v-btn @click="state.showFullExplanation = true">Toon preview-lang</v-btn>
-
     </template>
 
     <v-divider class="my-8"></v-divider>
@@ -137,7 +152,7 @@
       </v-col>
       <v-spacer></v-spacer>
       <v-col class="text-right">
-        <v-btn :disabled="!canSave()" append-icon="mdi-arrow-right" @click="doSaveQuestion()">
+        <v-btn :disabled="!canSave()" append-icon="mdi-arrow-right" @click="doSaveQuestion(state.questionNumber)">
           Bewaar Quiz-vraag
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
@@ -150,7 +165,7 @@
   <v-dialog v-model="state.showQuestionSelect" width="70%">
     <v-card>
       <v-card-title>Kies een bestaande quiz-vraag</v-card-title>
-      <v-select :items="state.questionItems" item-value="key" v-model="state.selectedQuestionItem" return-object single-line />
+      <v-autocomplete v-model="state.selectedQuestionNumber" item-value="key" :items="state.questionItems" label="Kies een bestaande quiz-vraag" />
       <v-divider></v-divider>
       <v-card-actions>
         <v-row>
@@ -176,10 +191,10 @@
     </v-card>
   </v-dialog>
 
-  <v-dialog v-model="state.showQuestionRemove" width="70%">
+  <v-dialog v-model="state.changeQuestionNumber" width="70%">
     <v-card>
-      <v-card-title>Kies een te verwijderen quiz-vraag</v-card-title>
-      <v-select :items="state.questionItems" item-value="key" v-model="state.selectedQuestionItem" return-object single-line />
+      <v-card-title>Verander het nummer van deze quiz-vraag</v-card-title>
+      <v-text-field v-model="state.newQuestionNumber" :rules="state.questionNumberRules" label="Nieuw quiz-vraag nummer" />
       <v-divider></v-divider>
       <v-card-actions>
         <v-row>
@@ -193,7 +208,36 @@
           </v-col>
           <v-spacer></v-spacer>
           <v-col>
-            <v-btn :disabled="!canRemove()" append-icon="mdi-arrow-right" @click="doRemoveQuestion">
+            <v-btn :disabled="!canChangeTo(state.newQuestionNumber)" append-icon="mdi-arrow-right" @click="doChangeQuestionNumber(state.newQuestionNumber)">
+              Verder
+              <template v-slot:append>
+                <v-icon size="x-large" color="red"></v-icon>
+              </template>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+
+  <v-dialog v-model="state.showQuestionRemove" width="70%">
+    <v-card>
+      <v-card-title>Kies een te verwijderen quiz-vraag</v-card-title>
+      <v-autocomplete v-model="state.selectedQuestionNumber" item-value="key" :items="state.questionItems" label="Kies de te verwijderen quiz-vraag" />
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-row>
+          <v-col>
+            <v-btn prepend-icon="mdi-arrow-left" @click="clearAll()">
+              <template v-slot:prepend>
+                <v-icon size="x-large" color="purple"></v-icon>
+              </template>
+              Terug
+            </v-btn>
+          </v-col>
+          <v-spacer></v-spacer>
+          <v-col>
+            <v-btn :disabled="!canRemove()" append-icon="mdi-arrow-right" @click="doRemoveQuestion(state.questionNumber)">
               Verder
               <template v-slot:append>
                 <v-icon size="x-large" color="red"></v-icon>
@@ -206,7 +250,6 @@
   </v-dialog>
 </template>
 
-
 <script setup>
 import { onBeforeMount, computed, reactive, watch } from 'vue'
 import { useAppStore } from '../../store/app.js'
@@ -217,24 +260,18 @@ import PreviewFullExplanation from './PreviewFullExplanation.vue'
 
 const store = useAppStore()
 const emit = defineEmits(['m-done'])
+const emptyQuillValue = '<p><br></p>'
 
 onBeforeMount(() => {
-  loadMetaData()
+  loadQuestionsIndex()
 })
-
-const editorToolbar = [
-  [{ header: [false, 1, 2, 3, 4, 5, 6] }],
-  ['bold', 'italic', 'underline', 'strike'],
-  [{ list: 'ordered' }, { list: 'bullet' }],
-  [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
-  ['link', 'image', 'code-block']
-]
 
 const state = reactive({
   showPreviewQuestion: false,
   showFullExplanation: false,
 
   indexObject: {},
+  allQuestionNumbers: [],
   allQuizNumbers: [],
   indexObjectKeys: [],
 
@@ -242,15 +279,17 @@ const state = reactive({
   quizTitle: '',
   ankeiler: '',
   quizItems: [],
-  selectedQuizItem: { "key": 0, "title": "" },
+  selectedQuizNumber: null,
 
   questionNumber: undefined,
+  newQuestionNumber: undefined,
   questionTitle: '',
   questionItems: [],
-  selectedQuestionItem: { "key": undefined, "title": "Kies een quiz-vraag" },
+  selectedQuestionNumber: null,
 
   showCreateQuestion: false,
   showQuestionSelect: false,
+  changeQuestionNumber: false,
   showQuestionRemove: false,
 
   content: undefined,
@@ -260,41 +299,41 @@ const state = reactive({
   gameRules: '',
   quizQAnswers: {},
   correctAnswer: undefined,
-  resultInfo: undefined,
+  longExplanation: undefined,
   questionNumberRules: [
-    value => {
+    (value) => {
       if (value) return true
 
       return 'Vul 1 of meer cijfers in.'
     },
-    value => {
+    (value) => {
       if (value && value.length >= 1) return true
 
       return 'Vul minimaal 1 cijfer in.'
     },
 
-    value => {
+    (value) => {
       if (!isNaN(value)) return true
 
       return 'Vul alleen cijfers in.'
     },
-    value => {
+    (value) => {
       if (value >= 0) return true
 
       return 'Mag geen negatief getal zijn.'
     },
-    value => {
-      if (!state.indexObjectKeys.includes(value)) return true
+    (value) => {
+      if (!state.allQuestionNumbers.includes(value)) return true
 
       return 'Dit quiz-vraag nummer bestaat al'
-    }
+    },
   ],
   urlRules: [
-    value => {
+    (value) => {
       const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}/gm
       return regex.test(value) || 'Onjuist url formaat'
-    }
-  ]
+    },
+  ],
 })
 
 // must be non-reactive
@@ -306,8 +345,20 @@ const sLabel = computed(() => {
 
 const editMode = computed(() => {
   if (state.statementNumber < state.statementsArray.length) {
-    return "change"
-  } else return "add"
+    return 'change'
+  } else return 'add'
+})
+
+const gameRules = computed(() => {
+  if (state.quizQAnswers === undefined) return ''
+  const keys = Object.keys(state.quizQAnswers)
+  let count = 0
+  keys.forEach((k) => {
+    if (state.quizQAnswers[k] === true && state.quizQAnswers[k] === true) count++
+  })
+  if (count === 0) return '!! onbepaald !!'
+  if (count === 1) return 'Kies het goede antwoord!'
+  return `Kies ${count} juiste antwoorden!`
 })
 
 function showInputFields() {
@@ -316,22 +367,24 @@ function showInputFields() {
 
 function clearAll() {
   state.showCreateQuestion = false
+  // remove modals
   state.showQuestionSelect = false
+  state.changeQuestionNumber = false
   state.showQuestionRemove = false
 
-  state.selectedQuizItem = { "key": 0, "title": "" }
-  state.selectedQuestionItem = { "key": undefined, "title": "Kies een quiz-vraag" }
+  state.selectedQuizNumber = null
+  state.selectedQuestionNumber = null
   state.questionNumber = ''
+  state.newQuestionNumber = ''
   state.questionTitle = ''
-  state.ankeiler = '',
+  state.ankeiler = ''
   state.statementNumber = 0
   state.quizStatement = ''
   state.content = undefined
   state.statementsArray = []
   state.quizQAnswers = []
   state.correctAnswer = undefined
-  state.resultInfo = undefined
-  state.gameRules = ''
+  state.longExplanation = undefined
   state.quizNumber = ''
 }
 
@@ -352,35 +405,40 @@ function removeQuestion() {
 
 function createQuizItems(quizzesObject, allQuizNumbers) {
   state.quizItems = []
-  allQuizNumbers.forEach(el => {
-    state.quizItems.push({ 'key': el, 'title': `(${el}) ${quizzesObject[el].title}` })
+  allQuizNumbers.forEach((el) => {
+    state.quizItems.push({ key: el, title: `(${el}) ${quizzesObject[el].title}` })
   })
 }
 
-function createQuestionItems(questionObject, indexObjectKeys) {
+function collectQuestionData(questionObject, indexObjectKeys) {
+  state.allQuestionNumbers = []
   state.questionItems = []
-  indexObjectKeys.forEach(el => {
-    state.questionItems.push({ 'key': el, 'title': `(${el}) ${questionObject[el].title}` })
+  indexObjectKeys.forEach((el) => {
+    state.allQuestionNumbers.push(el)
+    state.questionItems.push({ key: el, title: `(${el}) ${questionObject[el].title}` })
   })
 }
 
-/* Get quiz and questions meta data */
-function loadMetaData() {
+/* Get or refresh questions meta data */
+function loadQuestionsIndex() {
   clearAll()
   state.allQuizNumbers = Object.keys(store.metaObject)
   createQuizItems(store.metaObject, state.allQuizNumbers)
-  // get all available question numbers and titles
-  get(child(dbRef, `/quizzes/questions/index/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      state.indexObject = snapshot.val()
-      state.indexObjectKeys = Object.keys(state.indexObject)
-      createQuestionItems(state.indexObject, state.indexObjectKeys)
-    } else {
-      console.log("No quiz-questions available")
-    }
-  }).catch((error) => {
-    console.error('Error while reading all available quiz-questions from database: ' + error.message)
-  })
+  // get all available question numbers and meta data
+  get(child(dbRef, `/quizzes/questions/index/`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        state.indexObject = snapshot.val()
+        state.indexObjectKeys = Object.keys(state.indexObject)
+        // note: indexObjectKeys is an array of integers
+        collectQuestionData(state.indexObject, state.indexObjectKeys)
+      } else {
+        console.log('No quiz-questions available')
+      }
+    })
+    .catch((error) => {
+      console.error('Error while reading all available quiz-questions from database: ' + error.message)
+    })
 }
 
 /* Return true if questionNumber is defined, is a number and valid */
@@ -390,31 +448,33 @@ function canLoad() {
 
 /* Get the quiz-question data */
 function doLoadQuestion() {
+  // remove modal
   state.showQuestionSelect = false
-  get(child(dbRef, `/quizzes/questions/` + state.questionNumber)).then((snapshot) => {
-    if (snapshot.exists()) {
-      const quizObject = snapshot.val()
-      state.content = quizObject.body || ''
-      state.statementsArray = quizObject.statementsArray
-      state.quizQAnswers = quizObject.answers
-      state.correctAnswer = quizObject.correctAnswer || "<p></p>"
-      state.resultInfo = quizObject.resultInfo
-      state.gameRules = quizObject.gameRules
-      state.statementNumber = state.statementsArray.length - 1
-      // assign the quiz number
-      state.quizNumber = state.indexObject[state.questionNumber].quizNumber
-      // preset the quiz select
-      state.selectedQuizItem = state.quizItems.filter((q => q.key === state.quizNumber))[0]
-    } else {
-      console.log("No quiz-question data available")
-    }
-  }).catch((error) => {
-    console.error('While reading the quiz-question data from database: error message = ' + error.message)
-  })
+  get(child(dbRef, `/quizzes/questions/${state.questionNumber}`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        const quizObject = snapshot.val()
+        state.content = quizObject.body || emptyQuillValue
+        state.statementsArray = quizObject.statementsArray
+        state.quizQAnswers = quizObject.answers
+        state.correctAnswer = quizObject.correctAnswer || emptyQuillValue
+        state.longExplanation = quizObject.resultInfo || emptyQuillValue
+        state.statementNumber = state.statementsArray.length - 1
+        // assign the quiz number
+        state.quizNumber = state.indexObject[state.questionNumber].quizNumber
+        // preset the quiz select
+        state.selectedQuizNumber = state.quizNumber
+      } else {
+        console.log('No quiz-question data available')
+      }
+    })
+    .catch((error) => {
+      console.error('While reading the quiz-question data from database: error message = ' + error.message)
+    })
 }
 
 function composeStatement(idx) {
-  if (idx > 12) return "Fout: Meer dan 12 vragen?"
+  if (idx > 12) return 'Fout: Meer dan 12 vragen?'
   const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
   bgColor = 'white'
   if (state.quizQAnswers[idx]) {
@@ -466,7 +526,7 @@ function countGoodAnswers() {
   if (state.quizQAnswers === undefined) return 0
   const keys = Object.keys(state.quizQAnswers)
   let count = 0
-  keys.forEach(k => {
+  keys.forEach((k) => {
     if (state.quizQAnswers[k] === true && state.quizQAnswers[k] === true) count++
   })
   return count
@@ -478,32 +538,64 @@ the quizNumber represents an existing quiz, the question title is not empty and
 at leat 1 good answer is set
 */
 function canSave() {
-  return !isNaN(state.quizNumber) && !isNaN(state.questionNumber) &&
+  return (
+    !isNaN(state.quizNumber) &&
+    !isNaN(state.questionNumber) &&
     state.allQuizNumbers.includes(state.quizNumber) &&
-    state.questionTitle && state.questionTitle.length > 0 &&
-    countGoodAnswers() > 0 && state.gameRules && state.gameRules.length > 0
+    state.questionTitle &&
+    state.questionTitle.length > 0 &&
+    state.ankeiler &&
+    state.ankeiler.length > 0 &&
+    countGoodAnswers() > 0 &&
+    state.content &&
+    state.content.length > 0 &&
+    state.content !== emptyQuillValue &&
+    state.correctAnswer &&
+    state.correctAnswer.length > 0 &&
+    state.correctAnswer !== emptyQuillValue &&
+    state.longExplanation &&
+    state.longExplanation.length > 0 &&
+    state.longExplanation !== emptyQuillValue
+  )
 }
 
-function doSaveQuestion() {
+function doSaveQuestion(questionNr, toSubmit) {
   // note: Using set() overwrites data at the specified location, including any child nodes.
-  set(ref(db, '/quizzes/questions/' + state.questionNumber), {
-    "body": state.content || '',
-    "statementsArray": state.statementsArray,
-    "answers": state.quizQAnswers,
-    "correctAnswer": state.correctAnswer,
-    "resultInfo": state.resultInfo,
-    "gameRules": state.gameRules
-  }).then(() => {
-    const newIndexObject = { 'quizNumber': state.quizNumber, 'title': state.questionTitle, 'ankeiler': state.ankeiler, 'creationDate': Number(new Date()) }
-    set(ref(db, '/quizzes/questions/index/' + state.questionNumber.toString()), newIndexObject).then(() => {
-      // reset current activity and refresh the meta data
-      loadMetaData()
-    }).catch((error) => {
-      console.error('The write of the index data failed: ' + error.message)
-    })
-  }).catch((error) => {
-    console.error('The write of the question data failed: ' + error.message)
+  if (!questionNr || isNaN(questionNr)) {
+    console.error(`The write of the question data failed: the question number '${questionNr}' (quotes not included) is incorrect`)
+    return
+  }
+  set(ref(db, `/quizzes/questions/${questionNr}`), {
+    body: state.content || '',
+    statementsArray: state.statementsArray,
+    answers: state.quizQAnswers,
+    correctAnswer: state.correctAnswer,
+    resultInfo: state.longExplanation,
+    gameRules: gameRules.value,
   })
+    .then(() => {
+      const newIndexObject = { quizNumber: state.quizNumber, title: state.questionTitle, ankeiler: state.ankeiler, creationDate: Number(new Date()) }
+      set(ref(db, `/quizzes/questions/index/${questionNr}`), newIndexObject)
+        .then(() => {
+          // submit another call if provided
+          if (toSubmit) {
+            try {
+              toSubmit()
+            } catch (e) {
+              console.error(`Failed to remove the quiz question: ${e.message}`)
+            }
+          } else {
+            // reset current activity and refresh the meta data
+            loadQuestionsIndex()
+          }
+        })
+        .catch((error) => {
+          console.error(`The write of the index data failed: ${e.message}`)
+        })
+    })
+    .catch((error) => {
+      console.error(`TThe write of the question data failed: ${e.message}`)
+    })
 }
 
 /* Return true if quiestionNumber is defined and a number greater than zero */
@@ -511,41 +603,56 @@ function canRemove() {
   return !isNaN(state.questionNumber) && state.questionNumber > 0
 }
 
-function doRemoveQuestion() {
-  remove(child(dbRef, `/quizzes/questions/index/${state.questionNumber}`)).then(() => {
-    remove(child(dbRef, `/quizzes/questions/${state.questionNumber})`)).then(() => {
-      state.showQuestionRemove = false
-      loadMetaData()
-    }).catch((error) => {
-      console.error('The removal of the quiz-question failed: ' + error.message)
+function canChangeTo(newNumber) {
+  return !state.allQuestionNumbers.includes(newNumber)
+}
+
+function doRemoveQuestion(questionNr) {
+  if (!questionNr || isNaN(questionNr)) {
+    console.error(`The removal of the question data failed: the question number '${questionNr}' (quotes not included) is incorrect`)
+    return
+  }
+  remove(child(dbRef, `/quizzes/questions/index/${questionNr}`))
+    .then(() => {
+      remove(child(dbRef, `/quizzes/questions/${questionNr})`))
+        .then(() => {
+          remove(child(dbRef, `/quizzes/questions/${questionNr}`))
+          // reset current activity and refresh the meta data
+          loadQuestionsIndex()
+        })
+        .catch((error) => {
+          console.error(`The removal of the quiz-question failed: ${error.message}`)
+        })
     })
-  }).catch((error) => {
-    console.error('The removal of the index entry of the quiz-question failed: ' + error.message)
+    .catch((error) => {
+      console.error(`The removal of the index entry of the quiz-question failed: ${error.message}`)
+    })
+}
+
+function doChangeQuestionNumber(newQuestionNr) {
+  doSaveQuestion(newQuestionNr, function () {
+    doRemoveQuestion(state.questionNumber)
   })
 }
 
 watch(
-  () => state.selectedQuizItem,
+  () => state.selectedQuizNumber,
   () => {
-    // fires only when state.someObject is replaced
-    if (state.selectedQuizItem.key) {
-      // suppress events not coming from v-select
-      state.quizNumber = state.selectedQuizItem.key
+    if (state.selectedQuizNumber) {
+      state.quizNumber = state.selectedQuizNumber
       state.quizTitle = store.metaObject[state.quizNumber].title
     }
-  }
+  },
 )
 
 watch(
-  () => state.selectedQuestionItem,
+  () => state.selectedQuestionNumber,
   () => {
-    // fires only when state.someObject is replaced
-    if (state.selectedQuestionItem.key) {
-      // suppress events not coming from v-select
-      state.questionNumber = state.selectedQuestionItem.key
+    if (state.selectedQuestionNumber) {
+      state.questionNumber = state.selectedQuestionNumber
       state.questionTitle = state.indexObject[state.questionNumber].title
       state.ankeiler = state.indexObject[state.questionNumber].ankeiler
     }
-  }
+  },
 )
 </script>

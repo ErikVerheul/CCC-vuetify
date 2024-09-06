@@ -16,15 +16,21 @@ const globalOptions = {
   debug: 'warn',
   placeholder: 'Compose your text...',
   readOnly: false,
-  theme: 'snow'
+  theme: 'snow',
+  modules: {
+    toolbar: [
+      [{ header: [false, 1, 2, 3, 4, 5, 6] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
+      ['link', 'image', 'code-block'],
+    ],
+  },
 }
 
 export function registerPlugins(app) {
   loadFonts()
   QuillEditor.props.globalOptions.default = () => globalOptions
   app.component('QuillEditor', QuillEditor)
-  app
-    .use(vuetify)
-    .use(router)
-    .use(pinia)
+  app.use(vuetify).use(router).use(pinia)
 }

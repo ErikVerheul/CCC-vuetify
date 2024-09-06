@@ -1,5 +1,6 @@
 <template>
   <v-app-bar density="compact" color="purple">
+<<<<<<< HEAD
     <v-app-bar-title class="flex text-center"
       >Hoe goed ken je Maastricht?</v-app-bar-title
     >
@@ -12,6 +13,10 @@
       size="small"
       variant="outlined"
       @click="doAdmin"
+=======
+    <v-app-bar-title class="flex text-center">Hoe goed ken je Maastricht?</v-app-bar-title>
+    <v-btn v-if="store.largeScreenDetected && props.isAuthenticated && store.userData.alias === 'admin'" size="small" variant="outlined" @click="doAdmin"
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
       >Admin</v-btn
     >
     <v-btn v-if="props.withActivator" icon id="menu-activator">
@@ -19,44 +24,38 @@
     </v-btn>
     <v-menu activator="#menu-activator">
       <v-list>
+<<<<<<< HEAD
         <v-list-item
           v-if="props.isAuthenticated && aliasIsCelebrity(store.userData.alias)"
         >
           <v-btn flat size="small" @click="emit('show-alias-info')">
             Wie was {{ store.userData.alias }}?
           </v-btn>
+=======
+        <v-list-item v-if="props.isAuthenticated && aliasIsCelebrity(store.userData.alias)">
+          <v-btn flat size="small" @click="emit('show-alias-info')"> Wie was {{ store.userData.alias }}? </v-btn>
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog1 = true">
-            Schuilnaam en pincode
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog1 = true"> Schuilnaam en pincode </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog2 = true">
-            Stop automatisch inloggen
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog2 = true"> Stop automatisch inloggen </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="state.dialog4 = true">
-            Feedback
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog4 = true"> Feedback </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="state.dialog5 = true">
-            Contact
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog5 = true"> Contact </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="state.dialog6 = true">
-            Veelgestelde vragen
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog6 = true"> Veelgestelde vragen </v-btn>
         </v-list-item>
         <v-list-item>
-          <v-btn flat size="small" @click="state.dialog7 = true">
-            Over de Speelmee app
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog7 = true"> Over de Speelmee app </v-btn>
         </v-list-item>
         <v-list-item>
+<<<<<<< HEAD
           <v-btn
             flat
             size="small"
@@ -64,12 +63,14 @@
           >
             Privacybeleid
           </v-btn>
+=======
+          <v-btn flat size="small" @click="router.push({ path: '/Privacybeleid' })"> Privacybeleid </v-btn>
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated">
-          <v-btn flat size="small" @click="state.dialog9 = true">
-            Log uit
-          </v-btn>
+          <v-btn flat size="small" @click="state.dialog9 = true"> Log uit </v-btn>
         </v-list-item>
+<<<<<<< HEAD
         <v-list-item
           v-if="props.isAuthenticated && store.userData.alias !== 'admin'"
         >
@@ -83,6 +84,13 @@
           <v-btn color="green" flat @click="showScores">
             Toon de scores en de winnaars
           </v-btn>
+=======
+        <v-list-item v-if="props.isAuthenticated && store.userData.alias !== 'admin'">
+          <v-btn color="pink" flat @click="state.dialog10 = true"> Ik speel niet meer mee.<br />Verwijder mijn gegevens </v-btn>
+        </v-list-item>
+        <v-list-item v-if="props.isAuthenticated && store.userData.alias === 'admin'">
+          <v-btn color="green" flat @click="showScores"> Toon de scores en de winnaars </v-btn>
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
         </v-list-item>
       </v-list>
     </v-menu>
@@ -163,11 +171,17 @@
       <v-card-text>
         <p>Vraag: Is de app wel veilig?</p>
         <p>
+<<<<<<< HEAD
           Ja, de app is veilig omdat er geen persoonlijke gegevens worden
           bewaard, zoals jouw e-mail adres, of ieder ander naar jou
           indentificerend gegeven. Het ergste wat kan gebeuren is dat iemand
           anders jouw pin code raadt en namens jou gaat spelen. Mail ons naar
           contact@speelmee.app als je vermoedt dat dit is gebeurd.
+=======
+          Ja, de app is veilig omdat er geen persoonlijke gegevens worden bewaard, zoals jouw e-mail adres, of ieder ander naar jou indentificerend gegeven. Het
+          ergste wat kan gebeuren is dat iemand anders jouw pin code raadt en namens jou gaat spelen. Mail ons naar contact@speelmee.app als je vermoedt dat dit
+          is gebeurd.
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
         </p>
       </v-card-text>
       <v-card-actions>
@@ -179,11 +193,16 @@
   <v-dialog v-model="state.dialog7">
     <v-card>
       <v-card-text>
+<<<<<<< HEAD
         <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.11.1</p>
         <p>
           De broncode is open source en is in te zien op:
           <a href="https://t.ly/vtCMQ">GitHub</a>
         </p>
+=======
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.12.2</p>
+        <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
       </v-card-text>
       <v-card-actions>
         <v-btn color="purple" block @click="state.dialog7 = false">Sluit</v-btn>
@@ -194,10 +213,14 @@
   <v-dialog v-model="state.dialog9">
     <v-card>
       <v-card-text>
+<<<<<<< HEAD
         <p>
           In plaats van uit te loggen kunt u ook het tab blad van uw browser
           sluiten. Als u hier uitlogt stopt u ook de automatische login.
         </p>
+=======
+        <p>In plaats van uit te loggen kunt u ook het tab blad van uw browser sluiten. Als u hier uitlogt stopt u ook de automatische login.</p>
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
         <h3>Om opnieuw in te loggen noteer deze gegevens:</h3>
         <ul class="mx-5">
           <li>Uw schuilnaam: {{ store.userData.alias }}</li>
@@ -236,10 +259,14 @@
   <v-dialog v-model="state.dialog10">
     <v-card>
       <v-card-text>
+<<<<<<< HEAD
         <h3>
           Als u uw gegevens verwijderd kunt u niet meer inloggen. Wel kunt u een
           nieuwe schuilnaam en pin code kiezen en fris opnieuw beginnen.
         </h3>
+=======
+        <h3>Als u uw gegevens verwijderd kunt u niet meer inloggen. Wel kunt u een nieuwe schuilnaam en pin code kiezen en fris opnieuw beginnen.</h3>
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
         <h3>UW GEGEVENS WORDEN VERNIETIGD NIEMAND KAN DIE NOG TERUGHALEN</h3>
       </v-card-text>
       <v-divider></v-divider>
@@ -305,7 +332,11 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+<<<<<<< HEAD
 });
+=======
+})
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 
 const emit = defineEmits([
   "logout-app",
@@ -325,7 +356,11 @@ const state = reactive({
   dialog10: false,
   dialog11: false,
   cookieIsRemoved: false,
+<<<<<<< HEAD
 });
+=======
+})
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 
 function removeCookies() {
   cookies.remove("speelMee", { sameSite: true });
@@ -352,6 +387,7 @@ function removeAccount() {
       store.firebaseUser
         .delete()
         .then(() => {
+<<<<<<< HEAD
           removeCookies();
           state.dialog10 = false;
           emit("reset-app");
@@ -370,6 +406,22 @@ function removeAccount() {
         `Removal of ${store.userData.alias} data failed: ${error.message}`
       );
     });
+=======
+          removeCookies()
+          state.dialog10 = false
+          emit('reset-app')
+        })
+        .catch((error) => {
+          state.dialog10 = false
+          console.log(`Account and/or cookie deletion failed: ${error.message}`)
+          // emit('reset-app')
+        })
+    })
+    .catch((error) => {
+      removeCookies()
+      console.log(`Removal of ${store.userData.alias} data failed: ${error.message}`)
+    })
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 }
 
 function aliasIsCelebrity(alias) {

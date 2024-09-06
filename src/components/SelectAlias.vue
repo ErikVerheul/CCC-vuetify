@@ -22,12 +22,16 @@
         Terug
       </v-btn>
 
+<<<<<<< HEAD
       <v-btn
         :disabled="state.aliasSelected === undefined"
         flat
         append-icon="mdi-arrow-right"
         @click="emit('alias-selected', state.aliasSelected)"
       >
+=======
+      <v-btn :disabled="state.aliasSelected === undefined" flat append-icon="mdi-arrow-right" @click="emit('alias-selected', state.aliasSelected)">
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
         Verder
         <template v-slot:append>
           <v-icon size="x-large" color="purple"></v-icon>

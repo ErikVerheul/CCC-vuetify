@@ -1,9 +1,4 @@
 <template>
-  <!-- <p>store.currentQuizNumber = {{ store.currentQuizNumber }}</p>
-  <p>state.currentQuestionIdx = {{ state.currentQuestionIdx }}</p>
-  <p>store.rqActive = {{ store.rqActive }}</p>
-  <p>state.showExplanation = {{ state.showExplanation }}</p>
-  <p>store.isArchivedQuiz = {{ store.isArchivedQuiz }}</p> -->
   <ReportFbError v-if="store.rqActive === 'onError'" />
   <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
   <template v-else>
@@ -25,7 +20,11 @@
       <p class="py-2">Meer hierover na afloop van de quiz</p>
     </v-sheet>
     <template v-else>
+<<<<<<< HEAD
       <v-sheet class="ma-2">
+=======
+      <v-sheet class="mt-6 ml-2 mr-2">
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
         <template v-if="!state.showExplanation">
           <v-row class="mt-n6" no-gutters>
             <div class="small-font">{{ getProgressIndicator() }}</div>
@@ -47,10 +46,14 @@
       </v-sheet>
       <v-sheet class="pa-2" :height="state.counterHeight">
         <v-row v-if="!state.questionDone">
+<<<<<<< HEAD
           <v-col v-if="state.answerClicked" cols="7">
             <v-btn @click="finishQuestion()">{{ getReadyText() }}</v-btn>
           </v-col>
           <v-col v-else cols="7">
+=======
+          <v-col cols="7">
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
             <p>{{ state.currentQuestion.gameRules }}<br />Binnen 1 min</p>
           </v-col>
           <v-col cols="5">
@@ -69,7 +72,7 @@
     <v-divider></v-divider>
     <v-row class="mt-2">
       <v-col class="text-right">
-        <v-btn :disabled="!state.questionDone" flat append-icon="mdi-arrow-right" @click="nextStep">
+        <v-btn :disabled="!canProceed" flat append-icon="mdi-arrow-right" @click="nextStep">
           Verder
           <template v-slot:append>
             <v-icon size="x-large" color="purple"></v-icon>
@@ -90,11 +93,16 @@
 }
 </style>
 
+<<<<<<< HEAD
 // to allow to exit the app and return to the state where left, the needed data is collected in the object
 state.progress and saved in the cookie spleelmee-progress
+=======
+/* * To allow to exit the app and return to the state where left, the needed data is collected in the object state.progress and saved in the cookie *
+spleelmee-progress */
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 
 <script setup>
-import { onBeforeMount, reactive, watch } from 'vue'
+import { computed, onBeforeMount, reactive, watch } from 'vue'
 import { useAppStore } from '../store/app.js'
 import { db, dbRef } from '../firebase'
 import { ref, child, get, set } from 'firebase/database'
@@ -140,6 +148,13 @@ const state = reactive({
   quizResult: {},
   lastCookieQuestionResult: null,
   quizProgress: {},
+<<<<<<< HEAD
+=======
+})
+
+const canProceed = computed(() => {
+  return state.showExplanation || state.isLastAnswerOverdue || numberOfCorrectAnswers() === numberOfSelectedAnswers()
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 })
 
 function loadQuestionNumbers() {
@@ -310,11 +325,14 @@ function loadQuestion(resetShowExplanation) {
       store.firebaseError = error
       store.fbErrorContext = `De fout is opgetreden bij het lezen van quiz vraag met nummer ${questId}`
     })
+<<<<<<< HEAD
 }
 
 function getReadyText() {
   if (store.isArchivedQuiz) return 'Onthul resultaat'
   return 'Verzend antwoord'
+=======
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 }
 
 function getResultText() {
@@ -337,6 +355,14 @@ function qAnswer(idx) {
   if (state.questionDone) return
   state.userAnswers[idx] = !state.userAnswers[idx]
   state.answerClicked = true
+}
+
+function numberOfSelectedAnswers() {
+  let count = 0
+  state.userAnswers.forEach((a) => {
+    if (a === true) count++
+  })
+  return count
 }
 
 function numberOfCorrectAnswers() {
@@ -381,7 +407,7 @@ function startTimer() {
 }
 
 function finishQuestion() {
-  state.questionDone = true
+  state.questionDone = canProceed.value
   // stop the timer
   clearInterval(state.timerId)
   state.answerClicked = false
@@ -399,30 +425,31 @@ function finishQuestion() {
     store.compactResult.push(false)
     state.quizResult[state.currentQuestionIdx].correctAnswer = false
   }
-  state.showExplanation = false
+  state.showExplanation = true
   if (!store.isArchivedQuiz) saveProgress()
+}
+
+function nextQuestion() {
+  state.isLastAnswerOverdue = false
+  state.currentQuestionIdx++
+  if (state.currentQuestionIdx < state.questionNumbers.length) {
+    state.quizProgress.showExplanation = false
+    state.questionDone = false
+    state.clockValue = `1:00`
+    loadQuestion(true)
+  } else {
+    // the user finished the quiz; remove the cookie containing the progress as it is obsolete now that the user finished the quiz to the end
+    cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
+    // save quiz result only if not an archived quiz and it is not admin who is playing
+    if (!store.isArchivedQuiz && store.userData.alias !== 'admin') saveResults()
+    emit('quiz-is-done')
+  }
 }
 
 function nextStep() {
   if (state.showExplanation) {
-    state.isLastAnswerOverdue = false
-    state.currentQuestionIdx++
-    if (state.currentQuestionIdx < state.questionNumbers.length) {
-      state.quizProgress.showExplanation = false
-      state.questionDone = false
-      state.clockValue = `1:00`
-      loadQuestion(true)
-    } else {
-      // the user finished the quiz; remove the cookie containing the progress as it is obsolete now that the user finished the quiz to the end
-      cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
-      // save quiz result only if not an archived quiz and it is not admin who is playing
-      if (!store.isArchivedQuiz && store.userData.alias !== 'admin') saveResults()
-      emit('quiz-is-done')
-    }
-  } else {
-    state.showExplanation = true
-    if (!store.isArchivedQuiz) saveProgress()
-  }
+    nextQuestion()
+  } else finishQuestion()
 }
 
 function isTextAvailable() {
@@ -443,7 +470,11 @@ watch(
       store.compactResult.push(false)
       if (!store.isArchivedQuiz) saveProgress()
     }
+<<<<<<< HEAD
   }
+=======
+  },
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 )
 
 function saveResults() {

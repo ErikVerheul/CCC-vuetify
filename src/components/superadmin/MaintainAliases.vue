@@ -34,12 +34,8 @@
           Terug
         </v-btn>
       </v-col>
-      <v-col v-if="state.saveSuccess === 1">
-        {{ cuccessText }} is gelukt
-      </v-col>
-      <v-col v-if="!state.saveSuccess === 2">
-        {{ cuccessText }} is mislukt
-      </v-col>
+      <v-col v-if="state.saveSuccess === 1"> {{ cuccessText }} is gelukt </v-col>
+      <v-col v-if="!state.saveSuccess === 2"> {{ cuccessText }} is mislukt </v-col>
       <v-col class="text-right">
         <v-btn :disabled="!allowSave" :color="saveButtonColor" append-icon="mdi-arrow-right" @click="doSave">
           {{ saveButtonText }}
@@ -52,7 +48,7 @@
     <v-row v-if="showEditInfo()" class="d-flex align-center justify-center">
       <h2>Onderhoud schuilnaam info</h2>
       <v-sheet>
-        <QuillEditor v-model:content="state.aliasInfoContent" contentType="html" :toolbar="editorToolbar"></QuillEditor>
+        <QuillEditor v-model:content="state.aliasInfoContent" contentType="html"></QuillEditor>
       </v-sheet>
       <v-row justify="space-around">
         <v-col cols="6" md="4">
@@ -87,92 +83,86 @@ onBeforeMount(() => {
   resetAndLoadAliases()
 })
 
-const editorToolbar = [
-  [{ header: [false, 1, 2, 3, 4, 5, 6] }],
-  ['bold', 'italic', 'underline', 'strike'],
-  [{ list: 'ordered' }, { list: 'bullet' }],
-  [{ indent: '-1' }, { indent: '+1' }], // outdent/indent
-  ['link', 'image', 'code-block']
-]
-
 const state = reactive({
   aliasesObj: {},
   allAliases: [],
-  action: "newAlias",
+  action: 'newAlias',
   newAlias: '',
-  selectedAlias: '',
+  selectedAlias: null,
   isCelebrity: false,
   replaceAlias: '',
   nameRules: [
-    value => {
+    (value) => {
       if (value) return true
 
       return 'Vul 2 of meer letters in.'
     },
-    value => {
+    (value) => {
       if (value && value.length >= 2) return true
 
       return 'Vul minimaal 2 letters in.'
     },
-    value => {
+    (value) => {
       if (isAliasInUse(value)) {
         return 'Deze schuilnaam is in gebruik'
       }
       return true
     },
-    value => {
+    (value) => {
       if (aliasExists(value)) {
         return 'Deze schuilnaam bestaat al'
       }
       return true
-    }
+    },
   ],
   newNameRules: [
-    value => {
+    (value) => {
       if (value) return true
 
       return 'Vul 2 of meer letters in.'
     },
-    value => {
+    (value) => {
       if (value && value.length >= 2) return true
 
       return 'Vul minimaal 2 letters in.'
     },
-    value => {
+    (value) => {
       if (isAliasInUse(value)) {
         return 'Deze schuilnaam is in gebruik'
       }
       return true
     },
-    value => {
+    (value) => {
       if (aliasExists(value)) {
         return 'Deze schuilnaam bestaat al'
       }
       return true
-    }
+    },
   ],
   saveSuccess: 0,
-  aliasInfoContent: ''
+  aliasInfoContent: '',
 })
 
 function resetAndLoadAliases() {
   resetInput()
   // get all available aliases
-  get(child(dbRef, `/aliases/`)).then((snapshot) => {
-    if (snapshot.exists()) {
-      state.aliasesObj = snapshot.val()
-      state.allAliases = Object.keys(state.aliasesObj)
-    } else {
-      console.log("No aliases data available")
-    }
-  }).catch((error) => {
-    console.error(`Error while reading all available aliases from database: ${error.message}`)
-  })
+  get(child(dbRef, `/aliases/`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        state.aliasesObj = snapshot.val()
+        state.allAliases = Object.keys(state.aliasesObj)
+      } else {
+        console.log('No aliases data available')
+      }
+    })
+    .catch((error) => {
+      console.error(`Error while reading all available aliases from database: ${error.message}`)
+    })
 }
 
 // extract the aliases in use
 const aliasesInUse = computed(() => {
-  return state.allAliases.filter(a => state.aliasesObj[a] && state.aliasesObj[a].inUse)
+  return state.allAliases.filter((a) => state.aliasesObj[a] && state.aliasesObj[a].inUse)
 })
 
 const textFieldLabel = computed(() => {
@@ -221,7 +211,8 @@ const replaceAliasOk = computed(() => {
 
 const allowSave = computed(() => {
   if (state.action === 'newAlias') return newAliasOk.value && !aliasExists(state.newAlias) && !isAliasInUse(state.newAlias)
-  if (state.action === 'replaceAlias') return selectedAliasOk.value && replaceAliasOk.value && !aliasExists(state.replaceAlias) && !isAliasInUse(state.replaceAlias)
+  if (state.action === 'replaceAlias')
+    return selectedAliasOk.value && replaceAliasOk.value && !aliasExists(state.replaceAlias) && !isAliasInUse(state.replaceAlias)
   if (state.action === 'removeAlias') return selectedAliasOk.value && aliasExists(state.selectedAlias) && !isAliasInUse(state.selectedAlias)
   if (state.action === 'celebrityInfo') return selectedAliasOk.value && aliasExists(state.selectedAlias)
   return false
@@ -243,16 +234,18 @@ function saveAliasEntry() {
   if (state.action === 'newAlias') {
     // note: Using set() overwrites data at the specified location, including any child nodes.
     set(ref(db, '/aliases/' + state.newAlias), {
-      "celebrity": false,
-      "inUse": false
-    }).then(() => {
-      // refresh data from previous changes
-      resetAndLoadAliases()
-      state.saveSuccess = 1
-    }).catch((error) => {
-      state.saveSuccess = 2
-      console.error(`The alias addition failed: ${error.message}`)
+      celebrity: false,
+      inUse: false,
     })
+      .then(() => {
+        // refresh data from previous changes
+        resetAndLoadAliases()
+        state.saveSuccess = 1
+      })
+      .catch((error) => {
+        state.saveSuccess = 2
+        console.error(`The alias addition failed: ${error.message}`)
+      })
   }
   if (state.action === 'replaceAlias') {
     const updates = {}
@@ -266,14 +259,16 @@ function saveAliasEntry() {
     if (state.isCelebrity) {
       updates[`/aliasInfo/${state.replaceAlias}`] = state.aliasInfoContent
     }
-    update(dbRef, updates).then(() => {
-      // refresh data from previous changes
-      resetAndLoadAliases()
-      state.saveSuccess = 1
-    }).catch((error) => {
-      state.saveSuccess = 2
-      console.error(`The replace failed: ${error.message}`)
-    })
+    update(dbRef, updates)
+      .then(() => {
+        // refresh data from previous changes
+        resetAndLoadAliases()
+        state.saveSuccess = 1
+      })
+      .catch((error) => {
+        state.saveSuccess = 2
+        console.error(`The replace failed: ${error.message}`)
+      })
   }
   if (state.action === 'removeAlias') {
     const updates = {}
@@ -281,14 +276,16 @@ function saveAliasEntry() {
     if (state.isCelebrity) {
       updates[`/aliasInfo/${state.selectedAlias}`] = null
     }
-    update(dbRef, updates).then(() => {
-      // refresh data from previous changes
-      resetAndLoadAliases()
-      state.saveSuccess = 1
-    }).catch((error) => {
-      state.saveSuccess = 2
-      console.error(`The remove failed: ${error.message}`)
-    })
+    update(dbRef, updates)
+      .then(() => {
+        // refresh data from previous changes
+        resetAndLoadAliases()
+        state.saveSuccess = 1
+      })
+      .catch((error) => {
+        state.saveSuccess = 2
+        console.error(`The remove failed: ${error.message}`)
+      })
   }
 }
 
@@ -299,13 +296,15 @@ function saveAliasInfo() {
   if (state.isCelebrity) {
     updates[`/aliasInfo/${state.selectedAlias}`] = state.aliasInfoContent
   } else updates[`/aliasInfo/${state.selectedAlias}`] = null
-  update(dbRef, updates).then(() => {
-    resetInput()
-    state.saveSuccess = 1
-  }).catch((error) => {
-    state.saveSuccess = 2
-    console.error('The write failed, error message = ' + error.message)
-  })
+  update(dbRef, updates)
+    .then(() => {
+      resetInput()
+      state.saveSuccess = 1
+    })
+    .catch((error) => {
+      state.saveSuccess = 2
+      console.error('The write failed, error message = ' + error.message)
+    })
 }
 
 function doSave() {
@@ -318,7 +317,7 @@ function doSave() {
 // reset the user input when changing action
 function resetInput() {
   state.newAlias = ''
-  state.selectedAlias = ''
+  state.selectedAlias = null
   state.replaceAlias = ''
   state.isCelebrity = false
   state.saveSuccess = 0
@@ -326,26 +325,30 @@ function resetInput() {
 }
 
 /* Get alias info if the alias is a celebrity */
-watch(() => state.selectedAlias, () => {
-  // prevent null when backspacing
-  if (state.selectedAlias === null) return
-  // clear data from previous action
-  state.saveSuccess = 0
-  state.aliasInfoContent = ''
-  // check for celebrity info
-  state.isCelebrity = state.aliasesObj[state.selectedAlias] && state.aliasesObj[state.selectedAlias].celebrity || false
-  if (state.isCelebrity) {
-    get(child(dbRef, `/aliasInfo/${state.selectedAlias}`)).then((snapshot) => {
-      if (snapshot.exists()) {
-        state.aliasInfoContent = snapshot.val()
-      } else {
-        // no info found
-        state.isCelebrity = false
-      }
-    }).catch((error) => {
-      console.error(`Error while reading alias info of ${state.selectedAlias} from database: ${error.message}`)
-    })
-  }
-})
-
+watch(
+  () => state.selectedAlias,
+  () => {
+    // check for null when backspacing
+    if (state.selectedAlias === null) return
+    // clear data from previous action
+    state.saveSuccess = 0
+    state.aliasInfoContent = ''
+    // check for celebrity info
+    state.isCelebrity = (state.aliasesObj[state.selectedAlias] && state.aliasesObj[state.selectedAlias].celebrity) || false
+    if (state.isCelebrity) {
+      get(child(dbRef, `/aliasInfo/${state.selectedAlias}`))
+        .then((snapshot) => {
+          if (snapshot.exists()) {
+            state.aliasInfoContent = snapshot.val()
+          } else {
+            // no info found
+            state.isCelebrity = false
+          }
+        })
+        .catch((error) => {
+          console.error(`Error while reading alias info of ${state.selectedAlias} from database: ${error.message}`)
+        })
+    }
+  },
+)
 </script>

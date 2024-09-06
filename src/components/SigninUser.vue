@@ -2,8 +2,12 @@
   <v-container class="max-container-width d-flex flex-column h-100">
     <div class="flex-grow-1">
       <p class="mb-4">
+<<<<<<< HEAD
         Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of
         tablet?<br />
+=======
+        Heb je al <b>eerder</b> een schuilnaam aangemaakt op een <b>ander</b> apparaat zoals een PC, mobiel of tablet?<br />
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
         Haal dan <b>eerst schuilnaam en pincode</b> op van dat apparaat en voer hier onder in.
       </p>
 
@@ -20,9 +24,13 @@
         <v-text-field v-model.trim="store.userData.PIN" label="PIN" :rules="state.pinRules" />
       </div>
 
+<<<<<<< HEAD
       <p>
         De app <b>onthoudt</b> je schuilnaam en pincode <b>ook</b> op dit apparaat en login gaat dan <b>automatisch</b>
       </p>
+=======
+      <p>De app <b>onthoudt</b> je schuilnaam en pincode <b>ook</b> op dit apparaat en login gaat dan <b>automatisch</b></p>
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 
       <p v-if="state.loginErrorMsg !== undefined">Controleer of uw schuilnaam en pin code kloppen en probeer opnieuw</p>
     </div>
@@ -63,7 +71,7 @@ const emit = defineEmits(['signin-completed', 'exit-signup'])
 const store = useAppStore()
 
 const state = reactive({
-  selectedAlias: '',
+  selectedAlias: null,
   pinRules: [
     (value) => {
       if (value) return true
@@ -107,18 +115,26 @@ function doSigninUser() {
             // get the user data in the store including its alias
             store.userData = snapshot.val()
             if (state.selectedAlias !== store.userData.alias) {
+<<<<<<< HEAD
               console.log(
                 'doSigninUser: SOMETHING WENT WRONG: the alias of the retrieved user is different from the selected alias. STOP'
               )
+=======
+              console.log('doSigninUser: SOMETHING WENT WRONG: the alias of the retrieved user is different from the selected alias. STOP')
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
               return
             }
             // save a cookie for auto login next time
             const cookies = new Cookies()
+<<<<<<< HEAD
             cookies.set(
               'speelMee',
               { alias: store.userData.alias, fpw: fakePassword },
               { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true }
             )
+=======
+            cookies.set('speelMee', { alias: store.userData.alias, fpw: fakePassword }, { path: '/', maxAge: 60 * 60 * 24 * 365, sameSite: true })
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
             // update the login date/time
             const now = Date.now()
             store.userData.lastLogin = now

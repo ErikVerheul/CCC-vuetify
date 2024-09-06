@@ -1,6 +1,7 @@
 <template>
   <ReportFbError v-if="store.rqActive === 'onError'" />
   <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
+<<<<<<< HEAD
   <ViewQExplanation
     v-else-if="state.doActivate === 'showExpl'"
     :questionObject="state.questionObject"
@@ -33,6 +34,16 @@
         <v-divider></v-divider>
       </v-col>
     </v-row>
+=======
+  <ViewQExplanation v-else-if="state.doActivate === 'showExpl'" :quizExplanation="state.quizExplanation" @view-over="state.doActivate = undefined">
+  </ViewQExplanation>
+  <v-card v-else color="#FEF1E5" min-height="100vh">
+    <v-card-title v-if="!store.isArchivedQuiz" class="text-center">Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title>
+    <v-card-title v-else class="text-center">Je hebt de quiz voltooid</v-card-title>
+    <v-card-text>Je had {{ countGood() }} van de {{ countAll() }} antwoorden goed</v-card-text>
+    <v-card-title class="text-center">{{ appreciationText() }}</v-card-title>
+    <v-btn @click="state.doActivate = 'showExpl'">Bekijk nu de toelichting op de quiz</v-btn>
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
     <v-card-actions>
       <v-row>
         <v-col cols="12" class="text-right">
@@ -56,19 +67,27 @@ import { useAppStore } from '../store/app.js'
 import ViewQExplanation from './ViewQExplanation.vue'
 import ReportFbError from './ReportFbError.vue'
 import ReportWarning from './ReportWarning.vue'
+<<<<<<< HEAD
+=======
+
+const store = useAppStore()
+const emit = defineEmits(['return-to-base'])
+const emptyQuillValue = '<p><br></p>'
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 
 const state = reactive({
+  quizExplanation: undefined,
   doActivate: undefined,
+<<<<<<< HEAD
   questionIndexData: [],
   questionObject: {},
+=======
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 })
 
 onBeforeMount(() => {
-  loadQuizQuestionsIndex()
+  loadQuizExplanation()
 })
-
-const emit = defineEmits(['return-to-base'])
-const store = useAppStore()
 
 function countAll() {
   if (store.compactResult) return store.compactResult.length
@@ -94,6 +113,7 @@ function appreciationText() {
   return 'Dat kan beter'
 }
 
+<<<<<<< HEAD
 function loadQuizQuestionsIndex() {
   // get all question index data for the current quiz
   get(child(dbRef, `/quizzes/questions/index/`))
@@ -150,4 +170,22 @@ function showExplanation(item) {
       store.fbErrorContext = `De fout is opgetreden bij het lezen van quiz vraag met nummer ${item.qNumber}`
     })
 }
+=======
+function loadQuizExplanation() {
+  get(child(dbRef, `/quizzes/themes/${store.currentQuizNumber}`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        const explanation = snapshot.val()
+        if (explanation === emptyQuillValue || explanation === '') {
+          state.quizExplanation = '<p>De toelichting is nog niet beschikbaar'
+        } else state.quizExplanation = explanation
+      } else state.quizExplanation = '<p>De toelichting is nog niet beschikbaar'
+    })
+    .catch((error) => {
+      store.firebaseError = error
+      store.fbErrorContext = `De fout is opgetreden bij het lezen van de toelichting op de quiz`
+      store.rqActive = 'onError'
+    })
+}
+>>>>>>> b15ed8974b263f46f718a4bb6a57e7c5fd985d7c
 </script>

@@ -7,7 +7,7 @@
         <v-sheet class="pa-2" color="grey-lighten-3" width="414">
           <h4 class="py-3">Toelichting op goed/fout antwoord:</h4>
           <v-row no-gutters>
-            <div v-html="props.resultInfo"></div>
+            <div v-html="props.longExplanation"></div>
           </v-row>
         </v-sheet>
       </v-col>
@@ -16,7 +16,7 @@
         <v-sheet class="pa-2" color="grey-lighten-3" width="375">
           <h4 class="py-3">Toelichting op goed/fout antwoord:</h4>
           <v-row no-gutters>
-            <div v-html="props.resultInfo"></div>
+            <div v-html="props.longExplanation"></div>
           </v-row>
         </v-sheet>
       </v-col>
@@ -39,6 +39,5 @@
 </template>
 <script setup>
 const emit = defineEmits(['return-to'])
-const props = defineProps(['resultInfo'])
-
+const props = defineProps(['longExplanation'])
 </script>

@@ -10,7 +10,11 @@
           </v-row>
           <v-row no-gutters>
             <v-list lines="two" density="compact">
-              <v-list-item v-for="(num, index) in props.statementsArray" :subtitle="composeStatement(index)" :style="{ 'background-color': bgColor }"></v-list-item>
+              <v-list-item
+                v-for="(num, index) in props.statementsArray"
+                :subtitle="composeStatement(index)"
+                :style="{ 'background-color': bgColor }"
+              ></v-list-item>
             </v-list>
           </v-row>
           <v-row v-if="props.gameRules !== ''" no-gutters>
@@ -30,7 +34,11 @@
           </v-row>
           <v-row no-gutters>
             <v-list lines="two" density="compact">
-              <v-list-item v-for="(num, index) in props.statementsArray" :subtitle="composeStatement(index)" :style="{ 'background-color': bgColor }"></v-list-item>
+              <v-list-item
+                v-for="(num, index) in props.statementsArray"
+                :subtitle="composeStatement(index)"
+                :style="{ 'background-color': bgColor }"
+              ></v-list-item>
             </v-list>
           </v-row>
           <v-row v-if="props.gameRules !== ''" no-gutters>
@@ -68,7 +76,7 @@ const props = defineProps(['content', 'statementsArray', 'quizQAnswers', 'gameRu
 let bgColor = undefined
 
 function composeStatement(idx) {
-  if (idx > 12) return "Fout: Meer dan 12 vragen?"
+  if (idx > 12) return 'Fout: Meer dan 12 vragen?'
   const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
   bgColor = 'white'
   if (props.quizQAnswers[idx]) {
@@ -76,5 +84,4 @@ function composeStatement(idx) {
   }
   return `${letters[idx]}. ` + props.statementsArray[idx]
 }
-
 </script>
