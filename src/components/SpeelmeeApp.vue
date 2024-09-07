@@ -1,26 +1,28 @@
 <template>
   <v-app>
     <v-main>
-      <AppBar :is-authenticated="state.isAuthenticated" :withActivator="true" @logout-app="returnToLogin" @reset-app="resetApp"
-        @show-alias-info="showAliasInfo" />
+      <v-container class="d-flex justify-center pa-0 mt-0">
+        <AppBar :is-authenticated="state.isAuthenticated" :withActivator="true" @logout-app="returnToLogin" @reset-app="resetApp"
+          @show-alias-info="showAliasInfo" />
 
-      <h2 v-if="state.loginErrorMsg !== undefined" class="py-4">Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
+        <h2 v-if="state.loginErrorMsg !== undefined" class="py-4">Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
 
-      <template v-if="state.isInitDone">
-        <ShowCelebrity v-if="!nowPlaying && state.showAliasInfoActive" @return-to="state.showAliasInfoActive = false" />
+        <template v-if="state.isInitDone">
+          <ShowCelebrity v-if="!nowPlaying && state.showAliasInfoActive" @return-to="state.showAliasInfoActive = false" />
 
-        <MaastrichtStories v-else-if="state.isAuthenticated" @logout-app="returnToLogin" />
-        <template v-else>
-          <NewUser v-if="state.userEntryMode === 'login'" :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" @change-to-signin="switchToSignin"
-            @change-to-signup="switchToSignup" @exit-signin="resetApp" />
-          <!-- Sign up a new user -->
-          <SelectAlias v-if="state.userEntryMode === 'signup'" :aliases-not-in-use="state.aliasesNotInUse" @alias-selected="doCreateUser"
-            @reset-signup="returnToLogin" />
-          <!-- Sign in an existing user -->
-          <SigninUser v-if="state.userEntryMode === 'signin'" :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" :isCelebrity="state.isCelebrity"
-            @signin-completed="continueSignup" @exit-signup="returnToLogin" />
+          <MaastrichtStories v-else-if="state.isAuthenticated" @logout-app="returnToLogin" />
+          <template v-else>
+            <NewUser v-if="state.userEntryMode === 'login'" :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" @change-to-signin="switchToSignin"
+              @change-to-signup="switchToSignup" @exit-signin="resetApp" />
+            <!-- Sign up a new user -->
+            <SelectAlias v-if="state.userEntryMode === 'signup'" :aliases-not-in-use="state.aliasesNotInUse" @alias-selected="doCreateUser"
+              @reset-signup="returnToLogin" />
+            <!-- Sign in an existing user -->
+            <SigninUser v-if="state.userEntryMode === 'signin'" :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" :isCelebrity="state.isCelebrity"
+              @signin-completed="continueSignup" @exit-signup="returnToLogin" />
+          </template>
         </template>
-      </template>
+      </v-container>
     </v-main>
   </v-app>
 </template>
