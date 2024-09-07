@@ -1,5 +1,6 @@
 <template>
-  <v-card width="store.screenWidth">
+  <v-card>
+    <!-- do not limit the width for easy reading on the desktop -->
     <v-card-title class="text-center">Quiz toelichting</v-card-title>
     <v-row justify="space-around">
       <v-col cols="12" md="8">
