@@ -4,21 +4,14 @@
   <RunQuiz v-else-if="state.doActivate === 'playOldQuiz'" @quiz-is-done="state.doActivate = 'showRecap'"></RunQuiz>
   <QuizRecap v-else-if="state.doActivate === 'showRecap'" @return-to-base="state.doActivate = undefined"></QuizRecap>
   <template v-else>
-    <v-container>
+    <v-container :max-width="store.screenWidth">
       <template v-if="!store.isArchivedQuiz">
         <v-row>
           <b>Zondag 13:00 wordt de ranglijst definitief</b>
         </v-row>
         <v-row>
-          <v-data-table
-            mobile-breakpoint="0"
-            density="compact"
-            v-model:items-per-page="state.itemsPerPage"
-            v-model:sort-by="state.sortBy"
-            :headers="getHeaders()"
-            :items="state.scores"
-            item-value="name"
-          >
+          <v-data-table mobile-breakpoint="0" density="compact" v-model:items-per-page="state.itemsPerPage" v-model:sort-by="state.sortBy"
+            :headers="getHeaders()" :items="state.scores" item-value="name">
           </v-data-table>
         </v-row>
       </template>
@@ -32,29 +25,30 @@
         <b>Je had {{ countGood() }} van de {{ countAll() }} antwoorden goed</b>
       </v-row>
       <v-row v-if="!store.isArchivedQuiz && state.showWinners"> Bij gelijke scrore wint de speler die de minste tijd nodig had </v-row>
-    </v-container>
-    <v-divider></v-divider>
-    <v-row>
-      <v-col>
-        <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('return-to-menu')">
-          <template v-slot:prepend>
-            <v-icon size="x-large" color="purple"></v-icon>
-          </template>
-          Terug
-        </v-btn>
-      </v-col>
-      <template v-if="!store.isArchivedQuiz && !state.showWinners">
-        <v-spacer></v-spacer>
+
+      <v-divider class="mt-4"></v-divider>
+      <v-row>
         <v-col>
-          <v-btn flat append-icon="mdi-arrow-right" @click="state.showWinners = true">
-            Toon winnaars
-            <template v-slot:append>
+          <v-btn flat prepend-icon="mdi-arrow-left" @click="emit('return-to-menu')">
+            <template v-slot:prepend>
               <v-icon size="x-large" color="purple"></v-icon>
             </template>
+            Terug
           </v-btn>
         </v-col>
-      </template>
-    </v-row>
+        <template v-if="!store.isArchivedQuiz && !state.showWinners">
+          <v-spacer></v-spacer>
+          <v-col>
+            <v-btn flat append-icon="mdi-arrow-right" @click="state.showWinners = true">
+              Toon winnaars
+              <template v-slot:append>
+                <v-icon size="x-large" color="purple"></v-icon>
+              </template>
+            </v-btn>
+          </v-col>
+        </template>
+      </v-row>
+    </v-container>
   </template>
 </template>
 
