@@ -1,5 +1,5 @@
 <template>
-  <v-card width="store.screenWidth">
+  <v-card :width="store.screenWidth">
     <v-card-title>Er is een fout opgetreden</v-card-title>
     <v-card-text>
       <p><b>De database geeft de volgende melding:</b> {{ store.firebaseError.message }}</p>
