@@ -2,66 +2,68 @@
   <ReportFbError v-if="store.rqActive === 'onError'" />
   <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
   <template v-else>
-    <v-sheet v-if="state.showExplanation" class="ma-2" :max-width="store.screenWidth">
-      <p>
-        Je antwoord was <b>{{ getResultText() }}</b>
-      </p>
-      <p v-if="state.correctStatements.length === 1">Het juiste antwoord is:</p>
-      <p v-else>De juiste antwoorden zijn:</p>
-      <v-list lines="two" density="compact">
-        <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="state.correctStatements[index]"
-          :style="{ 'background-color': '#DCEDC8' }"></v-list-item>
-      </v-list>
-      <p v-if="isTextAvailable()" v-html="state.currentQuestion.correctAnswer"></p>
-      <h3 v-if="!isTextAvailable()" class="py-12">Sorry, de toelichting is niet beschikbaar</h3>
-      <p class="py-2">Meer hierover na afloop van de quiz</p>
-    </v-sheet>
-    <template v-else>
-      <v-sheet class="mt-6 ml-2 mr-2" :max-width="store.screenWidth">
-        <template v-if="!state.showExplanation">
-          <v-row class="mt-n6" no-gutters>
-            <div class="small-font">{{ getProgressIndicator() }}</div>
-          </v-row>
-          <v-row class="mt-2" no-gutters>
-            <div v-html="state.currentQuestion.body"></div>
-          </v-row>
-          <v-row no-gutters>
-            <v-list lines="two" density="compact">
-              <v-list-item v-for="(num, index) in state.currentQuestion.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)"
-                :style="{ 'background-color': bgColor }"></v-list-item>
-            </v-list>
-          </v-row>
-        </template>
+    <v-container :max-width="store.screenWidth">
+      <v-sheet v-if="state.showExplanation" class="ma-2">
+        <p>
+          Je antwoord was <b>{{ getResultText() }}</b>
+        </p>
+        <p v-if="state.correctStatements.length === 1">Het juiste antwoord is:</p>
+        <p v-else>De juiste antwoorden zijn:</p>
+        <v-list lines="two" density="compact">
+          <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="state.correctStatements[index]"
+            :style="{ 'background-color': '#DCEDC8' }"></v-list-item>
+        </v-list>
+        <p v-if="isTextAvailable()" v-html="state.currentQuestion.correctAnswer"></p>
+        <h3 v-if="!isTextAvailable()" class="py-12">Sorry, de toelichting is niet beschikbaar</h3>
+        <p class="py-2">Meer hierover na afloop van de quiz</p>
       </v-sheet>
-      <v-sheet class="pa-2" :height="state.counterHeight" :max-width="store.screenWidth">
-        <v-row v-if="!state.questionDone">
-          <v-col cols="7">
-            <p>{{ state.currentQuestion.gameRules }}<br />Binnen 1 min</p>
-          </v-col>
-          <v-col cols="5">
-            <p class="text-right">Resterende tijd</p>
-            <p class="text-right color-red">{{ state.clockValue }}</p>
-          </v-col>
-        </v-row>
-        <v-row v-else>
-          <v-col cols="12">
-            {{ state.wrapupMsg }}
-          </v-col>
-        </v-row>
-      </v-sheet>
-    </template>
-
-    <v-divider></v-divider>
-    <v-row class="mt-2">
-      <v-col class="text-right">
-        <v-btn :disabled="!canProceed" flat append-icon="mdi-arrow-right" @click="nextStep">
-          Verder
-          <template v-slot:append>
-            <v-icon size="x-large" color="purple"></v-icon>
+      <template v-else>
+        <v-sheet class="mt-6 ml-2 mr-2" :max-width="store.screenWidth">
+          <template v-if="!state.showExplanation">
+            <v-row class="mt-n6" no-gutters>
+              <div class="small-font">{{ getProgressIndicator() }}</div>
+            </v-row>
+            <v-row class="mt-2" no-gutters>
+              <div v-html="state.currentQuestion.body"></div>
+            </v-row>
+            <v-row no-gutters>
+              <v-list lines="two" density="compact">
+                <v-list-item v-for="(num, index) in state.currentQuestion.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)"
+                  :style="{ 'background-color': bgColor }"></v-list-item>
+              </v-list>
+            </v-row>
           </template>
-        </v-btn>
-      </v-col>
-    </v-row>
+        </v-sheet>
+        <v-sheet class="pa-2" :height="state.counterHeight">
+          <v-row v-if="!state.questionDone">
+            <v-col cols="7">
+              <p>{{ state.currentQuestion.gameRules }}<br />Binnen 1 min</p>
+            </v-col>
+            <v-col cols="5">
+              <p class="text-right">Resterende tijd</p>
+              <p class="text-right color-red">{{ state.clockValue }}</p>
+            </v-col>
+          </v-row>
+          <v-row v-else>
+            <v-col cols="12">
+              {{ state.wrapupMsg }}
+            </v-col>
+          </v-row>
+        </v-sheet>
+      </template>
+
+      <v-divider></v-divider>
+      <v-row class="mt-2">
+        <v-col cols="12" class="text-right">
+          <v-btn :disabled="!canProceed" flat append-icon="mdi-arrow-right" @click="nextStep">
+            Verder
+            <template v-slot:append>
+              <v-icon size="x-large" color="purple"></v-icon>
+            </template>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
   </template>
 </template>
 
