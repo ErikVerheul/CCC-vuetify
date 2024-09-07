@@ -4,6 +4,13 @@
     <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="6">
+        <v-card-text>{{ getInfo() }}</v-card-text>
+      </v-col>
+      <v-col cols="3"></v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="3"></v-col>
+      <v-col cols="6">
         <v-text-field v-if="editNew" v-model="state.newQuizNumberInput" label="Nieuw quiz nummer" :rules="state.newNumberRules" />
         <v-autocomplete v-if="editExisting" v-model="state.quizNumberInput" item-value="key" :items="state.allQuizItems" label="Te veranderen quiz" />
       </v-col>
@@ -268,6 +275,16 @@ const editNew = computed(() => {
   return (state.newQuizNumberInput === '' && state.quizNumberInput === null) || (state.newQuizNumberInput !== '' && state.quizNumberInput === null)
 })
 
+function getInfo() {
+  let text = `Het huidige weeknummer is ${store.currentWeekNr}.`
+  if (store.quizAvailable) {
+    text += ` Het actieve quiznummer is ${store.currentQuizNumber}.`
+  } else {
+    text += ` Er is geen quiz actief deze week.`
+  }
+  return text + ` Herstart de app voor een update.`
+}
+
 function actionSettingsOk() {
   return (
     state.actionYear &&
@@ -327,7 +344,7 @@ function removeQuizRefs(quizNr) {
         })
         // save updated index
         set(ref(db, '/quizzes/questions/index/'), indexObject)
-          .then(() => {})
+          .then(() => { })
           .catch((error) => {
             console.error('Failed to save the questions index to the database: ' + error.message)
           })

@@ -27,7 +27,7 @@
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="12">
-        <v-btn :disabled="!state.quizAvailable" color="purple" @click="startQuiz">Start</v-btn>
+        <v-btn :disabled="!store.quizAvailable" color="purple" @click="startQuiz">Start</v-btn>
       </v-col>
     </v-row>
     <v-row v-else class="mr-2">
@@ -59,7 +59,6 @@ const store = useAppStore()
 const cookies = new Cookies()
 
 const state = reactive({
-  quizAvailable: false,
   problemText: '',
   problemCause: '',
   tipToResolve: '',
@@ -110,7 +109,7 @@ function getQuiz(allQuizNumbers) {
         // if more quizzes are set to the current week number, pick the first
         storeQuizMetaData(qNr)
         store.currentQuizNumber = qNr
-        state.quizAvailable = true
+        store.quizAvailable = true
         break
       }
     }
