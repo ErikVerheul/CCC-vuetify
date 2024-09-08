@@ -27,7 +27,7 @@
       </v-col>
       <v-col cols="2"></v-col>
       <v-col cols="12">
-        <v-btn :disabled="!store.quizAvailable" color="purple" @click="startQuiz">Start</v-btn>
+        <v-btn :disabled="!state.quizAvailable" color="purple" @click="startQuiz">Start</v-btn>
       </v-col>
     </v-row>
     <v-row v-else class="mr-2">
@@ -64,6 +64,7 @@ const state = reactive({
   tipToResolve: '',
   recoveryMode: false,
   userCompletedQuizBefore: false,
+  quizAvailable: false,
 })
 
 onBeforeMount(() => {
@@ -109,7 +110,7 @@ function getQuiz(allQuizNumbers) {
         // if more quizzes are set to the current week number, pick the first
         storeQuizMetaData(qNr)
         store.currentQuizNumber = qNr
-        store.quizAvailable = true
+        state.quizAvailable = true
         break
       }
     }

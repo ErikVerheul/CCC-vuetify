@@ -2,6 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import PrivacyView from '@/views/PrivacyView.vue'
+import QuizPlanningView from '@/views/QuizPlanningView.vue'
 import QuizResultsView from '@/views/QuizResultsView.vue'
 import { useAppStore } from '../store/app.js'
 
@@ -19,6 +20,11 @@ const routes = [
         path: '/Privacybeleid',
         name: 'Privacy',
         component: PrivacyView,
+      },
+      {
+        path: '/QuizPlanningView',
+        name: 'QuizPlanning',
+        component: QuizPlanningView,
       },
       {
         path: '/QuizResultsView',

@@ -4,7 +4,7 @@
     <v-row>
       <v-col cols="3"></v-col>
       <v-col cols="6">
-        <v-card-text>{{ getInfo() }}</v-card-text>
+        <v-card-text>{{ `Het huidige weeknummer is ${store.currentWeekNr}.` }}</v-card-text>
       </v-col>
       <v-col cols="3"></v-col>
     </v-row>
@@ -163,7 +163,7 @@
 import { onBeforeMount, computed, reactive, watch } from 'vue'
 import { useAppStore } from '../../store/app.js'
 import { db, dbRef } from '../../firebase'
-import { ref, child, get, set, remove, update } from 'firebase/database'
+import { ref, child, get, set, update } from 'firebase/database'
 
 const store = useAppStore()
 const emit = defineEmits(['m-done'])
@@ -274,16 +274,6 @@ const editExisting = computed(() => {
 const editNew = computed(() => {
   return (state.newQuizNumberInput === '' && state.quizNumberInput === null) || (state.newQuizNumberInput !== '' && state.quizNumberInput === null)
 })
-
-function getInfo() {
-  let text = `Het huidige weeknummer is ${store.currentWeekNr}.`
-  if (store.quizAvailable) {
-    text += ` Het actieve quiznummer is ${store.currentQuizNumber}.`
-  } else {
-    text += ` Er is geen quiz actief deze week.`
-  }
-  return text + ` Herstart de app voor een update.`
-}
 
 function actionSettingsOk() {
   return (

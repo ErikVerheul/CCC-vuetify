@@ -39,6 +39,9 @@
           <v-btn color="pink" flat @click="state.dialog10 = true"> Ik speel niet meer mee.<br />Verwijder mijn gegevens </v-btn>
         </v-list-item>
         <v-list-item v-if="props.isAuthenticated && store.userData.alias === 'admin'">
+          <v-btn color="blue" flat @click="showQuizPlanning">Toon de quiz planning</v-btn>
+        </v-list-item>
+        <v-list-item v-if="props.isAuthenticated && store.userData.alias === 'admin'">
           <v-btn color="green" flat @click="showScores"> Toon de scores en de winnaars </v-btn>
         </v-list-item>
       </v-list>
@@ -127,7 +130,7 @@
   <v-dialog v-model="state.dialog7" :max-width="store.screenWidth">
     <v-card>
       <v-card-text>
-        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.12.4</p>
+        <p>Speelmee.app is in ontwikkeling. De huidige versie is v.0.12.5</p>
         <p>De broncode is open source en is in te zien op: <a href="https://t.ly/vtCMQ">GitHub</a></p>
       </v-card-text>
       <v-card-actions>
@@ -294,6 +297,10 @@ function aliasIsCelebrity(alias) {
 function showScores() {
   store.isArchivedQuiz = false
   router.push({ path: '/QuizResultsView' })
+}
+
+function showQuizPlanning() {
+  router.push({ path: '/QuizPlanningView' })
 }
 
 function logout() {
