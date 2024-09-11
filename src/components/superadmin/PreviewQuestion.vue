@@ -10,11 +10,8 @@
           </v-row>
           <v-row no-gutters>
             <v-list lines="two" density="compact">
-              <v-list-item
-                v-for="(num, index) in props.statementsArray"
-                :subtitle="composeStatement(index)"
-                :style="{ 'background-color': bgColor }"
-              ></v-list-item>
+              <v-list-item v-for="(num, index) in props.statementsArray" :key="num" :subtitle="composeStatement(index)"
+                :style="{ 'background-color': bgColor }"></v-list-item>
             </v-list>
           </v-row>
           <v-row v-if="props.gameRules !== ''" no-gutters>
@@ -34,11 +31,8 @@
           </v-row>
           <v-row no-gutters>
             <v-list lines="two" density="compact">
-              <v-list-item
-                v-for="(num, index) in props.statementsArray"
-                :subtitle="composeStatement(index)"
-                :style="{ 'background-color': bgColor }"
-              ></v-list-item>
+              <v-list-item v-for="(num, index) in props.statementsArray" :key="num" :subtitle="composeStatement(index)"
+                :style="{ 'background-color': bgColor }"></v-list-item>
             </v-list>
           </v-row>
           <v-row v-if="props.gameRules !== ''" no-gutters>

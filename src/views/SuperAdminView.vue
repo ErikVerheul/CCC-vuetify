@@ -3,5 +3,5 @@
 </template>
 
 <script setup>
-import SuperAdmin from '@/components/superadmin/SuperAdmin.vue'
+import SuperAdmin from '../components/superadmin/SuperAdmin.vue'
 </script>

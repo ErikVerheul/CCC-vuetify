@@ -120,7 +120,7 @@
       <v-row>
         <v-col cols="12">
           <v-list lines="one">
-            <v-list-item v-for="item in quizzesAssignedAlready" :title="composeLine(item)"></v-list-item>
+            <v-list-item v-for="item in quizzesAssignedAlready" :title="composeLine(item)" :key="Object.keys(item)[0]"></v-list-item>
           </v-list>
         </v-col>
       </v-row>
@@ -147,11 +147,11 @@
           </v-card-title>
           <v-card-text>
             <v-list lines="one">
-              <v-list-item v-for="item in state.questionsList" :title="composeQuestionLine(item)"></v-list-item>
+              <v-list-item v-for="item in state.questionsList" :title="composeQuestionLine(item)" :key="item.question"></v-list-item>
             </v-list>
           </v-card-text>
           <v-card-actions>
-            <v-btn color="purple" block @click="state.listQuestions = false">Sluit</v-btn>
+            <v-btn color="purple" block @click="quitListQuestions">Sluit</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -468,6 +468,11 @@ function doCancel() {
   // refresh overall quiz data
   state.successText = undefined
   resetAndloadQuizes()
+}
+
+function quitListQuestions() {
+  state.action = undefined
+  state.listQuestions = false
 }
 
 function doAction() {

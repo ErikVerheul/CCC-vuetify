@@ -4,7 +4,7 @@
       <h2>Blader, en kies een schuilnaam</h2>
     </v-row>
     <v-row no-gutters class="text-center overflow-auto" align="center" justify="center" style="display: flex">
-      <SelectAliasRow v-for="(num, index) in state.numberOfRows" :random-names="state.randomNames" :row-length="state.rowLength" :row="index"
+      <SelectAliasRow v-for="(num, index) in state.numberOfRows" :random-names="state.randomNames" :row-length="state.rowLength" :row="index" :key="num"
         :alias-button-selections="state.aliasButtonSelections" />
     </v-row>
   </v-sheet>

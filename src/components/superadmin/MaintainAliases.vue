@@ -75,7 +75,7 @@
 <script setup>
 import { onBeforeMount, reactive, computed, watch } from 'vue'
 import { db, dbRef } from '../../firebase'
-import { ref, child, get, set, update, remove } from 'firebase/database'
+import { ref, child, get, set, update } from 'firebase/database'
 
 const emit = defineEmits(['m-done'])
 

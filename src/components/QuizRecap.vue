@@ -1,8 +1,7 @@
 <template>
   <ReportFbError v-if="store.rqActive === 'onError'" />
   <ReportWarning v-else-if="store.rqActive === 'onWarning'" />
-  <ViewQExplanation v-else-if="state.doActivate === 'showExpl'" :quizExplanation="state.quizExplanation" @view-over="state.doActivate = undefined">
-  </ViewQExplanation>
+  <ViewQExplanation v-else-if="state.doActivate === 'showExpl'" :quizExplanation="state.quizExplanation" @view-over="state.doActivate = undefined" />
   <v-card v-else color="#FEF1E5" :width="store.screenWidth" min-height="100vh">
     <v-card-title v-if="!store.isArchivedQuiz" class="text-center">Je hebt de quiz van week {{ store.currentWeekNr }} voltooid</v-card-title>
     <v-card-title v-else class="text-center">Je hebt de quiz voltooid</v-card-title>

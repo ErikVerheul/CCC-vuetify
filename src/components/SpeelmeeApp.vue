@@ -12,8 +12,7 @@
 
           <MaastrichtStories v-else-if="state.isAuthenticated" @logout-app="returnToLogin" />
           <template v-else>
-            <NewUser v-if="state.userEntryMode === 'login'" :aliases-in-use-incl-admin="aliasesInUseInclAdmin()" @change-to-signin="switchToSignin"
-              @change-to-signup="switchToSignup" @exit-signin="resetApp" />
+            <NewUser v-if="state.userEntryMode === 'login'" @change-to-signin="switchToSignin" @change-to-signup="switchToSignup" @exit-signin="resetApp" />
             <!-- Sign up a new user -->
             <SelectAlias v-if="state.userEntryMode === 'signup'" :aliases-not-in-use="state.aliasesNotInUse" @alias-selected="doCreateUser"
               @reset-signup="returnToLogin" />
@@ -158,10 +157,6 @@ const nowPlaying = computed(() => {
 
 function showAliasInfo() {
   state.showAliasInfoActive = true
-}
-
-function doGame(game) {
-  state.maastrichtStoriesActive = true
 }
 
 function returnToLogin() {

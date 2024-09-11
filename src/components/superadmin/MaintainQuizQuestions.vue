@@ -1,13 +1,6 @@
 <template>
-  <PreviewQuestion
-    v-if="state.showPreviewQuestion"
-    :content="state.content"
-    :statementsArray="state.statementsArray"
-    :quizQAnswers="state.quizQAnswers"
-    :gameRules="gameRules"
-    :correctAnswer="state.correctAnswer"
-    @return-to="state.showPreviewQuestion = false"
-  ></PreviewQuestion>
+  <PreviewQuestion v-if="state.showPreviewQuestion" :content="state.content" :statementsArray="state.statementsArray" :quizQAnswers="state.quizQAnswers"
+    :gameRules="gameRules" :correctAnswer="state.correctAnswer" @return-to="state.showPreviewQuestion = false"></PreviewQuestion>
   <PreviewFullExplanation v-else-if="state.showFullExplanation" :longExplanation="state.longExplanation" @return-to="state.showFullExplanation = false">
   </PreviewFullExplanation>
   <v-sheet v-else>
@@ -111,12 +104,8 @@
       </v-row>
       <v-row no-gutters>
         <v-list lines="two" density="compact">
-          <v-list-item
-            v-for="(num, index) in state.statementsArray"
-            :subtitle="composeStatement(index)"
-            @click="qAnswer(index)"
-            :style="{ 'background-color': bgColor }"
-          ></v-list-item>
+          <v-list-item v-for="(num, index) in state.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)"
+            :style="{ 'background-color': bgColor }" :key="num"></v-list-item>
         </v-list>
       </v-row>
       <v-row v-if="countGoodAnswers() === 0">
@@ -589,11 +578,11 @@ function doSaveQuestion(questionNr, toSubmit) {
             loadQuestionsIndex()
           }
         })
-        .catch((error) => {
+        .catch((e) => {
           console.error(`The write of the index data failed: ${e.message}`)
         })
     })
-    .catch((error) => {
+    .catch((e) => {
       console.error(`TThe write of the question data failed: ${e.message}`)
     })
 }

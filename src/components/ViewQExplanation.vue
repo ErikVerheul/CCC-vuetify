@@ -16,7 +16,7 @@
     <v-card-actions>
       <v-row>
         <v-col>
-          <v-btn prepend-icon="mdi-arrow-left" @click="emit('view-over')">
+          <v-btn prepend-icon="mdi-arrow-left" @click="readyReading">
             <template v-slot:prepend>
               <v-icon size="x-large" color="purple"></v-icon>
             </template>
@@ -27,7 +27,29 @@
     </v-card-actions>
   </v-card>
 </template>
+
 <script setup>
+import { onBeforeMount } from 'vue'
+import { useAppStore } from '../store/app.js'
+import Cookies from 'universal-cookie'
 const emit = defineEmits(['view-over'])
 const props = defineProps(['quizExplanation'])
+const store = useAppStore()
+const cookies = new Cookies()
+
+// store the state again now that the user has reached the quiz theme explanation
+onBeforeMount(() => {
+  if (!store.isArchivedQuiz) {
+    store.quizProgress.compactResult = store.compactResult
+    store.quizProgress.viewQExplanation = true
+    cookies.set(`speelMee${store.userData.alias}`, store.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
+  }
+})
+
+// remove the cookie so that the user can start another quiz
+function readyReading() {
+  cookies.remove(`speelMee${store.userData.alias}`, { sameSite: true })
+  emit('view-over')
+}
+
 </script>

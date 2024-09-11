@@ -31,6 +31,7 @@ export const useAppStore = defineStore('app', {
     isArchivedQuiz: false,
     problemText: '',
     problemCause: '',
+    quizProgress: {},
     tipToResolve: '',
     firebaseError: '',
     fbErrorContext: '',

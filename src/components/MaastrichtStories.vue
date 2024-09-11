@@ -3,6 +3,7 @@
   <RunQuiz v-else-if="store.msActive === 'doQuiz'" :recoveryMode="state.recoveryMode" @quiz-is-done="store.msActive = 'showRecap'" />
   <QuizRecap v-else-if="store.msActive === 'showRecap'" @return-to-base="store.msActive = 'showResults'" />
   <QuizResults v-else-if="store.msActive === 'showResults'" @return-to-menu="restartPage" />
+  <ViewQExplanation v-else-if="store.msActive === 'showQExplanation'" :quizExplanation="state.quizExplanation" @view-over="store.msActive = 'showRecap'" />
   <v-sheet v-else class="text-center" color="#FEF1E5" :width="store.screenWidth" height="100vh">
     <v-row>
       <v-col cols="12">
@@ -52,11 +53,13 @@ import QuizRecap from './QuizRecap.vue'
 import QuizResults from './QuizResults.vue'
 import Cookies from 'universal-cookie'
 import ReportWarning from './ReportWarning.vue'
+import ViewQExplanation from './ViewQExplanation.vue'
 
 const emit = defineEmits(['quiz-is-done', 'logout-app'])
 
 const store = useAppStore()
 const cookies = new Cookies()
+const emptyQuillValue = '<p><br></p>'
 
 const state = reactive({
   problemText: '',
@@ -65,6 +68,7 @@ const state = reactive({
   recoveryMode: false,
   userCompletedQuizBefore: false,
   quizAvailable: false,
+  quizExplanation: undefined
 })
 
 onBeforeMount(() => {
@@ -124,13 +128,40 @@ function getQuiz(allQuizNumbers) {
     if (errorConditions.includes('onError') || errorConditions.includes('onWarning')) {
       emit('logout-app')
     }
-    // set recovery mode
-    state.recoveryMode = true
-    storeQuizMetaData(unfinishedCookieData.quizNumber)
-    store.currentQuizNumber = unfinishedCookieData.quizNumber
-    // continue with the unfinished quiz IMMEDIATELY
-    store.msActive = 'doQuiz'
+    // check for unfinished reading of quiz theme explanation
+    if (unfinishedCookieData.viewQExplanation) {
+      console.log('getQuiz: continue to read quiz theme explanation')
+      store.compactResult = unfinishedCookieData.compactResult
+      loadQuizExplanation()
+    } else {
+      // the user exited the app while running the quiz; set recovery mode
+      state.recoveryMode = true
+      storeQuizMetaData(unfinishedCookieData.quizNumber)
+      store.currentQuizNumber = unfinishedCookieData.quizNumber
+      // continue with the unfinished quiz IMMEDIATELY
+      store.msActive = 'doQuiz'
+    }
   }
+}
+
+function loadQuizExplanation() {
+  get(child(dbRef, `/quizzes/themes/${store.currentQuizNumber}`))
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        const explanation = snapshot.val()
+        if (explanation === emptyQuillValue || explanation === '') {
+          state.quizExplanation = '<p>De toelichting is nog niet beschikbaar'
+        } else {
+          state.quizExplanation = explanation
+          store.msActive = 'showQExplanation'
+        }
+      } else state.quizExplanation = '<p>De toelichting is nog niet beschikbaar'
+    })
+    .catch((error) => {
+      store.firebaseError = error
+      store.fbErrorContext = `De fout is opgetreden bij het lezen van de toelichting op de quiz`
+      store.rqActive = 'onError'
+    })
 }
 
 /* Start the action week quiz if not completed before*/

@@ -10,7 +10,7 @@
         <p v-if="state.correctStatements.length === 1">Het juiste antwoord is:</p>
         <p v-else>De juiste antwoorden zijn:</p>
         <v-list lines="two" density="compact">
-          <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="state.correctStatements[index]"
+          <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="state.correctStatements[index]" :key="num"
             :style="{ 'background-color': '#DCEDC8' }"></v-list-item>
         </v-list>
         <p v-if="isTextAvailable()" v-html="state.currentQuestion.correctAnswer"></p>
@@ -29,7 +29,7 @@
             <v-row no-gutters>
               <v-list lines="two" density="compact">
                 <v-list-item v-for="(num, index) in state.currentQuestion.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)"
-                  :style="{ 'background-color': bgColor }"></v-list-item>
+                  :key="num" :style="{ 'background-color': bgColor }"></v-list-item>
               </v-list>
             </v-row>
           </template>
@@ -126,7 +126,6 @@ const state = reactive({
   counterHeight: 60,
   quizResult: {},
   lastCookieQuestionResult: null,
-  quizProgress: {},
 })
 
 const canProceed = computed(() => {
@@ -192,8 +191,8 @@ function checkForRecovery() {
             state.clockValue = 0
           }
           // process the data from the cookie saved when the quiz was started but unfinished and initiate the quiz progress
-          state.quizProgress.alias = store.userData.alias
-          state.quizProgress.quizNumber = store.currentQuizNumber
+          store.quizProgress.alias = store.userData.alias
+          store.quizProgress.quizNumber = store.currentQuizNumber
           // find the last answered questionIdx and set the current question number index
           const lastQuestionIdxAnswered = Number(Object.keys(unfinishedCookieData.quizResult).slice(-1)[0])
           state.currentQuestionIdx = lastQuestionIdxAnswered
@@ -241,20 +240,21 @@ function createRightOrWrongMessage(val) {
 /* Save the progress in a cookie with a lifetime of 1 hour */
 function saveProgress() {
   // save the active component, the collected progress and the answers of all answered questions so far
-  state.quizProgress.msActive = store.msActive || null
-  state.quizProgress.rqActive = store.rqActive || null
-  state.quizProgress.showExplanation = state.showExplanation
-  state.quizProgress.quizResult = state.quizResult
-  cookies.set(`speelMee${store.userData.alias}`, state.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
+  store.quizProgress.msActive = store.msActive || null
+  store.quizProgress.rqActive = store.rqActive || null
+  store.quizProgress.showExplanation = state.showExplanation
+  store.quizProgress.compactResult = store.compactResult
+  store.quizProgress.quizResult = state.quizResult
+  cookies.set(`speelMee${store.userData.alias}`, store.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })
 }
 
 function loadQuestion(resetShowExplanation) {
   const questId = state.questionNumbers[state.currentQuestionIdx]
   const letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm']
   if (!store.isArchivedQuiz) {
-    state.quizProgress.alias = store.userData.alias
-    state.quizProgress.quizNumber = store.currentQuizNumber
-    state.quizProgress.showExplanation = false
+    store.quizProgress.alias = store.userData.alias
+    store.quizProgress.quizNumber = store.currentQuizNumber
+    store.quizProgress.showExplanation = false
   }
   get(child(dbRef, `/quizzes/questions/${Number(questId)}`))
     .then((snapshot) => {
@@ -397,7 +397,7 @@ function nextQuestion() {
   state.isLastAnswerOverdue = false
   state.currentQuestionIdx++
   if (state.currentQuestionIdx < state.questionNumbers.length) {
-    state.quizProgress.showExplanation = false
+    store.quizProgress.showExplanation = false
     state.questionDone = false
     state.clockValue = `1:00`
     loadQuestion(true)

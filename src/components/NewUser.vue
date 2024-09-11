@@ -16,7 +16,6 @@
 <script setup>
 import { useAppStore } from '../store/app.js'
 
-const props = defineProps(['aliasesInUseInclAdmin'])
 const emit = defineEmits(['change-to-signup', 'change-to-signin', 'exit-signin'])
 const store = useAppStore()
 </script>
