@@ -10,7 +10,7 @@
         <p v-if="state.correctStatements.length === 1">Het juiste antwoord is:</p>
         <p v-else>De juiste antwoorden zijn:</p>
         <v-list lines="two" density="compact">
-          <v-list-item v-for="(num, index) in state.correctStatements" :subtitle="state.correctStatements[index]" :key="num"
+          <v-list-item v-for="(dummy, index) in state.correctStatements" :subtitle="state.correctStatements[index]"
             :style="{ 'background-color': '#DCEDC8' }"></v-list-item>
         </v-list>
         <p v-if="isTextAvailable()" v-html="state.currentQuestion.correctAnswer"></p>
@@ -28,8 +28,8 @@
             </v-row>
             <v-row no-gutters>
               <v-list lines="two" density="compact">
-                <v-list-item v-for="(num, index) in state.currentQuestion.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)"
-                  :key="num" :style="{ 'background-color': bgColor }"></v-list-item>
+                <v-list-item v-for="(dummy, index) in state.currentQuestion.statementsArray" :subtitle="composeStatement(index)" @click="qAnswer(index)"
+                  :style="{ 'background-color': bgColor }"></v-list-item>
               </v-list>
             </v-row>
           </template>
