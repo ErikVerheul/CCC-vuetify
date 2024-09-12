@@ -136,6 +136,7 @@ function getQuiz(allQuizNumbers) {
     } else {
       // the user exited the app while running the quiz; set recovery mode
       state.recoveryMode = true
+      store.compactResult = unfinishedCookieData.compactResult
       storeQuizMetaData(unfinishedCookieData.quizNumber)
       store.currentQuizNumber = unfinishedCookieData.quizNumber
       // continue with the unfinished quiz IMMEDIATELY
