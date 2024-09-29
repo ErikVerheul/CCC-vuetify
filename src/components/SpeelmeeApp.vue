@@ -5,11 +5,9 @@
         <AppBar :is-authenticated="state.isAuthenticated" :withActivator="true" @logout-app="returnToLogin" @reset-app="resetApp"
           @show-alias-info="showAliasInfo" />
 
-        <h2 v-if="state.loginErrorMsg !== undefined" class="py-4">Er is een fout opgetreden. Fout: {{ state.loginErrorMsg }}</h2>
-
-        <template v-if="state.isInitDone">
+        <ReportFbError v-if="store.rqActive === 'onError'" />
+        <template v-else-if="state.isInitDone">
           <ShowCelebrity v-if="!nowPlaying && state.showAliasInfoActive" @return-to="state.showAliasInfoActive = false" />
-
           <MaastrichtStories v-else-if="state.isAuthenticated" @logout-app="returnToLogin" />
           <template v-else>
             <NewUser v-if="state.userEntryMode === 'login'" @change-to-signin="switchToSignin" @change-to-signup="switchToSignup" @exit-signin="resetApp" />
@@ -29,6 +27,7 @@
 <script setup>
 import { onBeforeMount, reactive, computed } from 'vue'
 import { useAppStore } from '../store/app.js'
+import ReportFbError from './ReportFbError.vue'
 import SelectAlias from './SelectAlias.vue'
 import Cookies from 'universal-cookie'
 import SigninUser from './SigninUser.vue'
@@ -116,8 +115,9 @@ onBeforeMount(() => {
               }
             })
             .catch((error) => {
-              console.error('Firebase signOut: error message = ' + error.message)
-              state.loginErrorMsg = error.message
+              store.rqActive = 'onError'
+              store.firebaseError = error
+              store.fbErrorContext = `Systeemfout: de app kon niet uitloggen van het systeem account`
             })
         })
         .catch((error) => {
@@ -126,7 +126,9 @@ onBeforeMount(() => {
     })
     .catch((error) => {
       console.error('The system account could not login: error message = ' + error.message)
-      state.loginErrorMsg = error.message
+      store.rqActive = 'onError'
+      store.firebaseError = error
+      store.fbErrorContext = `Systeemfout: het systeem account kan zich niet aanmelden`
     })
 })
 
@@ -140,7 +142,6 @@ const state = reactive({
   isCelebrity: false,
   maastrichtStoriesActive: false,
   showAliasInfoActive: false,
-  loginErrorMsg: undefined,
 })
 
 function aliasesInUseInclAdmin() {
@@ -233,7 +234,7 @@ function doCreateUser(alias) {
       state.isAuthenticated = true
     })
     .catch((error) => {
-      state.onError = true
+      store.rqActive = 'onError'
       store.firebaseError = error
       store.fbErrorContext = `Mogelijk heeft een andere speler deze schuilnaam net gekozen. Kies een andere schuilnaam`
       console.log('doCreateUser: error = ' + error)

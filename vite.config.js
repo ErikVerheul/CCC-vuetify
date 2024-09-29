@@ -12,6 +12,14 @@ export default defineConfig({
   optimizeDeps: {
     include: ['quill'],
   },
+  // workaround to let Vite use the new sass api ToDo: remove if integrated in Vite
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler', // or "modern", "legacy"
+      },
+    },
+  },
   plugins: [
     vue({
       template: { transformAssetUrls },

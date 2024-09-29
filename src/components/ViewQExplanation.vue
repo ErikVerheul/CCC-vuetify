@@ -39,7 +39,7 @@ const cookies = new Cookies()
 
 // store the state again now that the user has reached the quiz theme explanation
 onBeforeMount(() => {
-  if (!store.isArchivedQuiz) {
+  if (!store.isArchivedQuiz && store.userData.alias !== 'admin') {
     store.quizProgress.compactResult = store.compactResult
     store.quizProgress.viewQExplanation = true
     cookies.set(`speelMee${store.userData.alias}`, store.quizProgress, { path: '/', maxAge: 60 * 60, sameSite: true })

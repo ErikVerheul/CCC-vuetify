@@ -390,7 +390,7 @@ function finishQuestion() {
     state.quizResult[state.currentQuestionIdx].correctAnswer = false
   }
   state.showExplanation = true
-  if (!store.isArchivedQuiz) saveProgress()
+  if (!store.isArchivedQuiz && store.userData.alias !== 'admin') saveProgress()
 }
 
 function nextQuestion() {
@@ -432,7 +432,7 @@ watch(
       state.quizResult[state.currentQuestionIdx].overdue = true
       state.isLastAnswerOverdue = true
       store.compactResult.push(false)
-      if (!store.isArchivedQuiz) saveProgress()
+      if (!store.isArchivedQuiz && store.userData.alias !== 'admin') saveProgress()
     }
   },
 )
