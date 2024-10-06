@@ -1,3 +1,5 @@
+<h2>2024-10-04: The further development and maintenance on this repository is discontinued </h2>
+
 <h2>With this application, an editorial team can generate quizzes flexibly:</h2>
 <ul>
   <li>A quiz can contain any number of questions</li>
